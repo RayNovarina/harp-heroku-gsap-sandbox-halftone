@@ -1,7 +1,7 @@
 {
-  "name": "greensock-tutorial",
+  "name": "greensock-sandbox-halftone",
   "version": "0.0.1",
-  "description": "Harp server App: javascript/greensock-tutorial",
+  "description": "Harp server App: javascript/greensock-sandbox-halftone",
   "dependencies": {
     "harp": "*"
   }
