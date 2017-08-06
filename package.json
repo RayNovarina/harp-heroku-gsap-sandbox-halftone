@@ -1,0 +1,8 @@
+{
+  "name": "greensock-tutorial",
+  "version": "0.0.1",
+  "description": "Harp server App: javascript/greensock-tutorial",
+  "dependencies": {
+    "harp": "*"
+  }
+}
