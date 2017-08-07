@@ -15,15 +15,16 @@ function explode( _this, options, /*Code to resume when done*/ callback ) {
 	for( var i = 0; i < canvasParticlesLen; i++ ) {
 		var canvasParticle = canvasParticles.eq(i);
     var particle = _this.particles[ i ];
-		var randX = getRandom(  30 , -30 );
-		var randY = getRandom(  300 , -300 );
+		//var randX = getRandom(  300 , -300 );
+    //var randY = getRandom(  300 , -300 );
 
 		var tmax = TweenMax.to( canvasParticle, options.tweenDuration, {
-      // HACK:
-      // left: particle.x, // randX,
-			// top: particle.y, // randY,
-		  left: randX,
-			top: randY,
+		  //left: randX,
+			//top: randY,
+      //left: getRandom( 150, 250 ),
+      //top: particle.y, // - getRandom( 10, 50 ),
+      left: getRandom(  150, 250 ),
+  		top:  getRandom(  50 , -200 ),
 			autoAlpha: 0,
       ease: Power0.easeInOut
 		}); // end TweenMax

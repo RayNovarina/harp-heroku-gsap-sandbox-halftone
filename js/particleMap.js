@@ -8,24 +8,28 @@ function createParticleMap( _this, options, /*Code to resume when done*/ callbac
   console.log( " ..*5) createParticleMap() for id: '" + options.id +
                "'. useTrrData: '" + _this.settings.isUseTrrData + "'. *");
 
-  var particles = [];
+  var maps = {};
   if ( _this.settings.isUseTrrData ) {
-    particles = makeParticlesFromTrrMap( _this, {
+    maps = makeParticlesFromTrrMap( _this, {
       id: options.id,
       effectsDataAsJSONstring: effectsDataForRender[0].effectsDataAsJSONstring,
       particlesHomeOffsetLeft: 80,
       particlesHomeOffsetTop: 20,
+      isMakeHomePositionMap: true,
+      isMakePooledAtBottomMap: true,
     } );
   } else {
-    particles = makeCartesianGridParticles( _this, {
+    maps = makeCartesianGridParticles( _this, {
       id: options.id,
       particlesHomeOffsetLeft: 82,
       particlesHomeOffsetTop: 20,
+      isMakeHomePositionMap: true,
+      isMakePooledAtBottomMap: true,
     } );
   }
-  console.log( " ..*5a) createParticleMap() Created particles[" + particles.length + "] *");
-  if ( typeof callback == 'function' ) { callback( particles ); return; }
-  return particles;
+  console.log( " ..*5a) createParticleMap() Created HomePositionParticles[" + maps.homePostionParticles.length + "] *");
+  if ( typeof callback == 'function' ) { callback( maps ); return; }
+  return maps;
 }; // end: createParticleMap()
 
 //----------------------------------------------------------------------------
@@ -37,25 +41,29 @@ function makeParticlesFromTrrMap( _this, options, /*Code to resume when done*/ c
                ". effectsData.particles.len = " + effectsData.particles.length +
                ". effectsDataAsJSONstring.len = " + _this.settings.effectsDataAsJSONstring.length +
                ". Canvas Particles Home position Offset left: " + _this.settings.particlesHomeOffsetLeft +
-               ". top: " + _this.settings.particlesHomeOffsetTop + ".");
+               ". top: " + _this.settings.particlesHomeOffsetTop +
+               ". MakeHomePositionMap: " + _this.settings.isMakeHomePositionMap +
+               ".");
 
-  var particles = new Array();
+  var maps = { homePostionParticles: [] };
   var effectsDataParticles = effectsData.particles,
       edpParticle = {},
       homeOffsetLeft = _this.settings.particlesHomeOffsetLeft,
       homeOffsetTop = _this.settings.particlesHomeOffsetTop;
 
-  for( var i = 0; i < (effectsData.particles.length); i += 1 ) {
+  if (_this.settings.isMakeHomePositionMap) {
+    for( var i = 0; i < (effectsData.particles.length); i += 1 ) {
       edpParticle = effectsDataParticles[ i ];
-      particles.push( {
+      maps.homePostionParticles.push( {
           x: edpParticle.x + homeOffsetLeft,
           y: edpParticle.y + homeOffsetTop,
           r: edpParticle.r,
       });
-  } //end for( var n )
+    } //end for( var n )
+  }
 
-  if ( typeof callback == 'function' ) { callback( particles ); return; }
-  return particles;
+  if ( typeof callback == 'function' ) { callback( maps ); return; }
+  return maps;
 }; // end: makeParticlesFromTrrMap()
 
 //----------------------------------------------------------------------------
@@ -65,6 +73,7 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
   console.log( " ..*5.2) makeCartesianGridParticles() for id: " + _this.settings.id +
                ". Particles Home position Offset left: " + _this.settings.particlesHomeOffsetLeft +
                ". top: " + _this.settings.particlesHomeOffsetTop +
+                ". MakeHomePositionMap: " + _this.settings.isMakeHomePositionMap +
                ". maxHalftoneDotSize: " + _this.settings.maxHalftoneDotSize +
                ". pixelChannelIntensityThreshold: " + _this.settings.pixelChannelIntensityThreshold +
                ". imageScale: " + _this.settings.imageScale +
@@ -82,7 +91,7 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
                ". isRejectParticlesSameAsConversionContainerBackground: " + _this.settings.isRejectParticlesSameAsConversionContainerBackground +                 ".");
 
   // Create local variables to reduce loop overhead.
-  var particles = [],
+  var maps = { homePostionParticles: [] },
       homeOffsetLeft = _this.settings.particlesHomeOffsetLeft,
       homeOffsetTop = _this.settings.particlesHomeOffsetTop,
       pixelsPerCluster = _this.settings.pixelsPerCluster,
@@ -147,7 +156,7 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
       // background/fill color is.
       var filterResults = particleFilter( _this, _this.settings.rgbChannel, home_position_x, home_position_y, carryOverResults );
       if ( filterResults.isAccepted ) {
-        particles.push( {
+        maps.homePostionParticles.push( {
           x: filterResults.x + homeOffsetLeft,
           y: filterResults.y+ homeOffsetTop,
           r: filterResults.pixelChannelIntensity * gridSize,
@@ -156,8 +165,8 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
     } // end for (col)
   } // end for (row)
 
-  console.log( " ..*5.2b) makeCartesianGridParticles(): END LOOP: particles[].len = " +
-               particles.length + ". Out of " + maxNumOfParticles + " possible. " +
+  console.log( " ..*5.2b) makeCartesianGridParticles(): END LOOP: HomePositionParticles[].len = " +
+               maps.homePostionParticles.length + ". Out of " + maxNumOfParticles + " possible. " +
                "Particles Rejected Because Particle Is Out Of Bounds = '" +
                _this.particlesRejectedBecauseParticleIsOutOfBounds +
                "'. Particles Rejected Because Pixel Intensity Less Than Threshold = '" +
@@ -173,8 +182,8 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
                "'. Particles Rejected Because is Non-center member of cluster. = '" +
                _this.particlesRejectedBecauseIsNonCenterMemberOfCluster +
                "'. *");
-  if ( typeof callback == 'function' ) { callback( particles ); return; }
-   return particles;
+  if ( typeof callback == 'function' ) { callback( maps ); return; }
+   return maps;
 }; // end: makeParticles()
 
 //----------------------------------------------------------------------------

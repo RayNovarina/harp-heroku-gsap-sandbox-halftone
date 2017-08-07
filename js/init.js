@@ -14,12 +14,15 @@ function trr_init(/*Code to resume when done*/ callback ) {
     photoTag: $el.attr('photoTag'),
     photoType: $el.attr('photoType'),
     isTransformPixels: true,
+    isMakeHomePositionMap: true,
+    isMakeAtRestPositionMap: true,
+    isMakePooledAtBottomMap: false,
     isExcludePixels: false,
     isProcessBySkipCount: true,
     isEvery1: false,
     nthPixelToProcess: 3,
-    isEvery2: false,
-    isEvery3: true,
+    isEvery2: true,
+    isEvery3: false,
     isEvery4: false,
     is1x1_cluster: false,
     is3x3_cluster: false,
@@ -97,7 +100,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
     explode( trrPlugin, { tweenDuration: 4.0 } );
   });
   $( "#collapse" ).click( function() {
-    collapse( trrPlugin, { tweenDuration: 6.0 } );
+    collapse( trrPlugin, { tweenDuration: 2.5 } );
   });
   $( "#riseUp" ).click( function() {
     riseUp( trrPlugin, { tweenDuration: 4.0 } );

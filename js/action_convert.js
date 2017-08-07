@@ -49,8 +49,8 @@ function convert( _this, options, /*Code to resume when done*/ callback ) {
     isRejectParticlesBelowIntensityThreshold: true,
     isRejectParticlesSameAsConversionContainerBackground: true,
   },
-  /*2-Resume here when done*/ function( particles ) {
-  _this.particles = particles;
+  /*2-Resume here when done*/ function( maps ) {
+  _this.particles = maps.homePostionParticles;
   // Create elements (from the particle map) in a form that we can animate.
   createAnimationElements( _this, {
     animationElementWidth: 6,
