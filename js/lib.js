@@ -104,7 +104,7 @@ function createScene_reset( _this ) {
     $(_this.centerPanel).empty();
     //_this.centerPanel = document.createElement( "div" );
   }
-}; // end: createSceneContainer_reset()
+}; // end: createScene_reset()
 
 //----------------------------------------------------------------------------
 function isSceneDisabled( _this, options ) {

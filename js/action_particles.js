@@ -29,7 +29,7 @@ function particles( _this, options, /*Code to resume when done*/ callback ) {
       height: _this.settings.img.height,
       left: 0,
       top: 0,
-      backgroundColor: '#E7F1F7', // rgb(231, 241, 247) rgba(231, 241, 247, 1)
+      backgroundColor: _this.defaults.sceneBackgroundColor, //  '#E7F1F7', Climate Corp "halftone background blue"
       //  background color of Climate Corp profile photo for Meg: rgb(234, 233, 238) #eae9ee
       border: '',
     },
@@ -58,40 +58,15 @@ function renderParticleMapAsSvgElements( _this, options, callback ) {
   var particleAnimationElementMethod = '';
   console.log( " ..*5a.1) For HomePositionParticles[].len = " + _this.particleMaps.homePostionParticles.length + ". *");
 
-/*
-  _this.settings.animationElementsContainer = document.createElement(
-      _this.settings.isUseCanvasElements ? 'div'
-      : _this.settings.isUseSVGelements ? 'svg'
-      : 'div' );
-  _this.settings.animationElementsContainer.id = 'aniElCon_' + _this.settings.id;
-  if (  _this.settings.isUseSVGelements ) {
-    _this.settings.animationElementsContainer.setAttribute( 'width', _this.settings.sceneContainer.style.width );
-    _this.settings.animationElementsContainer.setAttribute( 'height', _this.settings.sceneContainer.style.height );
-  } else {
-    _this.settings.animationElementsContainer.style.width = _this.settings.sceneContainer.style.width;
-    _this.settings.animationElementsContainer.style.height = _this.settings.sceneContainer.style.height;
-  }
-  _this.settings.animationElementsContainer.style.position = _this.settings.sceneContainer.style.position;
-  _this.settings.animationElementsContainer.style.left = _this.settings.sceneContainer.style.left;
-  _this.settings.animationElementsContainer.style.top  = _this.settings.sceneContainer.style.top;
-  _this.settings.animationElementsContainer.style.backgroundColor  = "white";
-
-  _this.settings.sceneContainer.appendChild( _this.settings.animationElementsContainer );
-*/
-
-if (  _this.settings.isUseSVGelements ) {
-  $(_this.centerPanel).children( 'div' ).remove();
-  $(_this.centerPanel).append(
-    ' <svg id="svgContainer" width="400px" height="400px" ' +
-        ' style="border: 4px solid black; ' +
-              //'  position: absolute; top: 0px; left: 0px;' +
-        '  "> ' +
-        ' <circle id="svgCircle"  cx="250" cy="400" r="8"  fill="red" /> ' +
-        ' <circle id="svgCircle2" cx="200" cy="400" r="12"  fill="blue" /> ' +
-        ' <circle id="svgCircle3" cx="300" cy="400" r="16"  fill="black" /> ' +
-    ' </svg> ');
-  _this.settings.sceneContainer = document.getElementById( 'svgContainer' );
-}
+  // Insert the REQUIRED <svg> tag within the sceneContainer to contain the svg <circle> elements.
+  // NOTE: browser can not directly add <svg> or <circle> tags, need to use "w3.org namespace".
+  _this.settings.animationElementsContainer =
+    $( makeSvgElementNS('svg') )
+      .attr( 'id', 'aniElems_Con_' )
+      .attr( 'width', '589' )
+      .attr( 'height', '600' );
+  $( _this.centerPanel ).children().last().append( _this.settings.animationElementsContainer );
+  setAnimationBoundaries( _this, options );
 
   var numElements = 0;
   _this.particlesTimeline = new TimelineMax( { repeat: 0, yoyo: false, repeatDelay: 0, paused: true } );
@@ -101,7 +76,7 @@ if (  _this.settings.isUseSVGelements ) {
 //_this.settings.sceneContainer.panel.appendChild( _this.settings.sceneContainer );
 
   $.each( _this.particleMaps.homePostionParticles, function( idx, particle ) {
-if (idx < 1) {
+//if (idx < 100) {
 
     // NOTE: particleAnimationMethod should return a Tween for the element. And it
     // should call its own "make an element" method.
@@ -110,18 +85,12 @@ if (idx < 1) {
     if ( element ) {
 
       // Move element from element.x, element.y to home.x, home.y.
-      if ( _this.settings.isUseSVGelements ) {
-        $( _this.settings.sceneContainer).append( element );
-      } else {
-        //_this.settings.animationElementsContainer.appendChild( element );
-        _this.settings.sceneContainer.appendChild( element );
-      }
-      // TweenMax.to( circle, 2, { attr: { cy:  "200", cx:  "500", fill: "yellow" }, ease:Power2.easeOut } ) // end TweenMax.to()
-  	   _this.particlesTimeline.insert(
+      $( _this.settings.animationElementsContainer ).append( element );
+      _this.particlesTimeline.insert(
         TweenMax.to(
           element, _this.settings.tweenDuration,
-          { attr: { cy: particle.x + _this.settings.animationElementOffsetX,
-                    cx: particle.y + _this.settings.animationElementOffsetY,
+          { attr: { cx: particle.x + _this.settings.animationElementOffsetX,
+                    cy: particle.y + _this.settings.animationElementOffsetY,
                   },
     	      //autoAlpha: 0,
             //ease: Power0.easeInOut,
@@ -131,7 +100,7 @@ if (idx < 1) {
       ); // end Timeline.insert()
       numElements += 1;
     } // end if ( element )
-}
+//}
   }); // end $.each()
 
   $( _this.settings.sceneContainer ).attr( 'numElements', numElements + '' );
@@ -145,23 +114,21 @@ if (idx < 1) {
 //----------------------------------------------------------------------------
 function createParticleAnimationSVGelement( _this, particle ) {
   //----------------------------------------------------------------------------
-  var elementWidth = 16,
-      elementHeight = 16
-      panel_bottom = $(_this.settings.sceneContainer).height(),
-      panel_width = $(_this.settings.sceneContainer).width(),
-      left_boundaryX = Math.round( panel_width * 3/8 ),
-      right_boundaryX = Math.round( panel_width - (panel_width * 3/8) );
+  //var panel_bottom = $(_this.settings.sceneContainer).height(),
+  //    panel_width = $(_this.settings.sceneContainer).width(),
+  //    left_boundaryX = Math.round( panel_width * 3/8 ),
+  //    right_boundaryX = Math.round( panel_width - (panel_width * 3/8) );
 
   // Create element "below the fold" and in a column in the middle of the panel.
   // i.e. element.y is off the bottom of the page, element.x is in middle.
-  //var circle = document.createElement( 'circle' );
-  // <circle id="svgCircle"  cx="250" cy="400" r="8"  fill="red" />
-  //circle.setAttribute( 'fill', 'red' );
-  //circle.setAttribute( 'r', 16 );
-  //circle.setAttribute( 'cx', 200 );
-  //circle.setAttribute( 'cy', 200 );
-  //return circle;
-  //return '<circle id="svgCircleX"  cx="250" cy="400" r="8"  fill="red"></circle>';
+  var circle = $( makeSvgElementNS( 'circle' ) )
+      .attr( 'cx', getRandom( 225, 425 ) )
+      .attr( 'cy', _this.settings.animationPanelBottom - getRandom( 40, 50 ) )
+      .attr( 'r', particle.r )
+      .attr( 'fill', _this.settings.animationElementColor );
+  return circle;
+}; // end createParticleAnimationSVGelement()
+
 
   /* per: https://stackoverflow.com/questions/32637811/how-can-i-add-a-svg-graphic-dynamically-using-javascript-or-jquery
   var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -201,13 +168,12 @@ function createParticleAnimationSVGelement( _this, particle ) {
     };
   */
 
-  var circle = $( document.createElementNS( 'http://www.w3.org/2000/svg', 'circle') )
-      .attr('cx', 250)
-      .attr('cy', 400)
-      .attr('r', 50)
-      .attr('fill', 'red');
-  return circle;
-}; // end createParticleAnimationSVGelement()
+//------------------------------------------------------------------------------
+function makeSvgElementNS( tag ) {
+  //----------------------------------------------------------------------------
+  // per: http://chubao4ever.github.io/tech/2015/07/16/jquerys-append-not-working-with-svg-element.html
+  return document.createElementNS('http://www.w3.org/2000/svg', tag);
+}; // end makeSvgElementNS()
 
 //----------------------------------------------------------------------------
 function renderParticleMapAsDivElements( _this, options, callback ) {
@@ -215,6 +181,7 @@ function renderParticleMapAsDivElements( _this, options, callback ) {
   updateSettings( _this, options );
   console.log( " ..*5a.1) renderParticleMapAsDivElements() For HomePositionParticles[].len = " + _this.particleMaps.homePostionParticles.length + ". *");
 
+  setAnimationBoundaries( _this, options );
   var numElements = 0;
   _this.particlesTimeline = new TimelineMax( { repeat: 0, yoyo: false, repeatDelay: 0, paused: true } );
 
@@ -253,20 +220,13 @@ function renderParticleMapAsDivElements( _this, options, callback ) {
 //----------------------------------------------------------------------------
 function createParticleAnimationDivElement( _this, particle ) {
   //----------------------------------------------------------------------------
-  var elementWidth = 16,
-      elementHeight = 16
-      panel_bottom = $(_this.settings.sceneContainer).height(),
-      panel_width = $(_this.settings.sceneContainer).width(),
-      left_boundaryX = Math.round( panel_width * 3/8 ),
-      right_boundaryX = Math.round( panel_width - (panel_width * 3/8) );
-
 
   // Create element "below the fold" and in a column in the middle of the panel.
   // i.e. element.y is off the bottom of the page, element.x is in middle.
   var div = document.createElement( 'div' );
   div.style.position = 'absolute';
   div.style.left = getRandom( 225, 425 ) + "px";
-  div.style.top = panel_bottom - getRandom( 40, 50 ) + "px";
+  div.style.top = _this.settings.animationPanelBottom - getRandom( 40, 50 ) + "px";
   // Math.round( particle.r * _this.particleMaps.gridSize
   // // max 8px, min 2px.
   var diameter = Math.round( particle.r * _this.particleMaps.gridSize );
@@ -289,17 +249,24 @@ function createParticleAnimationDivElement( _this, particle ) {
 }; // end createParticleAnimationDivElement()
 
 //----------------------------------------------------------------------------
+function setAnimationBoundaries( _this, particle ) {
+  //----------------------------------------------------------------------------
+  var panel_bottom = $( _this.settings.sceneContainer ).height(),
+      panel_width = $( _this.settings.sceneContainer ).width();
+  _this.settings.animationPanelBottom = panel_bottom;
+  _this.settings.animationPanelWidth = panel_width;
+  _this.settings.animationPanelLeftBoundaryX = Math.round( panel_width * 3/8 );
+  _this.settings.animationPanelRightBoundaryX = Math.round( panel_width - _this.settings.animationPanelLeftBoundaryX );
+}; // end setAnimationBoundaries()
+
+//----------------------------------------------------------------------------
 function createParticleAnimationCanvasElement( _this, particle ) {
   //----------------------------------------------------------------------------
   var canvasAndCtx = makeCanvasAndCtx(),
       canvas = canvasAndCtx.canvas,
       context = canvasAndCtx.ctx,
       elementWidth = 6,
-      elementHeight = 6
-      panel_bottom = $(_this.settings.sceneContainer).height(),
-      panel_width = $(_this.settings.sceneContainer).width(),
-      left_boundaryX = Math.round( panel_width * 3/8 ),
-      right_boundaryX = Math.round( panel_width - (panel_width * 3/8) );
+      elementHeight = 6;
 
   // NOTE: canvas.width and heigth is set by the radius of the dot we write.
 
@@ -307,7 +274,7 @@ function createParticleAnimationCanvasElement( _this, particle ) {
   // i.e. element.y is off the bottom of the page, element.x is in middle.
   canvas.style.position = 'absolute';
   canvas.style.left = getRandom( 225, 425 ) + "px";
-  canvas.style.top =  panel_bottom - getRandom( 40, 50 ) + "px";
+  canvas.style.top =  _this.settings.animationPanelBottom - getRandom( 40, 50 ) + "px";
   canvas.width = elementWidth;
   canvas.height = elementHeight;
   context.fillStyle = _this.settings.animationElementColor;
@@ -379,6 +346,7 @@ function particles_reset( _this, options ) {
     _this.particlesRejectedBecauseIsExcludedNthPixell = 0;
     _this.particlesRejectedBecauseIsExcludedNotNthPixell = 0;
     _this.particlesRejectedBecauseIsNonCenterMemberOfCluster = 0;
+    _this.particlesRejectedBecausePixelIndexIsOutOfBounds = 0;
     _this.settings.rgbChannelOffset = _this.RGB_CHANNEL_OFFSETS[ _this.settings.rgbChannel ];
     _this.settings.rgbChannelAngle = _this.RGB_CHANNEL_ANGLES[ _this.settings.rgbChannel ];
   }

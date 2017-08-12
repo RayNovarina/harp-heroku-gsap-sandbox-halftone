@@ -188,8 +188,10 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
                _this.particlesRejectedBecauseIsExcludedNthPixell +
                "'. Particles Rejected Because it is NOT the Nth Pixell = '" +
                _this.particlesRejectedBecauseIsExcludedNotNthPixell +
-               "'. Particles Rejected Because is Non-center member of cluster. = '" +
+               "'. Particles Rejected Because is Non-center member of cluster = '" +
                _this.particlesRejectedBecauseIsNonCenterMemberOfCluster +
+               "'. Particles Rejected Because PixelIndex Is Out Of Bounds = '" +
+               _this.particlesRejectedBecausePixelIndexIsOutOfBounds +
                "'. *");
   if ( typeof callback == 'function' ) { callback( maps ); return; }
    return maps;
@@ -249,6 +251,10 @@ function particleFilter( _this, rgbChannel, x, y, carryOverResults ) {
   }
   // We are processing every pixel that gets here.
   var pixelInfo = getPixelInfo( _this, x, y, rgbChannel );
+  if ( pixelInfo == null ) {
+    _this.particlesRejectedBecausePixelIndexIsOutOfBounds += 1;
+    return { isAccepted: false };
+  }
 
   if ( _this.settings.isRejectParticlesBelowIntensityThreshold &&
        ( pixelInfo.channelIntensity < _this.settings.pixelChannelIntensityThreshold ) ) {
@@ -291,6 +297,10 @@ function getPixelInfo( _this, x, y, rgbChannel ) {
   // array containing the data in the RGBA order, with integer values between
   // 0 and 255 (included). sarah.jpg imgData.len = '582400'
   var pixelIndex = ( x + y * _this.settings.img.width ) * 4;
+  // NOTE: we have seen out of boundary data.
+  if ( pixelIndex - 4 > _this.imgData.length ) {
+    return null;
+  }
   var pixelChannelValue = rgbChannel === 'lum'
         ? _this.getPixelLum( pixelIndex )
         : _this.imgData[ pixelIndex + _this.settings.rgbChannelOffset ]; // get the 'blue' value of the rgba item.

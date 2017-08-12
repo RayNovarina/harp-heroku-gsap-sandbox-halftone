@@ -38,8 +38,8 @@ function trr_init(/*Code to resume when done*/ callback ) {
     isUseTrrData: false,
     isRenderParticleMap: false,
     isUseCanvasElements: false,
-    isUseSVGelements: false,
-    isUseDivElements: true,
+    isUseSVGelements: true,
+    isUseDivElements: false,
     isYoyoEffect: false,
     isActionsUseMovedConversionPanel: false,
     isCreateAnimationElements: true,
@@ -52,7 +52,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
     imageScale: 1.0, // canvas.width / imgWidth;
     rgbChannel: 'blue',
     halftoneColor: 'blue',
-    sceneBackgroundColor: '#E7F1F7',
+    sceneBackgroundColor: '#E7F1F7', // Climate Corp "halftone background blue"
     animationElementOffsetX: -80,
     animationElementOffsetY: -20,
   };
