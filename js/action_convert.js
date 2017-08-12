@@ -4,64 +4,91 @@
 //----------------------------------------------------------------------------
 function convert( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.1) convert() *");
-  _this.conversionContainerBackgroundRGB = _this.imgDataBackgroundRGB;
-  _this.conversionContainerBackgroundRGBA = _this.imgDataBackgroundRGBA;
+  //convert_reset( _this );
+  updateSettings( _this, options );
+  console.log( " ..*4.1) convert() " + "'. RenderParticleMap: '" + _this.settings.isRenderParticleMap +
+               "'. CreateAnimationElements: '" + _this.settings.isCreateAnimationElements +
+               "'. CreateElementsInConversionPanel: '" + _this.settings.isCreateElementsInConversionPanel +
+               "'. CreateElementsInAnimationPanel: '" + _this.settings.isCreateElementsInAnimationPanel +
+               "'. RenderAnimationElements: '" + _this.settings.isRenderAnimationElements +
+               "'. *");
   _this.settings.rgbChannel = 'blue'; // _this.settings.halftoneColor
   _this.particlesRejectedBecauseParticleIsOutOfBounds = 0;
   _this.particlesRejectedBecausePixelIntensityLessThanThreshold = 0;
-  _this.particlesRejectedBecausePixelSameAsConversionContainerBackgroundRGB = 0;
-  _this.particlesRejectedBecausePixelSameAsConversionContainerBackgroundRGBA = 0;
+  _this.particlesRejectedBecausePixelSameAsSceneContainerBackgroundRGB = 0;
+  _this.particlesRejectedBecausePixelSameAsSceneContainerBackgroundRGBA = 0;
   _this.particlesRejectedBecauseIsExcludedNthPixell = 0;
   _this.particlesRejectedBecauseIsExcludedNotNthPixell = 0;
   _this.particlesRejectedBecauseIsNonCenterMemberOfCluster = 0;
   _this.settings.rgbChannelOffset = _this.RGB_CHANNEL_OFFSETS[ _this.settings.rgbChannel ];
   _this.settings.rgbChannelAngle = _this.RGB_CHANNEL_ANGLES[ _this.settings.rgbChannel ];
 
-  // Create conversionContainer
-  createSceneContainer( _this, {
-    sceneId: 'scene_Con_' + _this.settings.id,
-    sceneWidth: 430,
-    sceneHeight: 436,
-    sceneLeft: 0,
-    sceneTop: 0,
-    sceneBackgroundColor: '#E7F1F7', // rgb(231, 241, 247) rgba(231, 241, 247, 1)
-    //  background color of Climate Corp profile photo for Meg: rgb(234, 233, 238) #eae9ee
-    sceneBorder: '',
-  },
-  /*1-Resume here when done*/ function( scene ) {
-  _this.scene = scene;
+  var sceneTag = 'convert';
+
   // Create particle array by selecting pixels we want for a halftone image.
+  // Optionally display particles in conversionPanel.
   createParticleMap( _this, {
     id: _this.settings.id,
-    maxHalftoneDotSize: 1/150,
-    pixelChannelIntensityThreshold: 0.05,
-    imageScale: 1.0, // canvas.width / imgWidth;
-    // If isProcessBySkipCount is true. Default is 4.
-    // NOTE: Use buttons for options. Risky to set override here.
-    // nthPixelToProcess: 4,
-
-    // NOTE: Use buttons for options. Risky to set override here.
-    // If isProcessByCluster is true. Default is ?
-    // pixelsPerClusterSide: 5,
-
     isRejectParticlesOutOfBounds: true,
     isRejectParticlesBelowIntensityThreshold: true,
-    isRejectParticlesSameAsConversionContainerBackground: true,
+    isRejectParticlesSameAsSceneContainerBackground: true,
+    sceneTag: sceneTag,
   },
-  /*2-Resume here when done*/ function( maps ) {
+  /*1-Resume here when done*/ function( maps ) {
   _this.particles = maps.homePostionParticles;
   // Create elements (from the particle map) in a form that we can animate.
-  createAnimationElements( _this, {
+  createScene( _this, {
+    sceneTag: sceneTag,
     animationElementWidth: 6,
     animationElementHeight: 6,
-    animationElementColor: '#70C0EF',
     animationElementOffsetX: -80,
     animationElementOffsetY: -20,
   },
+  /*2-Resume here when done*/ function( scene ) {
+  // If options say to, show scene in panel.
+  playScene( _this, {
+    sceneTag: sceneTag,
+    scene: scene,
+  },
   /*3-Resume here when done*/ function() {
-  // AnimationElements will display after append()
-  _this.conversionContainer.appendChild( _this.scene );
   /*3-*/});/*2-*/});/*1-*/});
   if ( typeof callback == 'function' ) { callback(); return; }
-}; // end: convert()
+};// end: convert()
+
+//----------------------------------------------------------------------------
+function createScene( _this, options, callback ) {
+  //----------------------------------------------------------------------------
+  var scene = {
+    sceneTag: options.sceneTag,
+    container: createSceneContainer( _this, options ),
+  };
+
+  // Create elements (from the particle map) in a form that we can animate.
+  createAnimationElements( _this, {
+    container: sceneContainer,
+    animationElementWidth: 6,
+    animationElementHeight: 6,
+    animationElementOffsetX: -80,
+    animationElementOffsetY: -20,
+  },
+  /*1-Resume here when done*/ function( elements ) {
+  scene.elements = elements;
+  /*1-*/});
+  if ( typeof callback == 'function' ) { callback( scene ); return; }
+  return scene;
+};// end: createScene()
+
+//----------------------------------------------------------------------------
+function convert_reset( _this ) {
+  //----------------------------------------------------------------------------
+  if ( _this.settings == 'undefined' ) {
+    // onDomReady() init.
+  } else {
+    // Reset link clicked after load. Maybe conversion, actions done.
+    createSceneContainer_reset( _this );
+    _this.sceneContainer;
+    createParticleMap_reset( _this );
+    _this.particles;
+    //createAnimationElements_reset( _this );
+  }
+}; // end: convert_reset()

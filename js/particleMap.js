@@ -3,11 +3,14 @@
 
 //----------------------------------------------------------------------------
 function createParticleMap( _this, options, /*Code to resume when done*/ callback ) {
-  //--------------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  createParticleMap_reset( _this );
   updateSettings( _this, options );
   console.log( " ..*5) createParticleMap() for id: '" + options.id +
-               "'. useTrrData: '" + _this.settings.isUseTrrData + "'. *");
-
+               "'. useTrrData: '" + _this.settings.isUseTrrData +
+               "'. RenderParticleMap: '" + _this.settings.isRenderParticleMap + "'. *");
+  _this.containerBackgroundRGB = _this.imgDataBackgroundRGB;
+  _this.containerBackgroundRGBA = _this.imgDataBackgroundRGBA;
   var maps = {};
   if ( _this.settings.isUseTrrData ) {
     maps = makeParticlesFromTrrMap( _this, {
@@ -88,11 +91,10 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
 
                ". isRejectParticlesOutOfBounds: " + _this.settings.isRejectParticlesOutOfBounds +
                ". isRejectParticlesBelowIntensityThreshold: " + _this.settings.isRejectParticlesBelowIntensityThreshold +
-               ". isRejectParticlesSameAsConversionContainerBackground: " + _this.settings.isRejectParticlesSameAsConversionContainerBackground +                 ".");
+               ". isRejectParticlesSameAsContainerBackground: " + _this.settings.isRejectParticlesSameAsContainerBackground +                 ".");
 
   // Create local variables to reduce loop overhead.
-  var maps = { homePostionParticles: [] },
-      homeOffsetLeft = _this.settings.particlesHomeOffsetLeft,
+  var homeOffsetLeft = _this.settings.particlesHomeOffsetLeft,
       homeOffsetTop = _this.settings.particlesHomeOffsetTop,
       pixelsPerCluster = _this.settings.pixelsPerCluster,
       image_width = _this.settings.img.width,
@@ -110,6 +112,13 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
       halfImageWidth = image_width / 2,
       halfImageHeigth = image_heigth / 2,
       halfGridSize = 0.5 * gridSize;
+
+  var maps = {
+    diagonal: diagonal,
+    gridSize: gridSize,
+    homePostionParticles: []
+  };
+
 
   console.log( " ..*5.2a) makeCartesianGridParticles(): BEGIN LOOP: " +
                ". gridSize = " + gridSize + ". rows = " + rows +
@@ -172,9 +181,9 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
                "'. Particles Rejected Because Pixel Intensity Less Than Threshold = '" +
                _this.particlesRejectedBecausePixelIntensityLessThanThreshold +
                "'. Particles Rejected Because Pixel Same As Conversion Container Background RGBA = '" +
-               _this.particlesRejectedBecausePixelSameAsConversionContainerBackgroundRGBA +
+               _this.particlesRejectedBecausePixelSameAsContainerBackgroundRGBA +
                "'. Particles Rejected Because Pixel Same As Conversion Container Background RGB = '" +
-               _this.particlesRejectedBecausePixelSameAsConversionContainerBackgroundRGB +
+               _this.particlesRejectedBecausePixelSameAsContainerBackgroundRGB +
                "'. Particles Rejected Because is Every Nth Pixell = '" +
                _this.particlesRejectedBecauseIsExcludedNthPixell +
                "'. Particles Rejected Because it is NOT the Nth Pixell = '" +
@@ -247,11 +256,12 @@ function particleFilter( _this, rgbChannel, x, y, carryOverResults ) {
     return { isAccepted: false };
   }
 
-  if ( _this.settings.isRejectParticlesSameAsConversionContainerBackground &&
-       ( pixelInfo.rgbString == _this.conversionContainerBackgroundRGB ) ) {
-    pixelInfo.rgbaString == _this.conversionContainerBackgroundRGBA
-      ? _this.particlesRejectedBecausePixelSameAsConversionContainerBackgroundRGBA += 1
-      : _this.particlesRejectedBecausePixelSameAsConversionContainerBackgroundRGB += 1;
+  if ( _this.settings.isRejectParticlesSameAsContainerBackground &&
+       ( pixelInfo.rgbString == _this.containerBackgroundRGB ) ) {
+    _this.particlesRejectedBecausePixelSameAsContainerBackgroundRGB += 1;
+    if ( pixelInfo.rgbaString == _this.containerBackgroundRGBA ) {
+      _this.particlesRejectedBecausePixelSameAsContainerBackgroundRGBA += 1;
+    }
     return { isAccepted: false };
   }
 
@@ -302,3 +312,11 @@ function getPixelLum( _this, pixelIndex ) {
   var min = Math.min( r, g, b );
   return ( max + min ) / 2;
 }; // end getPixelLum()
+
+//----------------------------------------------------------------------------
+function createParticleMap_reset( _this ) {
+  //----------------------------------------------------------------------------
+  if ( _this.particles !== 'undefined' ) {
+    _this.particles = [];
+  }
+}; // end createParticleMap_reset()

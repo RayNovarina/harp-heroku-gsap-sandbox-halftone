@@ -4,23 +4,28 @@ function trr_init(/*Code to resume when done*/ callback ) {
 
   // Create plugIn instance, defaults.
   var trrPlugin = new TrrEffect();
-  trrPlugin.timeNow = new Date().getTime();
   trrPlugin.$el = $( '#selectedPhoto' );;
   var $el = trrPlugin.$el;
+  trrPlugin.leftPanel = document.getElementById( 'leftPanel' );
+  trrPlugin.centerPanel = document.getElementById( 'centerPanel' );
+  trrPlugin.rightPanel = document.getElementById( 'rightPanel' );
+  //trrPlugin.mainTimeLine = new TimelineMax( { repeat: 0 } );
 
   trrPlugin.defaults = {
     img: document.getElementById( 'selectedPhoto'),
     $img: $el,
-    photoTag: $el.attr('photoTag'),
-    photoType: $el.attr('photoType'),
+    photoTag: 'meg',
+    photoType: 'color',
+    imgSrc: './images/meg_makalou_CC_581x600.jpg',
     isTransformPixels: true,
+    isAutoPlay: false,
     isMakeHomePositionMap: true,
     isMakeAtRestPositionMap: true,
     isMakePooledAtBottomMap: false,
     isExcludePixels: false,
     isProcessBySkipCount: true,
     isEvery1: false,
-    nthPixelToProcess: 3,
+    nthPixelToProcess: 2,
     isEvery2: true,
     isEvery3: false,
     isEvery4: false,
@@ -31,35 +36,27 @@ function trr_init(/*Code to resume when done*/ callback ) {
     isProcessByCluster: false,
     pixelsPerClusterSide: 5,
     isUseTrrData: false,
+    isRenderParticleMap: false,
+    isUseCanvasElements: false,
     isUseSVGelements: false,
+    isUseDivElements: true,
     isYoyoEffect: false,
-    isActionsUseMovedConversionContainer: false,
+    isActionsUseMovedConversionPanel: false,
+    isCreateAnimationElements: true,
+    isRenderAnimationElements: true,
+    isCreateElementsInConversionPanel: true,
+    isCreateElementsInAnimationPanel: false,
+    animationElementColor: '#70C0EF',
+    maxHalftoneDotSize: 1/150,
+    pixelChannelIntensityThreshold: 0.05,
+    imageScale: 1.0, // canvas.width / imgWidth;
+    rgbChannel: 'blue',
+    halftoneColor: 'blue',
+    sceneBackgroundColor: '#E7F1F7',
+    animationElementOffsetX: -80,
+    animationElementOffsetY: -20,
   };
-
-  // Create settings for first time, will get settings from defaults.
-  trrPlugin.settings = updateSettings( trrPlugin, {
-      timeNow: trrPlugin.timeNow,
-      id: 'mapTrrEffect_' + trrPlugin.timeNow } );
-
-  trrPlugin.particles = [];
-  trrPlugin.conversionContainer = document.getElementById( 'conversionContainer' );
-  trrPlugin.animationContainer = document.getElementById( 'animationContainer' );
-
-  // Set default state of checkboxes.
-  $( '#cbox_transform' ).prop('checked', trrPlugin.defaults.isTransformPixels );
-  $( '#cbox_exclude' ).prop('checked', trrPlugin.defaults.isExcludePixels );
-  $( '#cbox_useTrr' ).prop('checked', trrPlugin.defaults.isUseTrrData );
-  $( '#cbox_useSVG' ).prop('checked', trrPlugin.defaults.isUseSVGelements );
-  $( '#cbox_yoyo' ).prop('checked', trrPlugin.defaults.isYoyoEffect );
-
-  $( '#cbox_every1' ).prop('checked', trrPlugin.defaults.isEvery1 );
-  $( '#cbox_every2' ).prop('checked', trrPlugin.defaults.isEvery2 );
-  $( '#cbox_every3' ).prop('checked', trrPlugin.defaults.isEvery3 );
-  $( '#cbox_every4' ).prop('checked', trrPlugin.defaults.isEvery4 );
-  $( '#cbox_1x1_cluster' ).prop('checked', trrPlugin.defaults.is1x1_cluster );
-  $( '#cbox_3x3_cluster' ).prop('checked', trrPlugin.defaults.is3x3_cluster );
-  $( '#cbox_5x5_cluster' ).prop('checked', trrPlugin.defaults.is5x5_cluster );
-  $( '#cbox_7x7_cluster' ).prop('checked', trrPlugin.defaults.is7x7_cluster );
+  init_reset( trrPlugin ); // includes selecting default photo.
 
   // Add click handlers for various functions.
   // NOTE: within click handler 'this' refers to the dom element clicked, i.e.
@@ -83,34 +80,54 @@ function trr_init(/*Code to resume when done*/ callback ) {
     newPhoto( trrPlugin, { photoType: "color", photoTag: $(this).attr('photoTag'),
                            imgSrc: $(this).attr('data-src') } );
   });
-
+  $( "#newCcHalftoneMike" ).click( function( event ) {
+    newPhoto( trrPlugin, { photoType: "halftone", photoTag: $(this).attr('photoTag'),
+                           imgSrc: $(this).attr('data-src') } );
+  });
+  $( "#newCcHalftoneMeg" ).click( function( event ) {
+    newPhoto( trrPlugin, { photoType: "halftone", photoTag: $(this).attr('photoTag'),
+                           imgSrc: $(this).attr('data-src') } );
+  });
   //----------------------------------------------------------------------------
   // Actions
-  $( "#convert" ).click( function() {
-    convert( trrPlugin );
-    //trrPlugin.convert( trrPlugin, {},
-    ///*1-Resume here when done/ function() {
-    //var imgSrc = trrPlugin.settings.imgSrc;
-    ///*1-/}.bind( trrPlugin ));
+  $( "#particles" ).click( function() {
+    particles( trrPlugin, {
+      isRenderParticleMap: true,
+      isRenderParticleMapAsSingleCanvas: false,
+      isRenderParticleMapAsTweens: true,
+      tweenDuration: 3,
+      isCreateSceneInCenterPanel: true,
+      isCreateSceneInRightPanel: false,
+    } );
   });
   $( "#elements" ).click( function() {
-    elements( trrPlugin );
+    elements( trrPlugin, {
+      isRenderAnimationElements: true,
+      isCreateSceneInCenterPanel: false,
+      isCreateSceneInRightPanel: false,
+    } );
   });
-  $( "#explode" ).click( function() {
-    explode( trrPlugin, { tweenDuration: 4.0 } );
-  });
+  //$( "#explode" ).click( function() {
+  //  explode( trrPlugin, { tweenDuration: 4.0 } );
+  //});
   $( "#collapse" ).click( function() {
-    collapse( trrPlugin, { tweenDuration: 2.5 } );
+    collapse( trrPlugin, { tweenDuration: 1.5 } );
+  });
+  $( "#expand" ).click( function() {
+    expand( trrPlugin, {} );
   });
   $( "#riseUp" ).click( function() {
     riseUp( trrPlugin, { tweenDuration: 4.0 } );
   });
-  $( "#combineAll" ).click( function() {
-    combineAll( trrPlugin, { tweenDuration: 4.0 } );
-  });
-  //$( "#reset" ).click( function() {
-  //  reset( trrPlugin );
+  //$( "#combineAll" ).click( function() {
+  //  combineAll( trrPlugin, { tweenDuration: 4.0 } );
   //});
+  $( "#reset" ).click( function() {
+    reset( trrPlugin, {} );
+  });
+  $( "#play" ).click( function() {
+    playScene( trrPlugin, { scene: trrPlugin.scene } );
+  });
 
   //----------------------------------------------------------------------------
   // Action checkboxesRow1
@@ -124,11 +141,14 @@ function trr_init(/*Code to resume when done*/ callback ) {
   $( "#cbox_useTrr" ).click( function( event ) {
     cbox_useTrr( trrPlugin, { event: event } );
   });
+  $( "#cbox_useCanvas" ).click( function( event ) {
+    cbox_useCanvas( trrPlugin, { event: event } );
+  });
   $( "#cbox_useSVG" ).click( function( event ) {
     cbox_useSVG( trrPlugin, { event: event } );
   });
-  $( "#cbox_yoyo" ).click( function( event ) {
-    cbox_yoyo( trrPlugin, { event: event } );
+  $( "#cbox_useDiv" ).click( function( event ) {
+    cbox_useDiv( trrPlugin, { event: event } );
   });
 
   //----------------------------------------------------------------------------
@@ -160,3 +180,46 @@ function trr_init(/*Code to resume when done*/ callback ) {
   if ( typeof callback == 'function' ) { callback( trrPlugin ); return; }
   return trrPlugin;
 }; // end: trr_init()
+
+
+// Private methods in context of plugIn instance, i.e. this
+// NOTE: Private methods MUST use _this to get 'this' for this instance of TrrPlugin
+//----------------------------------------------------------------------------
+function init_reset( _this ) {
+
+  if ( _this.settings == 'undefined' ) {
+    // onDomReady() init.
+  } else {
+    // Reset link clicked after load. Maybe conversion, actions done.
+    //var previousId = _this.settings.
+  }
+
+  _this.settings = _this.defaults;
+  _this.timeNow = new Date().getTime();
+  updateSettings( _this, { timeNow: _this.timeNow, id: 'mapTrrEffect_' + _this.timeNow } );
+
+  // Set default state of checkboxes.
+  $( '#cbox_transform' ).prop('checked', _this.defaults.isTransformPixels );
+  $( '#cbox_exclude' ).prop('checked', _this.defaults.isExcludePixels );
+  $( '#cbox_useTrr' ).prop('checked', _this.defaults.isUseTrrData );
+  $( '#cbox_useCanvas' ).prop('checked', _this.defaults.isUseCanvasElements );
+  $( '#cbox_useSVG' ).prop('checked', _this.defaults.isUseSVGelements );
+  $( '#cbox_useDiv' ).prop('checked', _this.defaults.isUseDivElements );
+
+  $( '#cbox_every1' ).prop('checked', _this.defaults.isEvery1 );
+  $( '#cbox_every2' ).prop('checked', _this.defaults.isEvery2 );
+  $( '#cbox_every3' ).prop('checked', _this.defaults.isEvery3 );
+  $( '#cbox_every4' ).prop('checked', _this.defaults.isEvery4 );
+  $( '#cbox_1x1_cluster' ).prop('checked', _this.defaults.is1x1_cluster );
+  $( '#cbox_3x3_cluster' ).prop('checked', _this.defaults.is3x3_cluster );
+  $( '#cbox_5x5_cluster' ).prop('checked', _this.defaults.is5x5_cluster );
+  $( '#cbox_7x7_cluster' ).prop('checked', _this.defaults.is7x7_cluster );
+
+  _this.imgDataObj = null;
+  _this.imgData = null;
+  // Select, display default photo.
+  newPhoto( _this, { photoTag: _this.defaults.photoTag, photoType: _this.defaults.photoType, imgSrc: _this.defaults.imgSrc },
+  /*1-Resume here when done*/ function() {
+  /*1-*/});
+
+};// end: init_reset()

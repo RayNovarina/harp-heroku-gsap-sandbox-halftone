@@ -4,55 +4,47 @@
 //----------------------------------------------------------------------------
 function elements( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.2) elements() *");
+  updateSettings( _this, options );
+  elements_reset( _this )
+  console.log( " ..*4.2) elements() " +
+               "'. CreateAnimationElements: '" + _this.settings.isCreateAnimationElements +
+               "'. CreateElementsInConversionContainer: '" + _this.settings.isCreateElementsInConversionContainer +
+               "'. CreateElementsInAnimationContainer: '" + _this.settings.isCreateElementsInAnimationContainer +
+               "'. RenderAnimationElements: '" + _this.settings.isRenderAnimationElements +
+               "'. *");
 
+  if ( _this.sceneContainer == 'undefined' ||
+       !_this.settings.isCreateAnimationElements ) {
+    if ( typeof callback == 'function' ) { callback(); return; }
+    return;
+  }
+
+  // Create elements (from the particle map) in a form that we can animate.
+  createAnimationElements( _this, {
+    animationElementWidth: 6,
+    animationElementHeight: 6,
+    animationElementOffsetX: -80,
+    animationElementOffsetY: -20,
+  },
+  /*1-Resume here when done*/ function() {
+  // AnimationElements will display after append()
+  if ( _this.settings.isRenderAnimationElements ) {
+    if ( _this.settings.isCreateElementsInConversionContainer ) {
+        _this.conversionContainer.appendChild( _this.sceneContainer );
+    } else if ( _this.settings.isCreateElementsInAnimationContainer ) {
+        _this.animationContainer.appendChild( _this.sceneContainer );
+    }
+  }
+  /*1-*/});
   if ( typeof callback == 'function' ) { callback(); return; }
 }; // end: elements()
 
 //----------------------------------------------------------------------------
-function createAnimationElements( _this, options, /*Code to resume when done*/ callback ) {
-  //--------------------------------------------------------------------------
-  updateSettings( _this, options );
-  var scene = _this.scene,
-      canvas = null,
-      context = null
-      particles = _this.particles,
-      particlesLen = particles.length,
-      canvasWidth = _this.settings.animationElementWidth,
-      canvasHeight = _this.settings.animationElementHeight,
-      dotsColor = _this.settings.animationElementColor,
-      canvasOffsetX = _this.settings.animationElementOffsetX,
-      canvasOffsetY = _this.settings.animationElementOffsetY;
-  console.log( " ..*7) createAnimationElements() for " + particles.length + " particles. " +
-               " Each canvasElement has width: '" + canvasWidth +
-               "'. height: '" + canvasHeight + "'. dotsColor: '" + dotsColor + "'. *");
-
-  for( var n = 0; n < particles.length; n++ ) {
-    var particle = particles[ n ];
-
-    canvas = document.createElement( "canvas" );
-    context = canvas.getContext("2d");
-
-    canvas.width = canvasWidth;
-  	canvas.height = canvasHeight;
-  	canvas.style.left = particle.x + canvasOffsetX + "px";
-    // HACK:
-    // canvas.style.top = (particle.y + 200) + canvasOffsetY + "px";
-  	canvas.style.top = particle.y + canvasOffsetY + "px";
-  	canvas.style.position = 'absolute';
-
-    // NOTE: Callbacks available? else it seems browsers is busy making
-    // canvas elems and we exit for loop.
-    context.fillStyle = dotsColor;
-    context.beginPath();
-    context.arc( 0, 0, particle.r, 0, _this.TAU );
-    context.fill();
-    context.closePath();
-
-    scene.appendChild( canvas );
-  } // end for( var n)
-  console.log( " ..*7a) createAnimationElements() DONE for " + particles.length + " particles. " +
-               " Created " + $(scene).find( 'canvas' ).length + " canvasParticles. *");
-  if ( typeof callback == 'function' ) { callback( scene ); return; }
-  return scene;
-}; // end: createAnimationElements()
+function elements_reset( _this ) {
+//----------------------------------------------------------------------------
+  if ( _this.settings.isRenderAnimationElements &&
+      _this.settings.isCreateElementsInConversionContainer ) {
+    createSceneContainer_reset( _this );
+  }
+  createAnimationElements_reset( _this );
+}; // end: elements_reset()

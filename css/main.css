@@ -12,6 +12,34 @@
 .peopleLeftRow1 a:hover {
     color: green;
 }
+.peopleLeftRow2 {
+  position: absolute;
+  top: 26px;
+  left: 8px;
+}
+.peopleLeftRow2 a {
+    padding: 0 6px;
+    text-decoration: underline;
+    color: blue;
+    cursor: pointer
+}
+.peopleLeftRow2 a:hover {
+    color: green;
+}
+.peopleLeftRow3 {
+  position: absolute;
+  top: 46px;
+  left: 8px;
+}
+.peopleLeftRow3 a {
+    padding: 0 6px;
+    text-decoration: underline;
+    color: blue;
+    cursor: pointer
+}
+.peopleLeftRow3 a:hover {
+    color: green;
+}
 
 .actionsMiddleRow1 {
   position: absolute;
@@ -74,25 +102,25 @@
     color: green;
 }
 
-.profileContainer {
+.leftPanel {
   position: absolute;
-  top: 50px;
-  left: 4px;
-  width: 430px;
-  height: 438px;
+  top: 80px;
+  left: 10px;
+  width: 610px;
+  height: 610px;
   background-color: blue;
   border: 4px solid green;
 }
-.conversionContainer {
+.centerPanel {
   position: absolute;
-  top: 50px;
-  left: 446px;
-  width: 430px;
-  height: 438px;
+  top: 80px;
+  left: 632px;
+  width: 610px;
+  height: 610px;
   background-color: yellow;
   border: 4px solid black;
 }
-.animationContainer {
+.rightPanel {
   position: absolute;
   top: 50px;
   left: 888px;

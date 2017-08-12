@@ -64,28 +64,133 @@ function getImgData( _this, /*Code to resume when done*/ callback ) {
 } // end: getImgData()
 
 //----------------------------------------------------------------------------
+function createScene( _this, options, /*Code to resume when done*/ callback ) {
+  //--------------------------------------------------------------------------
+  updateSettings( _this, options );
+  console.log( " ..*3.2) createScene() For sceneTag: '" + _this.settings.sceneTag + "'. *");
+  if ( isSceneDisabled( _this, options ) ) {
+    if ( typeof callback == 'function' ) { callback( null ); return; }
+    return null;
+  }
+  createScene_reset( _this );
+  // Create container per panel and options specified in settings.
+  createSceneContainer( _this, {
+    sceneId: 'scene_Con_' + _this.settings.id,
+  },
+  /*1-Resume here when done*/ function( sceneContainer ) {
+  _this.settings.sceneContainer = sceneContainer;
+  sceneContainer.panel.appendChild( sceneContainer );
+  $ (sceneContainer).attr( 'sceneTag', _this.settings.sceneTag );
+  // Create AnimationElements per panel and options specified in settings.
+  // Attach them as needed to the sceneContainer.
+  options.container = sceneContainer;
+  createAnimationElements( _this, {
+    container: sceneContainer,
+  },
+  /*2-Resume here when done*/ function( num_elements ) {
+  // Assume container.style.display = 'none'. Now attach to specified Panel.
+  //sceneContainer.panel.appendChild( sceneContainer );
+  if ( typeof callback == 'function' ) { callback( sceneContainer ); return; }
+  return sceneContainer;
+  /*2-*/});/*1-*/});
+}; // end: createScene()
+
+//----------------------------------------------------------------------------
+function createScene_reset( _this ) {
+  //--------------------------------------------------------------------------
+  if ( _this.centerPanel !== undefined ) {
+    $(_this.centerPanel).children( 'canvas' ).remove();
+    $(_this.centerPanel).children( 'div' ).remove();
+    $(_this.centerPanel).empty();
+    //_this.centerPanel = document.createElement( "div" );
+  }
+}; // end: createSceneContainer_reset()
+
+//----------------------------------------------------------------------------
+function isSceneDisabled( _this, options ) {
+  //----------------------------------------------------------------------------
+  if ( ( options.sceneTag == 'particles' && !_this.settings.isRenderParticleMap ) ) {
+    console.log( " ..*3.3) createScene() Rendering is disabled for sceneTag: '" + options.sceneTag + "'. *");
+    if ( typeof callback == 'function' ) { callback( true ); return; }
+    return true;
+  }
+  if ( typeof callback == 'function' ) { callback( false ); return; }
+  return false;
+}; // end isSceneDisabled()
+
+//------------------------------------------------------------------------------
+function xlatSettingsToPanel( _this ) {
+  //----------------------------------------------------------------------------
+  return  _this.settings.isCreateSceneInLeftPanel
+      ? 'left' : _this.settings.isCreateSceneInCenterPanel ? 'center' : 'right';
+}; // end xlatSettingsToPanel()
+
+//----------------------------------------------------------------------------
 function createSceneContainer( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
   updateSettings( _this, options );
-  console.log( " ..*6) createSceneContainer() *");
+  console.log( " ..*3.4) createSceneContainer() For '" + _this.settings.panel + "' Panel. *");
 
   var container = document.createElement( "div" );
   container.id = _this.settings.sceneId;
-  container.style.width = _this.settings.sceneWidth + "px";
-  container.style.height = _this.settings.sceneHeight + "px";
+  //container.style.display = 'none';
+  container.panel = ( _this.settings.isCreateSceneInLeftPanel ? _this.leftPanel
+    : _this.settings.isCreateSceneInCenterPanel ? _this.centerPanel
+    : _this.rightPanel );
+  container.style.width = _this.settings.container.width + "px";
+  container.style.height = _this.settings.container.height + "px";
   container.style.position = "absolute";
-  container.style.left = _this.settings.sceneLeft + "px";
-  container.style.top  = _this.settings.sceneTop + "px";
-  container.style.backgroundColor  = _this.settings.sceneBackgroundColor;
-  container.style.border  = _this.settings.sceneBorder;
+  container.style.left = _this.settings.container.left + "px";
+  container.style.top  = _this.settings.container.top + "px";
+  container.style.backgroundColor  = _this.settings.container.backgroundColor;
+  container.style.border  = _this.settings.container.border;
 
-  console.log( " ..*6a) createSceneContainer() container.width: " +  container.style.width +
+  console.log( " ..*3.4a) createSceneContainer() container.width: " +  container.style.width +
                ". container.height: " + container.style.height +
                ". Container Offset left: " + container.style.left + ". top: " + container.style.top + "'*");
 
   if ( typeof callback == 'function' ) { callback( container ); return; }
   return container;
 }; // end: createSceneContainer()
+
+//------------------------------------------------------------------------------
+function createAnimationElements( _this, options, /*Code to resume when done*/ callback ) {
+  //----------------------------------------------------------------------------
+  updateSettings( _this, options );
+  //createAnimationElements_reset( _this );
+  console.log( " ..*3.8) createAnimationElements() For " +
+               "sceneTag: '" + $ ( _this.settings.container).attr( 'sceneTag' ) +
+               "' in Panel: '" + _this.settings.panel +
+               "' using method '" + _this.settings.animationElements.method +
+               "' *");
+  window[ _this.settings.animationElements.method ]( _this, options,
+  /*1-Resume here when done*/ function( elements ) {
+  if ( typeof callback == 'function' ) { callback( elements ); return; }
+  return elements;
+  /*1-*/});
+}; // end: createAnimationElements()
+
+//------------------------------------------------------------------------------
+function createAnimationElements_reset( _this ) {
+//----------------------------------------------------------------------------
+  //if ( _this.animationContainer !== undefined ) {
+  //  $(_this.animationContainer).empty();
+  //  // Assume container.style.display = 'none'. Now attach to specified Panel.
+  //  sceneContainer.panel.appendChild( sceneContainer );
+  //}
+}; // end: createAnimationElements_reset()
+
+//----------------------------------------------------------------------------
+// NOTE: eraseCanvas() also set canvas.width/height, fillStyle = color
+function eraseCanvas( _this, canvas, context, color ) {
+  //----------------------------------------------------------------------------
+  // Create blank canvas with fillStyle = color param.
+  canvas.width = _this.settings.img.width;
+  canvas.height = _this.settings.img.height;
+  context.clearRect( 0, 0, canvas.width, canvas.height );
+  context.fillStyle = color;
+  context.fillRect( 0, 0, canvas.width, canvas.height );
+};
 
 //----------------------------------------------------------------------------
 function copyConversionContainerToAnimationContainer( _this, options, /*Code to resume when done*/ callback ) {
@@ -94,7 +199,7 @@ function copyConversionContainerToAnimationContainer( _this, options, /*Code to 
   var isUseConversionScene = options.isActionsUseMovedConversionContainer
     ? options.isActionsUseMovedConversionContainer
     : _this.settings.isActionsUseMovedConversionContainer;
-  console.log( " ..*4.2.1) copyConversionContainerToAnimationContainer() " +
+  console.log( " ..*3.6) copyConversionContainerToAnimationContainer() " +
                "isUseConversionScene: '" + isUseConversionScene +
                ( isUseConversionScene ? "'. Copy nothing. animationContainer uses conversionContainer scene"
                                       : "'. Copy' scene in conversionContainer to the animationContainer" ) +
@@ -118,10 +223,46 @@ function copyConversionContainerToAnimationContainer( _this, options, /*Code to 
   /*2-Resume here when done*/ function() {
   // AnimationElements will display after append()
   _this.animationContainer.appendChild( _this.scene );
-  /*2-*/});/*1-*/});
   if ( typeof callback == 'function' ) { callback(); return; }
+  /*2-*/});/*1-*/});
 }; // end: copyConversionContainerToAnimationContainer()
 
+//------------------------------------------------------------------------------
+function playSceneIfAutoPlay( _this, options, callback ) {
+  //----------------------------------------------------------------------------
+  if ( _this.settings.AutoPlay ) {
+    playScene( _this, options, callback );
+  }
+}; // end: playSceneIfAutoPlay()
+
+//------------------------------------------------------------------------------
+function playScene( _this, options, callback ) {
+  //----------------------------------------------------------------------------
+  var numElements = parseInt( $(options.scene).attr( 'numElements' ) );
+  console.log( " ..*3.7) playScene() SceneTag: '" + $(options.scene).attr( 'sceneTag' ) +
+               "'. For numElements: '" + numElements + "'. *");
+
+  if ( $(options.scene).attr( 'sceneTag' ) == 'particles' ) {
+    if ( _this.settings.isRenderParticleMapAsSingleCanvas ) {
+      if ( numElements !== '0' ) {
+        //options.scene.style.display = 'block';
+      }
+      return;
+    } else if ( _this.settings.isRenderParticleMapAsTweens ) {
+      if ( numElements !== '0' ) {
+        // Start animation at seek(starting seconds into animation)
+        _this.particlesTimeline.play();
+      }
+      return;
+    }
+  } // isRenderParticleMapAsTweens
+}; // end: playScene()
+
+//------------------------------------------------------------------------------
+function playScene_reset( _this, options ) {
+  //----------------------------------------------------------------------------
+
+}; // end: playScene_reset()
 
 //======== ACTIONS Checkboxes =================
 //=============================================
@@ -130,8 +271,8 @@ function copyConversionContainerToAnimationContainer( _this, options, /*Code to 
 function cbox_transform( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
   console.log( " ..*4.5) cbox_transform() Box checked = '" + $( '#cbox_transform' ).prop('checked') + "'. *");
-  if ( $( '#cbox_transform' ).prop('checked') ) {
-    _this.settings.isTransformPixels = true;
+  _this.settings.isTransformPixels = $( '#cbox_transform' ).prop('checked');
+  if ( _this.settings.isTransformPixels ) {
     _this.settings.isExcludePixels = false;
     $( '#cbox_exclude' ).prop('checked', false );
   }
@@ -142,9 +283,9 @@ function cbox_transform( _this, options, /*Code to resume when done*/ callback )
 function cbox_exclude( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
   console.log( " ..*4.5) cbox_exclude() Box checked = '" + $( '#cbox_exclude' ).prop('checked') + "'. *");
-  if ( $( '#cbox_exclude' ).prop('checked') ) {
+  _this.settings.isExcludePixels = $( '#cbox_exclude' ).prop('checked');
+  if ( _this.settings.isExcludePixels ) {
     _this.settings.isTransformPixels = false;
-    _this.settings.isExcludePixels = true;
     $( '#cbox_transform' ).prop('checked', false );
   }
   if ( typeof callback == 'function' ) { callback(); return; }
@@ -159,20 +300,46 @@ function cbox_useTrr( _this, options, /*Code to resume when done*/ callback ) {
 }; // end: cbox_useTrr()
 
 //----------------------------------------------------------------------------
+function cbox_useCanvas( _this, options, /*Code to resume when done*/ callback ) {
+  //--------------------------------------------------------------------------
+  console.log( " ..*4.5) cbox_useCanvas() Box checked = '" + $( '#cbox_useCanvas' ).prop('checked') + "'. *");
+  _this.settings.isUseCanvasElements = $( '#cbox_useCanvas' ).prop('checked');
+  if ( _this.settings.isUseCanvasElements ) {
+    _this.settings.isUseSVGelements = false;
+    $( '#cbox_useSVG' ).prop('checked', false );
+    _this.settings.isUseDivElements = false;
+    $( '#cbox_useDiv' ).prop('checked', false );
+  }
+  if ( typeof callback == 'function' ) { callback(); return; }
+}; // end: function cbox_useCanvas()
+
+//----------------------------------------------------------------------------
 function cbox_useSVG( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
   console.log( " ..*4.5) cbox_useSVG() Box checked = '" + $( '#cbox_useSVG' ).prop('checked') + "'. *");
   _this.settings.isUseSVGelements = $( '#cbox_useSVG' ).prop('checked');
+  if ( _this.settings.isUseSVGelements ) {
+    _this.settings.isUseCanvasElements = false;
+    $( '#cbox_useCanvas' ).prop('checked', false );
+    _this.settings.isUseDivElements = false;
+    $( '#cbox_useDiv' ).prop('checked', false );
+  }
   if ( typeof callback == 'function' ) { callback(); return; }
 }; // end: function cbox_useSVG()
 
 //----------------------------------------------------------------------------
-function cbox_yoyo( _this, options, /*Code to resume when done*/ callback ) {
+function cbox_useDiv( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.5) cbox_yoyo() Box checked = '" + $( '#cbox_yoyo' ).prop('checked') + "'. *");
-  _this.settings.isYoyoEffect = $( '#cbox_yoyo' ).prop('checked');
+  console.log( " ..*4.5) cbox_useDiv() Box checked = '" + $( '#cbox_useDiv' ).prop('checked') + "'. *");
+  _this.settings.isUseDivElements = $( '#cbox_useDiv' ).prop('checked');
+  if ( _this.settings.isUseDivElements ) {
+    _this.settings.isUseCanvasElements = false;
+    $( '#cbox_useCanvas' ).prop('checked', false );
+    _this.settings.isUseSVGelements = false;
+    $( '#cbox_useSVG' ).prop('checked', false );
+  }
   if ( typeof callback == 'function' ) { callback(); return; }
-}; // end: function cbox_yoyo()
+}; // end: function cbox_useDiv()
 
 
 //================ Action sub options checkboxes.

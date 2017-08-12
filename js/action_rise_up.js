@@ -5,6 +5,7 @@
 function riseUp( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
   console.log( " ..*4.2) riseUp() *");
-
+  //_this.mainTimeLine.reverse();
+  //_this.collapseTimeline.resume().reverse();
   if ( typeof callback == 'function' ) { callback(); return; }
 }; // end: riseUp()
