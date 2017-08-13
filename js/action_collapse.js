@@ -4,55 +4,115 @@
 //----------------------------------------------------------------------------
 function collapse( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.3) collapse() *");
-  copyConversionContainerToAnimationContainer( _this, {} ); // { isActionsUseMovedConversionContainer: true }
-  var particleContainer = _this.animationContainer,
-      canvasParticles = $( particleContainer ).find( 'canvas' ),
-      canvasParticlesLen = canvasParticles.length;
-  console.log( " ..*4.3) collapse() particleContainer: '" + particleContainer.id +
-               "' which has " + canvasParticles.length + " canvasParticles" +
+  options.sceneTag = 'collaspe';
+  collapse_reset( _this, { sceneTag: options.sceneTag } );
+  updateSettings( _this, options );
+  var story, scene, animationElements;
+  photoTagToStory( _this, _this.settings.photoTag, options,
+  /*1-Resume here when done*/ function( story ) {
+  story = story;
+  tagToScene( _this, 'particles', story,
+  /*2-Resume here when done*/ function( scene ) {
+  scene = scene;
+  _this.scene = scene; // NOTE: hack needed for play button.
+  animationElements = scene.animationElements.domElements.objects;
+
+  console.log( " ..*4.3) collapse() animationElementsContainer: '" + $( scene.animationElements.container.object ).attr( 'id' ) +
+               "' which has " + animationElements.length + " elements" +
                ". Tween Duration: '" + options.tweenDuration + "'. *");
 
-  _this.collapseTimeline = new TimelineMax( { repeat: 0 } );
+  story.scenes.push( {
+    tag: _this.settings.sceneTag,
+    proxyContainerTag: scene.tag,
+  } );
 
-
-	for( var i = 0; i < canvasParticlesLen; i++ ) {
-		var canvasParticle = canvasParticles.eq(i);
-    var particle = _this.particles[ i ];
-
-    //var randX = getRandom(  -30 , -50 );
-		//var randY = getRandom(  100 , 300 );
-
-    // need to individually adjust top/y. NOTE: should calc and make part of
-    // particle{} when map is created!
-		//var tmax = TweenMax.to( canvasParticle, options.tweenDuration, {
-		//  //left: randX,
-		//	//top: randY,
-		//	left: getRandom( 150, 250 ),
-    //  top:  particle.y + getRandom( 10, 50 ),
-		//	autoAlpha: 0,
-    //  ease: Power0.easeInOut,
-		//}); // end TweenMax
-
-		_this.collapseTimeline.insert(
-      TweenMax.to( canvasParticle, options.tweenDuration, {
-        left: getRandom( 150, 250 ),
-        top:  particle.y + getRandom( 10, 50 ),
-    		autoAlpha: 0,
-        //ease: Power0.easeInOut,
-      })
-    );
-
-	} // end for( var i )
-
+  _this.collapseTimeline = new TimelineMax( { repeat: 0, yoyo: false, repeatDelay: 0, paused: true } );
   // Just collaspe down to our "compressed core". If we wanted the position of
   // all particles, we could call a function upon pause() and get the pos info.  via "vars"?
-  _this.collapseTimeline.addPause( options.tweenDuration - ( options.tweenDuration * .30) );
+  //_this.collapseTimeline.addPause( options.tweenDuration - ( options.tweenDuration * .30) );
 
-  //_this.mainTimeLine.insert( _this.collapseTimeline );
-
-  if ( typeof callback == 'function' ) { callback(); return; }
+  setAnimationBoundaries( _this, options );
+  $.each( animationElements, function( idx, element ) {
+    // NOTE: ASSUME that 'particles' scene has played and all animiation elements
+    // are currently at their 'home' position.x/y.
+    // Collaspe down to our "compressed core".
+    // Move element from element.x, element.y to collasped.x, collasped.y.
+    // NOTE: maybe each element should have attributes for home.x/y, collasped.x/y?
+    _this.collapseTimeline.insert(
+      TweenMax.to(
+        element, _this.settings.tweenDuration,
+        { attr: { cx: getRandom( _this.settings.animationPanelLeftBoundaryX, _this.settings.animationPanelRightBoundaryX ),
+                  cy: getRandom( _this.settings.animationPanelTopBoundary, _this.settings.animationPanelBottom ),
+                },
+             	  //autoAlpha: 0,
+                //ease: Power0.easeInOut,
+                ease: Power2.easeOut,
+        }
+    )); // end Timeline.insert()
+    if ( idx == animationElements.length - 1 ) {
+      /**-Resume here when done with $.each() loop.*/
+      console.log( " ..*4.3a) collapse() Tweened " + (animationElements.length - 1) +
+                   " AnimationElements. *");
+      playSceneIfAutoPlay( _this, { scene: scene },
+      /*2a-Resume here when done*/ function( timeline ) {
+      if ( typeof callback == 'function' ) { callback(); return; }
+      return;
+      /*2a-*/});
+    }
+  }); // end $.each()
+  /*2-*/});/*1-*/});
 }; // end: collapse()
+
+/*
+_this.movie.stories.push( {
+  tag: _this.settings.photoTag,
+  particleMap: _this.particles,
+  scenes: [ { tag: _this.settings.sceneTag,
+              container: sceneContainer,
+              animationElements: {
+                container: {
+                  object: aniContainerObj,
+                  htmlString: '',
+                },
+                domElements: {
+                  objects: domElementsObjsArray,
+                  htmlString: '',
+                },
+              },
+  } ],
+});
+*/
+
+//----------------------------------------------------------------------------
+function tagToScene( _this, sceneTag, story, callback ) {
+  //----------------------------------------------------------------------------
+  $.each( story.scenes, function( idx, scene ) {
+    if ( scene.tag == sceneTag ) {
+      if ( typeof callback == 'function' ) { callback( scene ); return; }
+      return scene;
+    }
+  }); // end $.each()
+};// end: tagToScene()
+
+//----------------------------------------------------------------------------
+function photoTagToStory( _this, photoTag, options, callback ) {
+  //----------------------------------------------------------------------------
+  $.each( _this.movie.stories, function( idx, story ) {
+    if ( story.tag == photoTag ) {
+      if ( typeof callback == 'function' ) { callback( story ); return; }
+      return story;
+    }
+  }); // end $.each()
+};// end: collapse_reset()
+
+//----------------------------------------------------------------------------
+function collapse_reset( _this, options ) {
+  //----------------------------------------------------------------------------
+  if ( _this.settings == 'undefined' ) {
+    // onDomReady() init.
+  } else {
+  }
+};// end: collapse_reset()
 
 /*
 var main_tl = new TimelineMax({repeat:-1});

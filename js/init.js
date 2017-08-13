@@ -9,7 +9,11 @@ function trr_init(/*Code to resume when done*/ callback ) {
   trrPlugin.leftPanel = document.getElementById( 'leftPanel' );
   trrPlugin.centerPanel = document.getElementById( 'centerPanel' );
   trrPlugin.rightPanel = document.getElementById( 'rightPanel' );
-  //trrPlugin.mainTimeLine = new TimelineMax( { repeat: 0 } );
+  trrPlugin.movieTimeLine = new TimelineMax( { repeat: 0, yoyo: false, repeatDelay: 0, paused: true } );
+  trrPlugin.movie = {
+      timeLine: trrPlugin.movieTimeLine,
+      stories: [],
+  };
 
   trrPlugin.defaults = {
     img: document.getElementById( 'selectedPhoto'),
@@ -95,7 +99,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
       isRenderParticleMap: true,
       isRenderParticleMapAsSingleCanvas: false,
       isRenderParticleMapAsTweens: true,
-      tweenDuration: 3,
+      tweenDuration: 2,
       isCreateSceneInCenterPanel: true,
       isCreateSceneInRightPanel: false,
     } );
@@ -111,10 +115,10 @@ function trr_init(/*Code to resume when done*/ callback ) {
   //  explode( trrPlugin, { tweenDuration: 4.0 } );
   //});
   $( "#collapse" ).click( function() {
-    collapse( trrPlugin, { tweenDuration: 1.5 } );
+    collapse( trrPlugin, { tweenDuration: 3 } );
   });
   $( "#expand" ).click( function() {
-    expand( trrPlugin, {} );
+    expand( trrPlugin, { tweenDuration: 2.5 } );
   });
   $( "#riseUp" ).click( function() {
     riseUp( trrPlugin, { tweenDuration: 4.0 } );

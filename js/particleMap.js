@@ -30,6 +30,7 @@ function createParticleMap( _this, options, /*Code to resume when done*/ callbac
       isMakePooledAtBottomMap: true,
     } );
   }
+  maps.photoTag = _this.settings.photoTag;
   console.log( " ..*5a) createParticleMap() Created HomePositionParticles[" + maps.homePostionParticles.length + "] *");
   if ( typeof callback == 'function' ) { callback( maps ); return; }
   return maps;
@@ -118,7 +119,6 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
     gridSize: gridSize,
     homePostionParticles: []
   };
-
 
   console.log( " ..*5.2a) makeCartesianGridParticles(): BEGIN LOOP: " +
                ". gridSize = " + gridSize + ". rows = " + rows +

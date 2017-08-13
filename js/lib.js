@@ -131,8 +131,12 @@ function createSceneContainer( _this, options, /*Code to resume when done*/ call
   updateSettings( _this, options );
   console.log( " ..*3.4) createSceneContainer() For '" + _this.settings.panel + "' Panel. *");
 
-  var container = document.createElement( "div" );
+  var container = document.createElement( "div" ),
+      $container = $( container );
   container.id = _this.settings.sceneId;
+  $container.addClass( 'trr-scene-container' )
+            .attr( 'sceneTag', _this.settings.sceneTag )
+            .attr( 'photoTag', _this.settings.photoTag );
   //container.style.display = 'none';
   container.panel = ( _this.settings.isCreateSceneInLeftPanel ? _this.leftPanel
     : _this.settings.isCreateSceneInCenterPanel ? _this.centerPanel
@@ -255,7 +259,9 @@ function playScene( _this, options, callback ) {
       }
       return;
     }
-  } // isRenderParticleMapAsTweens
+  } else { //if ( $(options.scene).attr( 'sceneTag' ) == 'collapse' ) {
+      _this.collapseTimeline.play();
+  }
 }; // end: playScene()
 
 //------------------------------------------------------------------------------

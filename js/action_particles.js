@@ -43,9 +43,29 @@ function particles( _this, options, /*Code to resume when done*/ callback ) {
       offsetY: 0, //-20,
     },
   },
-  /*2-Resume here when done*/ function( scene ) {
-  _this.scene = scene;
-  playSceneIfAutoPlay( _this, { scene: scene },
+  /*2-Resume here when done*/ function( sceneContainer ) {
+  _this.scene = sceneContainer;
+  var aniContainerObj = $( sceneContainer ).find( '.trr-ani-elems-container' ),
+      domElementsObjsArray = $( aniContainerObj ).children().toArray();
+  _this.movie.stories.push( {
+    tag: _this.settings.photoTag,
+    particleMap: _this.particles,
+    scenes: [ { tag: _this.settings.sceneTag,
+                container: sceneContainer,
+                animationElements: {
+                  container: {
+                    object: aniContainerObj,
+                    htmlString: '',
+                  },
+                  domElements: {
+                    objects: domElementsObjsArray,
+                    htmlString: '',
+                  },
+                },
+    } ],
+  });
+  // _this.movie.stories[0].scenes[0].animationElements.domElements.objects
+  playSceneIfAutoPlay( _this, { scene: sceneContainer },
   /*3-Resume here when done*/ function( timeline ) {
   if ( typeof callback == 'function' ) { callback(); return; }
   /*3-*/});/*2-*/});/*1-*/});
@@ -64,7 +84,10 @@ function renderParticleMapAsSvgElements( _this, options, callback ) {
     $( makeSvgElementNS('svg') )
       .attr( 'id', 'aniElems_Con_' )
       .attr( 'width', '589' )
-      .attr( 'height', '600' );
+      .attr( 'height', '600' )
+      .attr( 'trr-ani-elem-type', 'circle' ),
+  $animationElementsContainer = $( _this.settings.animationElementsContainer );
+  $animationElementsContainer.addClass( 'trr-ani-elems-container' );
   $( _this.centerPanel ).children().last().append( _this.settings.animationElementsContainer );
   setAnimationBoundaries( _this, options );
 
@@ -122,7 +145,7 @@ function createParticleAnimationSVGelement( _this, particle ) {
   // Create element "below the fold" and in a column in the middle of the panel.
   // i.e. element.y is off the bottom of the page, element.x is in middle.
   var circle = $( makeSvgElementNS( 'circle' ) )
-      .attr( 'cx', getRandom( 225, 425 ) )
+      .attr( 'cx', getRandom( _this.settings.animationPanelLeftBoundaryX, _this.settings.animationPanelRightBoundaryX ) )
       .attr( 'cy', _this.settings.animationPanelBottom - getRandom( 40, 50 ) )
       .attr( 'r', particle.r )
       .attr( 'fill', _this.settings.animationElementColor );
@@ -181,6 +204,16 @@ function renderParticleMapAsDivElements( _this, options, callback ) {
   updateSettings( _this, options );
   console.log( " ..*5a.1) renderParticleMapAsDivElements() For HomePositionParticles[].len = " + _this.particleMaps.homePostionParticles.length + ". *");
 
+  _this.settings.animationElementsContainer =
+    $( document.createElement( "div" ) )
+      .attr( 'id', 'aniElems_Con_' )
+      .attr( 'width', '589' )
+      .attr( 'height', '600' )
+      .attr( 'trr-ani-elem-type', 'div' ),
+  $animationElementsContainer = $( _this.settings.animationElementsContainer );
+  $animationElementsContainer.addClass( 'trr-ani-elems-container' );
+  $( _this.centerPanel ).children().last().append( _this.settings.animationElementsContainer );
+
   setAnimationBoundaries( _this, options );
   var numElements = 0;
   _this.particlesTimeline = new TimelineMax( { repeat: 0, yoyo: false, repeatDelay: 0, paused: true } );
@@ -193,7 +226,7 @@ function renderParticleMapAsDivElements( _this, options, callback ) {
     // Create element "below the fold", i.e. element.y is off the bottom of the page.
     var element = createParticleAnimationDivElement( _this, particle );
     if ( element ) {
-      _this.settings.sceneContainer.appendChild( element );
+      _this.settings.animationElementsContainer.append( element );
       // Move element from element.x, element.y to home.x, home.y.
       _this.particlesTimeline.insert(
         TweenMax.to(
@@ -253,9 +286,11 @@ function setAnimationBoundaries( _this, particle ) {
   //----------------------------------------------------------------------------
   var panel_bottom = $( _this.settings.sceneContainer ).height(),
       panel_width = $( _this.settings.sceneContainer ).width();
+  _this.settings.animationPanelTop = 0;
+  _this.settings.animationPanelTopBoundary = Math.round( panel_bottom * .45 );
   _this.settings.animationPanelBottom = panel_bottom;
   _this.settings.animationPanelWidth = panel_width;
-  _this.settings.animationPanelLeftBoundaryX = Math.round( panel_width * 3/8 );
+  _this.settings.animationPanelLeftBoundaryX = Math.round( panel_width * .42 );
   _this.settings.animationPanelRightBoundaryX = Math.round( panel_width - _this.settings.animationPanelLeftBoundaryX );
 }; // end setAnimationBoundaries()
 
