@@ -96,6 +96,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
   // Actions
   $( "#particles" ).click( function() {
     particles( trrPlugin, {
+      autoPlay: true,
       isRenderParticleMap: true,
       isRenderParticleMapAsSingleCanvas: false,
       isRenderParticleMapAsTweens: true,
@@ -106,8 +107,11 @@ function trr_init(/*Code to resume when done*/ callback ) {
   });
   $( "#elements" ).click( function() {
     elements( trrPlugin, {
-      isRenderAnimationElements: true,
-      isCreateSceneInCenterPanel: false,
+      isRenderParticleMap: true,
+      isRenderParticleMapAsSingleCanvas: false,
+      isRenderParticleMapAsTweens: true,
+      tweenDuration: 2,
+      isCreateSceneInCenterPanel: true,
       isCreateSceneInRightPanel: false,
     } );
   });
@@ -115,10 +119,10 @@ function trr_init(/*Code to resume when done*/ callback ) {
   //  explode( trrPlugin, { tweenDuration: 4.0 } );
   //});
   $( "#collapse" ).click( function() {
-    collapse( trrPlugin, { tweenDuration: 3 } );
+    collapse( trrPlugin, { autoPlay: true, tweenDuration: 3 } );
   });
   $( "#expand" ).click( function() {
-    expand( trrPlugin, { tweenDuration: 2.5 } );
+    expand( trrPlugin, { autoPlay: true, tweenDuration: 2.5 } );
   });
   $( "#riseUp" ).click( function() {
     riseUp( trrPlugin, { tweenDuration: 4.0 } );

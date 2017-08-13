@@ -234,7 +234,7 @@ function copyConversionContainerToAnimationContainer( _this, options, /*Code to 
 //------------------------------------------------------------------------------
 function playSceneIfAutoPlay( _this, options, callback ) {
   //----------------------------------------------------------------------------
-  if ( _this.settings.AutoPlay ) {
+  if ( _this.settings.autoPlay ) {
     playScene( _this, options, callback );
   }
 }; // end: playSceneIfAutoPlay()
@@ -242,11 +242,12 @@ function playSceneIfAutoPlay( _this, options, callback ) {
 //------------------------------------------------------------------------------
 function playScene( _this, options, callback ) {
   //----------------------------------------------------------------------------
-  var numElements = parseInt( $(options.scene).attr( 'numElements' ) );
-  console.log( " ..*3.7) playScene() SceneTag: '" + $(options.scene).attr( 'sceneTag' ) +
+  var numElements = parseInt( $(options.scene).attr( 'numElements' ) ),
+      sceneTag = $(options.scene).attr( 'sceneTag' );
+  console.log( " ..*3.7) playScene() SceneTag: '" + sceneTag +
                "'. For numElements: '" + numElements + "'. *");
 
-  if ( $(options.scene).attr( 'sceneTag' ) == 'particles' ) {
+  if ( sceneTag == 'particles' || sceneTag == 'elements' ) {
     if ( _this.settings.isRenderParticleMapAsSingleCanvas ) {
       if ( numElements !== '0' ) {
         //options.scene.style.display = 'block';
