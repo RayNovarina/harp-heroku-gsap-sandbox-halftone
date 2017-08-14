@@ -91,59 +91,44 @@ One way to explode items at: https://greensock.com/forums/topic/7622-one-way-to-
            Panel and write the particle halftone dots on it in one pass,
            i.e. without animation."
        >Particles</a>
-    <a id="elements" style="margin-left: 6px;"
-       title="Create AnimationElements in the right Panel based on the particles.
-           Pin them to their image home position, i.e. re-create the hafltone
-           photo image using an array of animation elements. This is GSAP
-           timeline label 'start'."
+    <a id="elements" style="margin-left: 4px;"
+       title="Create AnimationElements in the center Panel based on the particles.
+           Pin them to their collapsed position."
        >Elements</a>
-    <!-- <a id="explode" style="margin-left: 6px;"
-       title="Create AnimationElements in the animationPanel. Pin them to
-           their image home position, i.e. re-create the photo image.
-           Delay and then apply the explode animation effect.
-           Elements move up and out."
-       >Explode</a> -->
-    <a id="collapse" style="margin-left: 6px;"
-       title="Move AnimationElements to the center Panel, i.e. play GSAP
+    <a id="collapse" style="margin-left: 4px;"
+       title="AnimationElements in the center Panel, i.e. play GSAP
            timeline at label 'start'. Re-create them in the right panel. Delay
            and then apply the collapse animation effect. Elements move down and
            inward. This is GSAP timeline label 'collapse' to label 'collapsed'."
        >Collapse</a>
-    <a id="expand" style="margin-left: 6px;"
-       title="Move AnimationElements to the center Panel, i.e. play GSAP
+    <a id="expand" style="margin-left: 4px;"
+       title="AnimationElements in the center Panel, i.e. play GSAP
            timeline at label 'start'. Re-create them in the right panel. Delay
            and then apply the expand animation effect. Elements move up and out
            into their home positon. i.e. re-create the
            photo image. This is GSAP timeline label 'collasped' to label
            'expanded'."
        >Expand</a>
-    <!-- <a id="riseUp" style="margin-left: 2px;"
-      title="Create AnimationElements in the animationPanel. Pin below
-          their image bottom position, i.e. photo image is visible below the
-          animationPanel.
-          Delay and then apply the rise up animation effect.
-          Elements move up and out into their home positon. i.e. re-create the
-          photo image."
-       >Rise Up</a> -->
-    <!-- <a id="combineAll" style="margin-left: 6px;"
-       title="Create AnimationElements in the animationPanel. Pin them to
-           their image home position, i.e. re-create the photo image.
-           Delay and then animate a sequence of events: collaspe, rise up."
-       >All</a> -->
-    <a id="play" style="margin-left: 0px;"
-      title="Play GSAP animation timeLine."
-      >Play</a>
+    <a id="play" style="margin-left: 4px;"
+         title="Play GSAP animation timeLine segment for Particles or Elements."
+         >Play</a>
+    <a id="playStory" style="margin-left: 4px;"
+      title="AnimationElements in the center Panel. Play all scenes for selected
+          photo. i.e. start in collapsed postion, expand to full image."
+       >Story</a>
+    <a id="playMovie" style="margin-left: 4px;"
+       title="AnimationElements in the center Panel. Play all stories and scenes
+           for all selected photos. i.e. start in collapsed postion, expand to
+           full image."
+       >Movie</a>
   </div>
 
   <div class="actionsMiddleRow2">
-    <a id="reset" style="margin-left: 0px; color: red;"
+    <a id="" style="margin-left: 0px; color: red;"
        title=""
+       href="/"
        >RESET</a>
-    <a id="copyPhoto_color" style="margin-left: 6px;"
-       title="Make color copy (pixel by pixel) of selected photo. Write to conversionPanel onto single <canvas>."
-       >Copy</a>
-    <span>&nbsp;&nbsp;&nbsp;</span>
-    <a id="copyPhoto_greyscale" style="margin-left: 6px;"
+    <a id="copyPhoto_greyscale" style="margin-left: 8px;"
        title="Make grey scale copy (pixel by pixel) of selected photo. Write to conversionPanel onto single <canvas>."
        >GreyScale</a>
   </div>
@@ -219,7 +204,7 @@ One way to explode items at: https://greensock.com/forums/topic/7622-one-way-to-
 <script type="text/javascript" src="js/action_collapse.js"></script>
 <script type="text/javascript" src="js/action_expand.js"></script>
 <!-- <script type="text/javascript" src="js/action_rise_up.js"></script> -->
-<script type="text/javascript" src="js/action_reset.js"></script>
+<!-- <script type="text/javascript" src="js/action_reset.js"></script> -->
 
 
 <script type="text/javascript">
@@ -230,6 +215,7 @@ $( document ).ready( function() {
   console.log( " ..*1) $( document ).ready()");
   trr_init(
   /*1-Resume here when done*/ function( trrPlugin ) {
+  window.trrPlugin = trrPlugin;
   // Select, display default photo.
   newPhoto( trrPlugin, { photoType: trrPlugin.defaults.photoType,
                          photoTag: trrPlugin.defaults.photoTag,

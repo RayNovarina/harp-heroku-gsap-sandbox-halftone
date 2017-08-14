@@ -12,7 +12,7 @@ function elements( _this, options, /*Code to resume when done*/ callback ) {
   // display particles in Panel specified by options (now in .settings).
   createScene( _this, {
     sceneTag: options.sceneTag,
-    panel: xlatSettingsToPanel( _this ),
+    panel: settingsToPanel( _this ),
     container: {
       width: _this.settings.img.width + 8,
       height: _this.settings.img.height,

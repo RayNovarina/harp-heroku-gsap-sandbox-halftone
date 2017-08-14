@@ -21,6 +21,8 @@ function newPhoto( _this, options, /*Code to resume when done*/ callback ) {
   var src = _this.settings.imgSrc,
       img = _this.settings.img,
       $img = _this.settings.$img;
+  _this.isVisiblePhoto = false;
+  _this.selectedPhotoTag = '';
 
   img.onload =
   /*1-Resume here when done*/ function() {
@@ -28,10 +30,26 @@ function newPhoto( _this, options, /*Code to resume when done*/ callback ) {
                "'. img.width: '" + img.width + "'. img.height: '" + img.height +
                "'. *");
   getImgData( _this,
-  /*2-Resume here when done*/ function() {
-  if ( typeof callback == 'function' ) { callback( img ); return; }
-  return img;
-  /*2-*/});/*1-*/}; // end img.onload()
+  /*2-Resume here when done*/ function( imgDataObj ) {
+  _this.isVisiblePhoto = true;
+  _this.selectedPhotoTag = _this.settings.photoTag;
+  selectedPhotoToStory( _this,
+  /*3-Resume here when done*/ function( result ) {
+  if ( !result.isFound ) {
+    // This photo has not been selected before.
+    result.item = newStory( _this, _this.selectedPhotoTag );
+  }
+  _this.activeStory = result.item;
+  _this.activeStory.image = {
+    html: {
+      elem: img,
+      src: $img.attr('src'),
+    },
+    ctxImgData: imgDataObj.data,
+  };
+  if ( typeof callback == 'function' ) { callback( _this.activeStory.imgage ); return; }
+  return _this.activeStory.imgage;
+  /*3-*/});/*2-*/});/*1-*/}; // end img.onload()
 
   $img.attr('src', src); // causes photo to be loaded and rendered.
 }; // end: newPhoto()
@@ -60,7 +78,8 @@ function getImgData( _this, /*Code to resume when done*/ callback ) {
   						 "'. imgWidth = '" + _this.imgWidth + "'. imgHeight = '" + _this.imgHeight +
   						 "'. Image Background RGB() = '" + _this.imgDataBackgroundRGB +
                "'. Image Background RGBA() = '" + _this.imgDataBackgroundRGBA + "' *");
-  if ( typeof callback == 'function' ) { callback(); return; }
+  if ( typeof callback == 'function' ) { callback( _this.imgDataObj ); return; }
+  return _this.imgDataObj;
 } // end: getImgData()
 
 //----------------------------------------------------------------------------
@@ -72,58 +91,25 @@ function createScene( _this, options, /*Code to resume when done*/ callback ) {
     if ( typeof callback == 'function' ) { callback( null ); return; }
     return null;
   }
-  createScene_reset( _this );
   // Create container per panel and options specified in settings.
   createSceneContainer( _this, {
     sceneId: 'scene_Con_' + _this.settings.id,
+    story: _this.activeStory,
   },
-  /*1-Resume here when done*/ function( sceneContainer ) {
-  _this.settings.sceneContainer = sceneContainer;
-  sceneContainer.panel.appendChild( sceneContainer );
-  $ (sceneContainer).attr( 'sceneTag', _this.settings.sceneTag );
+  /*1-Resume here when done*/ function( activeContainer ) {
+  activeContainer.panelElem.appendChild( activeContainer.html.elem );
+  // NOTE: container.style.display = 'none'. Will be enabled during animation.
+
   // Create AnimationElements per panel and options specified in settings.
   // Attach them as needed to the sceneContainer.
-  options.container = sceneContainer;
   createAnimationElements( _this, {
-    container: sceneContainer,
+    scene: _this.activeScene,
   },
-  /*2-Resume here when done*/ function( num_elements ) {
-  // Assume container.style.display = 'none'. Now attach to specified Panel.
-  //sceneContainer.panel.appendChild( sceneContainer );
-  if ( typeof callback == 'function' ) { callback( sceneContainer ); return; }
-  return sceneContainer;
+  /*2-Resume here when done*/ function( animationElementsContainerElem ) {
+  if ( typeof callback == 'function' ) { callback( _this.activeScene ); return; }
+  return _this.activeScene;
   /*2-*/});/*1-*/});
 }; // end: createScene()
-
-//----------------------------------------------------------------------------
-function createScene_reset( _this ) {
-  //--------------------------------------------------------------------------
-  if ( _this.centerPanel !== undefined ) {
-    $(_this.centerPanel).children( 'canvas' ).remove();
-    $(_this.centerPanel).children( 'div' ).remove();
-    $(_this.centerPanel).empty();
-    //_this.centerPanel = document.createElement( "div" );
-  }
-}; // end: createScene_reset()
-
-//----------------------------------------------------------------------------
-function isSceneDisabled( _this, options ) {
-  //----------------------------------------------------------------------------
-  if ( ( options.sceneTag == 'particles' && !_this.settings.isRenderParticleMap ) ) {
-    console.log( " ..*3.3) createScene() Rendering is disabled for sceneTag: '" + options.sceneTag + "'. *");
-    if ( typeof callback == 'function' ) { callback( true ); return; }
-    return true;
-  }
-  if ( typeof callback == 'function' ) { callback( false ); return; }
-  return false;
-}; // end isSceneDisabled()
-
-//------------------------------------------------------------------------------
-function xlatSettingsToPanel( _this ) {
-  //----------------------------------------------------------------------------
-  return  _this.settings.isCreateSceneInLeftPanel
-      ? 'left' : _this.settings.isCreateSceneInCenterPanel ? 'center' : 'right';
-}; // end xlatSettingsToPanel()
 
 //----------------------------------------------------------------------------
 function createSceneContainer( _this, options, /*Code to resume when done*/ callback ) {
@@ -131,57 +117,101 @@ function createSceneContainer( _this, options, /*Code to resume when done*/ call
   updateSettings( _this, options );
   console.log( " ..*3.4) createSceneContainer() For '" + _this.settings.panel + "' Panel. *");
 
-  var container = document.createElement( "div" ),
-      $container = $( container );
-  container.id = _this.settings.sceneId;
-  $container.addClass( 'trr-scene-container' )
-            .attr( 'sceneTag', _this.settings.sceneTag )
-            .attr( 'photoTag', _this.settings.photoTag );
-  //container.style.display = 'none';
-  container.panel = ( _this.settings.isCreateSceneInLeftPanel ? _this.leftPanel
-    : _this.settings.isCreateSceneInCenterPanel ? _this.centerPanel
-    : _this.rightPanel );
-  container.style.width = _this.settings.container.width + "px";
-  container.style.height = _this.settings.container.height + "px";
-  container.style.position = "absolute";
-  container.style.left = _this.settings.container.left + "px";
-  container.style.top  = _this.settings.container.top + "px";
-  container.style.backgroundColor  = _this.settings.container.backgroundColor;
-  container.style.border  = _this.settings.container.border;
+  // NOTE: will remove existing sceneContainer if it already exists.
+  createSceneContainer_reset( _this,
+  /*1-Resume here when done*/ function() {
 
-  console.log( " ..*3.4a) createSceneContainer() container.width: " +  container.style.width +
-               ". container.height: " + container.style.height +
-               ". Container Offset left: " + container.style.left + ". top: " + container.style.top + "'*");
+  var sceneContainerElem = document.createElement( "div" ),
+      $sceneContainerElem = $( sceneContainerElem );
+  $sceneContainerElem
+    .addClass( 'trr-scene-container' )
+    .attr( 'id', _this.settings.sceneId)
+    .attr( 'sceneTag', _this.settings.sceneTag )
+    .attr( 'photoTag', _this.settings.photoTag )
+    .attr( 'style', 'width: '           + _this.settings.createContainerParams.width + 'px; ' +
+                    'height: '          + _this.settings.createContainerParams.height + 'px; ' +
+                    'position: '        + 'absolute; ' +
+                    'left: '            + _this.settings.createContainerParams.left + 'px; ' +
+                    'top: '             + _this.settings.createContainerParams.top + 'px; ' +
+                    'backgroundColor: ' + _this.settings.createContainerParams.backgroundColor + '; ' +
+                    'border: '          + _this.settings.createContainerParams.border + '; ' +
+                    'display: '         + 'none'
+         );
 
-  if ( typeof callback == 'function' ) { callback( container ); return; }
-  return container;
+  _this.activeScene.container = {
+    panelElem: ( _this.settings.isCreateSceneInLeftPanel ? _this.leftPanel
+                : _this.settings.isCreateSceneInCenterPanel ? _this.centerPanel
+                : _this.rightPanel ),
+    html: {
+      elem: sceneContainerElem,
+    }
+  };
+  console.log( " ..*3.4a) createSceneContainer() container.width: '" +  _this.activeScene.container.html.elem.style.width +
+               "'. container.height: '" + _this.activeScene.container.html.elem.style.height +
+               "'. Container Offset left: '" + _this.activeScene.container.html.elem.style.left +
+               "'. top: '" + _this.activeScene.container.html.elem.style.top + "' *");
+
+  if ( typeof callback == 'function' ) { callback( _this.activeScene.container ); return; }
+  return _this.activeScene.container;
+  /*1-*/});
 }; // end: createSceneContainer()
+
+//----------------------------------------------------------------------------
+function createSceneContainer_reset( _this, callback ) {
+  //--------------------------------------------------------------------------
+  // NOTE: Assume we have an acitveStory{}.
+  if ( _this.activeScene ) {
+    // hide current scene before we create another one.
+    _this.activeScene.container.html.elem.style.display = 'none';
+  }
+  // Case: just loaded, just created meg_story, meg_ParticleMap. Going to render
+  //       particleMap for meg. need to create scene.
+  tagToScene( _this, _this.settings.sceneTag, _this.settings.story,
+  /*1-Resume here when done*/ function( result ) {
+  if ( result.isFound ) {
+    // This scene has been created before for this story.
+    var scene = result.item,
+        $sceneContainerElem = $( scene.container.html.elem );
+    // Remove from DOM for this story.
+    $sceneContainerElem.children( 'div' ).remove();
+    $sceneContainerElem.empty();
+    $sceneContainerElem.remove();
+    // Remove it from this story.
+    _this.settings.story.scenes.splice( result.index, 1 );
+  }
+  // Got rid of old scene, make a new scene object for the active story.
+  _this.activeScene = newScene( _this, _this.settings.sceneTag );
+  if ( typeof callback == 'function' ) { callback( _this.activeScene ); return; }
+  return _this.activeScene;
+  /*1-*/});
+}; // end: createSceneContainer_reset()
 
 //------------------------------------------------------------------------------
 function createAnimationElements( _this, options, /*Code to resume when done*/ callback ) {
   //----------------------------------------------------------------------------
   updateSettings( _this, options );
-  //createAnimationElements_reset( _this );
   console.log( " ..*3.8) createAnimationElements() For " +
-               "sceneTag: '" + $ ( _this.settings.container).attr( 'sceneTag' ) +
+               "sceneTag: '" + _this.settings.scene.tag +
                "' in Panel: '" + _this.settings.panel +
-               "' using method '" + _this.settings.animationElements.method +
+               "' using method '" + _this.settings.createAnimationElementsParams.method +
                "' *");
-  window[ _this.settings.animationElements.method ]( _this, options,
-  /*1-Resume here when done*/ function( elements ) {
-  if ( typeof callback == 'function' ) { callback( elements ); return; }
-  return elements;
-  /*1-*/});
+
+  createAnimationElements_reset( _this,
+  /*1-Resume here when done*/ function() {
+  window[ _this.settings.createAnimationElementsParams.method ]( _this, options,
+  /*2-Resume here when done*/ function( animationElementsContainerElem ) {
+  if ( typeof callback == 'function' ) { callback( animationElementsContainerElem ); return; }
+  return animationElementsContainerElem;
+  /*2-*/});/*1-*/});
 }; // end: createAnimationElements()
 
 //------------------------------------------------------------------------------
-function createAnimationElements_reset( _this ) {
+function createAnimationElements_reset( _this, callback ) {
 //----------------------------------------------------------------------------
-  //if ( _this.animationContainer !== undefined ) {
-  //  $(_this.animationContainer).empty();
-  //  // Assume container.style.display = 'none'. Now attach to specified Panel.
-  //  sceneContainer.panel.appendChild( sceneContainer );
-  //}
+  // Reset animationElementsContainer for _this.settings.scene.
+  var newElementsObj = newAnimationElements( _this, _this.settings.scene );
+  if ( typeof callback == 'function' ) { callback( newElementsObj ); return; }
+  return newElementsObj;
 }; // end: createAnimationElements_reset()
 
 //----------------------------------------------------------------------------
@@ -230,6 +260,121 @@ function copyConversionContainerToAnimationContainer( _this, options, /*Code to 
   if ( typeof callback == 'function' ) { callback(); return; }
   /*2-*/});/*1-*/});
 }; // end: copyConversionContainerToAnimationContainer()
+
+//----------------------------------------------------------------------------
+function isSceneDisabled( _this, options ) {
+  //----------------------------------------------------------------------------
+  if ( ( options.sceneTag == 'particles' && !_this.settings.isRenderParticleMap ) ) {
+    console.log( " ..*3.3) createScene() Rendering is disabled for sceneTag: '" + options.sceneTag + "'. *");
+    if ( typeof callback == 'function' ) { callback( true ); return; }
+    return true;
+  }
+  if ( typeof callback == 'function' ) { callback( false ); return; }
+  return false;
+}; // end isSceneDisabled()
+
+//------------------------------------------------------------------------------
+function settingsToPanel( _this ) {
+  //----------------------------------------------------------------------------
+  return  _this.settings.isCreateSceneInLeftPanel
+      ? 'left' : _this.settings.isCreateSceneInCenterPanel ? 'center' : 'right';
+}; // end settingsToPanel()
+
+//------------------------------------------------------------------------------
+function newMovie( _this, timeLine ) {
+  //----------------------------------------------------------------------------
+  return {
+    timeLine: timeLine,
+    stories: [],
+  };
+};// end: newMovie()
+
+//------------------------------------------------------------------------------
+function newStory( _this, photoTag ) {
+  //----------------------------------------------------------------------------
+  _this.movie.stories.push( {
+    movie: _this.movie,
+    tag: photoTag,
+    particleMap: {},
+    image: {},
+    scenes: [],
+  } );
+  return _this.movie.stories[ _this.movie.stories.length - 1 ];
+};// end: newStory()
+
+//------------------------------------------------------------------------------
+function newScene( _this, sceneTag ) {
+  //--------------------------------------------------------------------------
+  _this.activeStory.scenes.push( {
+    story: _this.activeStory,
+    tag: sceneTag,
+    container: {},
+    animationElements: {},
+    domElements: {},
+  } );
+  return _this.activeStory.scenes[ _this.activeStory.scenes.length - 1 ];
+}// end: newScene()
+
+//------------------------------------------------------------------------------
+function newAnimationElements( _this, scene ) {
+  //--------------------------------------------------------------------------
+  scene.animationElements = {
+    sceneContainer: scene.container,
+    container: {},
+    domElements: {},
+  }
+}// end: newAnimationElements()
+
+//----------------------------------------------------------------------------
+function selectedPhotoToStory( _this, callback ) {
+  //----------------------------------------------------------------------------
+  return photoTagToStory( _this, _this.selectedPhotoTag, callback );
+};// end: selectedPhotoToStory()
+
+//----------------------------------------------------------------------------
+function photoTagToStory( _this, photoTag, callback ) {
+  //----------------------------------------------------------------------------
+  return arrayEach(
+    _this.movie.stories, // array to search.
+    // Function to execute to test for "match" condition. Must return true/false
+    function( story ) {
+      return story.tag == photoTag;
+    },
+    callback );
+};// end: photoTagToStory()
+
+//----------------------------------------------------------------------------
+function arrayEach( array, testFunction, callback ) {
+  //----------------------------------------------------------------------------
+  var result = { isFound: false, index: null, item: null };
+  if ( array.length == 0 ) {
+    if ( typeof callback == 'function' ) { callback( result ); return; }
+    return result;
+  }
+  var isReturnedResult = false;
+  $.each( array, function( idx, item ) {
+    if ( testFunction(item) ) {
+      isReturnedResult = true;
+      result.isFound = true;
+      result.index = idx;
+      result.item = item;
+      if ( typeof callback == 'function' ) { callback( result ); return; }
+      return result;
+    }
+    if ( !isReturnedResult && idx == array.length - 1 ) {
+      if ( typeof callback == 'function' ) { callback( result ); return; }
+      return result;
+    }
+  }); // end $.each()
+};// end: arrayEach()
+
+//----------------------------------------------------------------------------
+function tagToScene( _this, sceneTag, story, callback ) {
+  //----------------------------------------------------------------------------
+  return arrayEach( story.scenes, function( scene ) {
+    return scene.tag == sceneTag;
+  }, callback );
+};// end: tagToScene()
 
 //------------------------------------------------------------------------------
 function playSceneIfAutoPlay( _this, options, callback ) {

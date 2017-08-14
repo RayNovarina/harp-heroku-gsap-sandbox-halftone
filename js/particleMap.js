@@ -11,9 +11,10 @@ function createParticleMap( _this, options, /*Code to resume when done*/ callbac
                "'. RenderParticleMap: '" + _this.settings.isRenderParticleMap + "'. *");
   _this.containerBackgroundRGB = _this.imgDataBackgroundRGB;
   _this.containerBackgroundRGBA = _this.imgDataBackgroundRGBA;
-  var maps = {};
+
+  var particles = [];
   if ( _this.settings.isUseTrrData ) {
-    maps = makeParticlesFromTrrMap( _this, {
+    particles = makeParticlesFromTrrMap( _this, {
       id: options.id,
       effectsDataAsJSONstring: effectsDataForRender[0].effectsDataAsJSONstring,
       particlesHomeOffsetLeft: 80,
@@ -22,7 +23,7 @@ function createParticleMap( _this, options, /*Code to resume when done*/ callbac
       isMakePooledAtBottomMap: true,
     } );
   } else {
-    maps = makeCartesianGridParticles( _this, {
+    particles = makeCartesianGridParticles( _this, {
       id: options.id,
       particlesHomeOffsetLeft: 82,
       particlesHomeOffsetTop: 20,
@@ -30,10 +31,11 @@ function createParticleMap( _this, options, /*Code to resume when done*/ callbac
       isMakePooledAtBottomMap: true,
     } );
   }
-  maps.photoTag = _this.settings.photoTag;
-  console.log( " ..*5a) createParticleMap() Created HomePositionParticles[" + maps.homePostionParticles.length + "] *");
-  if ( typeof callback == 'function' ) { callback( maps ); return; }
-  return maps;
+  _this.particles = particles;
+  _this.activeStory.particleMap.particles = particles;
+  console.log( " ..*5a) createParticleMap() Created HomePositionParticles[" + _this.activeStory.particleMap.particles.length + "] *");
+  if ( typeof callback == 'function' ) { callback( particles ); return; }
+  return particles;
 }; // end: createParticleMap()
 
 //----------------------------------------------------------------------------
@@ -49,8 +51,8 @@ function makeParticlesFromTrrMap( _this, options, /*Code to resume when done*/ c
                ". MakeHomePositionMap: " + _this.settings.isMakeHomePositionMap +
                ".");
 
-  var maps = { homePostionParticles: [] };
-  var effectsDataParticles = effectsData.particles,
+  var particles = [],
+      effectsDataParticles = effectsData.particles,
       edpParticle = {},
       homeOffsetLeft = _this.settings.particlesHomeOffsetLeft,
       homeOffsetTop = _this.settings.particlesHomeOffsetTop;
@@ -58,7 +60,7 @@ function makeParticlesFromTrrMap( _this, options, /*Code to resume when done*/ c
   if (_this.settings.isMakeHomePositionMap) {
     for( var i = 0; i < (effectsData.particles.length); i += 1 ) {
       edpParticle = effectsDataParticles[ i ];
-      maps.homePostionParticles.push( {
+      particles.push( {
           x: edpParticle.x + homeOffsetLeft,
           y: edpParticle.y + homeOffsetTop,
           r: edpParticle.r,
@@ -66,8 +68,8 @@ function makeParticlesFromTrrMap( _this, options, /*Code to resume when done*/ c
     } //end for( var n )
   }
 
-  if ( typeof callback == 'function' ) { callback( maps ); return; }
-  return maps;
+  if ( typeof callback == 'function' ) { callback( particles ); return; }
+  return particles;
 }; // end: makeParticlesFromTrrMap()
 
 //----------------------------------------------------------------------------
@@ -114,17 +116,12 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
       halfImageHeigth = image_heigth / 2,
       halfGridSize = 0.5 * gridSize;
 
-  var maps = {
-    diagonal: diagonal,
-    gridSize: gridSize,
-    homePostionParticles: []
-  };
-
   console.log( " ..*5.2a) makeCartesianGridParticles(): BEGIN LOOP: " +
                ". gridSize = " + gridSize + ". rows = " + rows +
                ". columns = " + cols + ". Max number of particles = " +
                maxNumOfParticles + ". *");
 
+  var particles = [];
   var carryOverResults = {};
 
   // Calculate the "home position", i.e. the image xy of each filtered pixel.
@@ -165,7 +162,7 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
       // background/fill color is.
       var filterResults = particleFilter( _this, _this.settings.rgbChannel, home_position_x, home_position_y, carryOverResults );
       if ( filterResults.isAccepted ) {
-        maps.homePostionParticles.push( {
+        particles.push( {
           x: filterResults.x + homeOffsetLeft,
           y: filterResults.y+ homeOffsetTop,
           r: filterResults.pixelChannelIntensity * gridSize,
@@ -175,7 +172,7 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
   } // end for (row)
 
   console.log( " ..*5.2b) makeCartesianGridParticles(): END LOOP: HomePositionParticles[].len = " +
-               maps.homePostionParticles.length + ". Out of " + maxNumOfParticles + " possible. " +
+               particles.length + ". Out of " + maxNumOfParticles + " possible. " +
                "Particles Rejected Because Particle Is Out Of Bounds = '" +
                _this.particlesRejectedBecauseParticleIsOutOfBounds +
                "'. Particles Rejected Because Pixel Intensity Less Than Threshold = '" +
@@ -193,8 +190,8 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
                "'. Particles Rejected Because PixelIndex Is Out Of Bounds = '" +
                _this.particlesRejectedBecausePixelIndexIsOutOfBounds +
                "'. *");
-  if ( typeof callback == 'function' ) { callback( maps ); return; }
-   return maps;
+  if ( typeof callback == 'function' ) { callback( particles ); return; }
+   return particles;
 }; // end: makeParticles()
 
 //----------------------------------------------------------------------------

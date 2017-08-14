@@ -44,7 +44,7 @@
 .actionsMiddleRow1 {
   position: absolute;
   top: 6px;
-  left: 442px;
+  left: 390px;
 }
 .actionsMiddleRow1 a {
     padding: 0 6px;
@@ -58,7 +58,7 @@
 .actionsMiddleRow2 {
   position: absolute;
   top: 26px;
-  left: 442px;
+  left: 390px;
 }
 .actionsMiddleRow2 a {
     padding: 0 6px;
@@ -73,7 +73,7 @@
 .actionCheckboxesRightRow1 {
   position: absolute;
   top: 6px;
-  left: 888px;
+  left: 880px;
 }
 .actionCheckboxesRightRow1 input {
     margin-left: 0px;
@@ -89,7 +89,7 @@
 .actionCheckboxesRightRow2 {
     position: absolute;
     top: 26px;
-    left: 888px;
+    left: 880px;
 }
 .actionCheckboxesRightRow2 input {
     margin-left: 0px;

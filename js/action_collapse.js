@@ -8,7 +8,7 @@ function collapse( _this, options, /*Code to resume when done*/ callback ) {
   collapse_reset( _this, { sceneTag: options.sceneTag } );
   updateSettings( _this, options );
   var story, scene, animationElements;
-  photoTagToStory( _this, _this.settings.photoTag, options,
+  photoTagToStory( _this, _this.settings.photoTag,
   /*1-Resume here when done*/ function( story ) {
   story = story;
   tagToScene( _this, 'particles', story,
@@ -62,48 +62,6 @@ function collapse( _this, options, /*Code to resume when done*/ callback ) {
   }); // end $.each()
   /*2-*/});/*1-*/});
 }; // end: collapse()
-
-/*
-_this.movie.stories.push( {
-  tag: _this.settings.photoTag,
-  particleMap: _this.particles,
-  scenes: [ { tag: _this.settings.sceneTag,
-              container: sceneContainer,
-              animationElements: {
-                container: {
-                  object: aniContainerObj,
-                  htmlString: '',
-                },
-                domElements: {
-                  objects: domElementsObjsArray,
-                  htmlString: '',
-                },
-              },
-  } ],
-});
-*/
-
-//----------------------------------------------------------------------------
-function tagToScene( _this, sceneTag, story, callback ) {
-  //----------------------------------------------------------------------------
-  $.each( story.scenes, function( idx, scene ) {
-    if ( scene.tag == sceneTag ) {
-      if ( typeof callback == 'function' ) { callback( scene ); return; }
-      return scene;
-    }
-  }); // end $.each()
-};// end: tagToScene()
-
-//----------------------------------------------------------------------------
-function photoTagToStory( _this, photoTag, options, callback ) {
-  //----------------------------------------------------------------------------
-  $.each( _this.movie.stories, function( idx, story ) {
-    if ( story.tag == photoTag ) {
-      if ( typeof callback == 'function' ) { callback( story ); return; }
-      return story;
-    }
-  }); // end $.each()
-};// end: collapse_reset()
 
 //----------------------------------------------------------------------------
 function collapse_reset( _this, options ) {

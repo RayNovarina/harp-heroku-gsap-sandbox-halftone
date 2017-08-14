@@ -9,11 +9,47 @@ function trr_init(/*Code to resume when done*/ callback ) {
   trrPlugin.leftPanel = document.getElementById( 'leftPanel' );
   trrPlugin.centerPanel = document.getElementById( 'centerPanel' );
   trrPlugin.rightPanel = document.getElementById( 'rightPanel' );
+  /*
+  _this.movie {
+    stories: [ {
+      tag: _this.settings.photoTag,
+      particleMap: {
+        particles: _this.particles,
+      },
+      image: {
+        html {
+          elem: _this.img,
+          src: img.src,
+        },
+        ctxImgData: [],
+      },
+      scenes: [ { tag: _this.settings.sceneTag,
+                  container: {
+                    panelElem: elem,
+                    html: {
+                      elem: sceneContainer,
+                    },
+                  },
+                  animationElements: {
+                    container: {
+                      html: {
+                        elem: aniContainerObj,
+                        string: '',
+                      },
+                    },
+                    domElements: {
+                      html: {
+                        elems: domElementsObjsArray[],
+                        string: '',
+                      },
+                    },
+                  },
+              } ],
+      ]
+  });
+  */
   trrPlugin.movieTimeLine = new TimelineMax( { repeat: 0, yoyo: false, repeatDelay: 0, paused: true } );
-  trrPlugin.movie = {
-      timeLine: trrPlugin.movieTimeLine,
-      stories: [],
-  };
+  trrPlugin.movie = newMovie( trrPlugin, trrPlugin.movieTimeLine );
 
   trrPlugin.defaults = {
     img: document.getElementById( 'selectedPhoto'),
@@ -23,9 +59,6 @@ function trr_init(/*Code to resume when done*/ callback ) {
     imgSrc: './images/meg_makalou_CC_581x600.jpg',
     isTransformPixels: true,
     isAutoPlay: false,
-    isMakeHomePositionMap: true,
-    isMakeAtRestPositionMap: true,
-    isMakePooledAtBottomMap: false,
     isExcludePixels: false,
     isProcessBySkipCount: true,
     isEvery1: false,
@@ -44,12 +77,6 @@ function trr_init(/*Code to resume when done*/ callback ) {
     isUseCanvasElements: false,
     isUseSVGelements: true,
     isUseDivElements: false,
-    isYoyoEffect: false,
-    isActionsUseMovedConversionPanel: false,
-    isCreateAnimationElements: true,
-    isRenderAnimationElements: true,
-    isCreateElementsInConversionPanel: true,
-    isCreateElementsInAnimationPanel: false,
     animationElementColor: '#70C0EF',
     maxHalftoneDotSize: 1/150,
     pixelChannelIntensityThreshold: 0.05,
@@ -96,46 +123,37 @@ function trr_init(/*Code to resume when done*/ callback ) {
   // Actions
   $( "#particles" ).click( function() {
     particles( trrPlugin, {
-      autoPlay: true,
       isRenderParticleMap: true,
-      isRenderParticleMapAsSingleCanvas: false,
-      isRenderParticleMapAsTweens: true,
-      tweenDuration: 2,
       isCreateSceneInCenterPanel: true,
-      isCreateSceneInRightPanel: false,
+      isRenderParticleMapAsSingleCanvas: true,
     } );
   });
   $( "#elements" ).click( function() {
     elements( trrPlugin, {
+      autoPlay: true,
       isRenderParticleMap: true,
-      isRenderParticleMapAsSingleCanvas: false,
+      isCreateSceneInCenterPanel: true,
       isRenderParticleMapAsTweens: true,
       tweenDuration: 2,
-      isCreateSceneInCenterPanel: true,
-      isCreateSceneInRightPanel: false,
     } );
   });
-  //$( "#explode" ).click( function() {
-  //  explode( trrPlugin, { tweenDuration: 4.0 } );
-  //});
   $( "#collapse" ).click( function() {
     collapse( trrPlugin, { autoPlay: true, tweenDuration: 3 } );
   });
   $( "#expand" ).click( function() {
     expand( trrPlugin, { autoPlay: true, tweenDuration: 2.5 } );
   });
-  $( "#riseUp" ).click( function() {
-    riseUp( trrPlugin, { tweenDuration: 4.0 } );
-  });
-  //$( "#combineAll" ).click( function() {
-  //  combineAll( trrPlugin, { tweenDuration: 4.0 } );
-  //});
-  $( "#reset" ).click( function() {
-    reset( trrPlugin, {} );
-  });
   $( "#play" ).click( function() {
-    playScene( trrPlugin, { scene: trrPlugin.scene } );
+    playSegment( trrPlugin, {} );
   });
+  $( "#playStory" ).click( function() {
+    playStory( trrPlugin, {} );
+  });
+  $( "#playMovie" ).click( function() {
+    playMovie( trrPlugin, {} );
+  });
+
+
 
   //----------------------------------------------------------------------------
   // Action checkboxesRow1
@@ -223,11 +241,9 @@ function init_reset( _this ) {
   $( '#cbox_5x5_cluster' ).prop('checked', _this.defaults.is5x5_cluster );
   $( '#cbox_7x7_cluster' ).prop('checked', _this.defaults.is7x7_cluster );
 
-  _this.imgDataObj = null;
-  _this.imgData = null;
   // Select, display default photo.
   newPhoto( _this, { photoTag: _this.defaults.photoTag, photoType: _this.defaults.photoType, imgSrc: _this.defaults.imgSrc },
-  /*1-Resume here when done*/ function() {
+  /*1-Resume here when done*/ function( imgage ) {
   /*1-*/});
 
 };// end: init_reset()
