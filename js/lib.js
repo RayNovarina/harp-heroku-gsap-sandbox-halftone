@@ -199,9 +199,13 @@ function createAnimationElements( _this, options, /*Code to resume when done*/ c
   createAnimationElements_reset( _this,
   /*1-Resume here when done*/ function() {
   window[ _this.settings.createAnimationElementsParams.method ]( _this, options,
-  /*2-Resume here when done*/ function( animationElementsContainerElem ) {
-  if ( typeof callback == 'function' ) { callback( animationElementsContainerElem ); return; }
-  return animationElementsContainerElem;
+  /*2-Resume here when done*/ function( results ) {
+  _this.activeScene.animationElements = {
+    container: { html: { elem: results.animationElementsContainerElem, string: '', }, },
+    domElements: { html: { elems: results.domElementsObjsArray, string: '', }, },
+  };
+  if ( typeof callback == 'function' ) { callback( results.animationElementsContainerElem ); return; }
+  return results.animationElementsContainerElem;
   /*2-*/});/*1-*/});
 }; // end: createAnimationElements()
 
@@ -310,7 +314,7 @@ function newScene( _this, sceneTag ) {
     tag: sceneTag,
     container: {},
     animationElements: {},
-    domElements: {},
+    proxyContainerTag: '',
   } );
   return _this.activeStory.scenes[ _this.activeStory.scenes.length - 1 ];
 }// end: newScene()

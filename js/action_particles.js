@@ -83,7 +83,8 @@ function renderParticleMapAsSingleCanvas( _this, options, callback ) {
       sceneContainerElem = _this.activeScene.container.html.elem,
       $sceneContainerElem = $( sceneContainerElem ),
       elementsContainer = _this.activeScene.animationElements.container,
-      imageElem = _this.activeStory.image.html.elem;
+      imageElem = _this.activeStory.image.html.elem,
+      domElementsObjsArray = [];
   console.log( " ..*5b.1) renderParticleMapAsSingleCanvas(): For Particles[].len = " + particles.length + ". *");
 
   elementsContainer.html = {
@@ -132,10 +133,16 @@ function renderParticleMapAsSingleCanvas( _this, options, callback ) {
     context.closePath();
   });
   $elementsContainerElem.append( element );
+  domElementsObjsArray.push( document.createElement( 'canvas' ) );
 
   $sceneContainerElem.attr( 'numElements', numElements + '' );
+
+  var results = {
+    animationElementsContainerElem: elementsContainerElem,
+    domElementsObjsArray: domElementsObjsArray,
+  };
   console.log( " ..*5b.2) renderParticleMapAsSingleCanvas(): Made " + $sceneContainerElem.attr( 'numElements' ) +
                " canvas AnimationElements. *");
-  if ( typeof callback == 'function' ) { callback( elementsContainerElem ); return; }
-  return elementsContainerElem;
+  if ( typeof callback == 'function' ) { callback( results ); return; }
+  return results;
 }; // end renderParticleMapAsSingleCanvas()

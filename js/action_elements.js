@@ -69,7 +69,8 @@ function renderParticleMapAsSvgElements( _this, options, callback ) {
       particles = _this.activeStory.particleMap.particles,
       sceneContainerElem = _this.activeScene.container.html.elem,
       $sceneContainerElem = $( sceneContainerElem ),
-      elementsContainer = _this.activeScene.animationElements.container;
+      elementsContainer = _this.activeScene.animationElements.container,
+      domElementsObjsArray = [];
   console.log( " ..*5a.1) For HomePositionParticles[].len = " + particles.length + ". *");
 
   // Insert the REQUIRED <svg> tag within the sceneContainer to contain the svg <circle> elements.
@@ -103,6 +104,8 @@ function renderParticleMapAsSvgElements( _this, options, callback ) {
 
       // Move element from element.x, element.y to home.x, home.y.
       $elementsContainerElem.append( element );
+      domElementsObjsArray.push( element );
+
       _this.particlesTimeline.insert(
         TweenMax.to(
           element, _this.settings.tweenDuration,
@@ -120,11 +123,15 @@ function renderParticleMapAsSvgElements( _this, options, callback ) {
   }); // end $.each()
 
   $sceneContainerElem.attr( 'numElements', numElements + '' );
+  var results = {
+    animationElementsContainerElem: elementsContainerElem,
+    domElementsObjsArray: domElementsObjsArray,
+  };
   console.log( " ..*5a.2) renderParticleMapAsTweens(): Made " + $sceneContainerElem.attr( 'numElements' ) +
                " canvas AnimationElements. *");
 
-  if ( typeof callback == 'function' ) { callback( elementsContainerElem ); return; }
-  return elementsContainerElem;
+  if ( typeof callback == 'function' ) { callback( results ); return; }
+  return results;
 }; // end renderParticleMapAsSvgElements()
 
 //----------------------------------------------------------------------------
@@ -202,7 +209,8 @@ function renderParticleMapAsDivElements( _this, options, callback ) {
       particles = _this.activeStory.particleMap.particles,
       sceneContainerElem = _this.activeScene.container.html.elem,
       $sceneContainerElem = $( sceneContainerElem ),
-      elementsContainer = _this.activeScene.animationElements.container;
+      elementsContainer = _this.activeScene.animationElements.container,
+      domElementsObjsArray = [];
   console.log( " ..*5a.1) renderParticleMapAsDivElements() For Particles[].len = " + particles.length + ". *");
 
   elementsContainer.html = {
@@ -234,6 +242,8 @@ function renderParticleMapAsDivElements( _this, options, callback ) {
     var element = createParticleAnimationDivElement( _this, particle );
     if ( element ) {
       elementsContainerElem.append( element );
+      domElementsObjsArray.push( element );
+
       // Move element from element.x, element.y to home.x, home.y.
       _this.particlesTimeline.insert(
         TweenMax.to(
@@ -251,10 +261,14 @@ function renderParticleMapAsDivElements( _this, options, callback ) {
   }); // end $.each()
 
   $sceneContainerElem.attr( 'numElements', numElements + '' );
+  var results = {
+    animationElementsContainerElem: elementsContainerElem,
+    domElementsObjsArray: domElementsObjsArray,
+  };
   console.log( " ..*5a.1a) renderParticleMapAsDivElements(): Made " + $sceneContainerElem.attr( 'numElements' ) +
                " <div> AnimationElements. *");
-  if ( typeof callback == 'function' ) { callback( elementsContainerElem ); return; }
-  return elementsContainerElem;
+  if ( typeof callback == 'function' ) { callback( results ); return; }
+  return results;
 }; // end renderParticleMapAsDivElements()
 
 //----------------------------------------------------------------------------

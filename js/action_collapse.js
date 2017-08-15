@@ -4,27 +4,28 @@
 //----------------------------------------------------------------------------
 function collapse( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  options.sceneTag = 'collaspe';
+  options.sceneTag = 'collapse';
   collapse_reset( _this, { sceneTag: options.sceneTag } );
   updateSettings( _this, options );
-  var story, scene, animationElements;
-  photoTagToStory( _this, _this.settings.photoTag,
-  /*1-Resume here when done*/ function( story ) {
-  story = story;
-  tagToScene( _this, 'particles', story,
-  /*2-Resume here when done*/ function( scene ) {
-  scene = scene;
-  _this.scene = scene; // NOTE: hack needed for play button.
-  animationElements = scene.animationElements.domElements.objects;
 
-  console.log( " ..*4.3) collapse() animationElementsContainer: '" + $( scene.animationElements.container.object ).attr( 'id' ) +
+  selectedPhotoToStory( _this,
+  /*1-Resume here when done*/ function( result ) {
+  _this.activeStory = result.item;
+  tagToScene( _this, 'elements', _this.activeStory,
+  /*2-Resume here when done*/ function( result ) {
+  var elementsScene = result.item
+  // We need to create a new scene that uses the animationElements[] for the
+  // activeStory.
+  var collapseScene = newScene( _this, options.sceneTag );
+  collapseScene.container = elementsScene.container;
+  collapseScene.animationElements = elementsScene.animationElements;
+  collapseScene.proxyContainerTag = 'elements';
+  _this.activeScene = collapseScene;
+  var animationElements = _this.activeScene.animationElements.domElements.html.elems;
+
+  console.log( " ..*4.3) collapse() animationElementsContainer: '" + $( _this.activeScene.animationElements.container.html.elem ).attr( 'id' ) +
                "' which has " + animationElements.length + " elements" +
                ". Tween Duration: '" + options.tweenDuration + "'. *");
-
-  story.scenes.push( {
-    tag: _this.settings.sceneTag,
-    proxyContainerTag: scene.tag,
-  } );
 
   _this.collapseTimeline = new TimelineMax( { repeat: 0, yoyo: false, repeatDelay: 0, paused: true } );
   // Just collaspe down to our "compressed core". If we wanted the position of
@@ -37,7 +38,9 @@ function collapse( _this, options, /*Code to resume when done*/ callback ) {
     // are currently at their 'home' position.x/y.
     // Collaspe down to our "compressed core".
     // Move element from element.x, element.y to collasped.x, collasped.y.
+
     // NOTE: maybe each element should have attributes for home.x/y, collasped.x/y?
+    // NOTE: if ( isSVGanimationElements)
     _this.collapseTimeline.insert(
       TweenMax.to(
         element, _this.settings.tweenDuration,
@@ -51,9 +54,9 @@ function collapse( _this, options, /*Code to resume when done*/ callback ) {
     )); // end Timeline.insert()
     if ( idx == animationElements.length - 1 ) {
       /**-Resume here when done with $.each() loop.*/
-      console.log( " ..*4.3a) collapse() Tweened " + (animationElements.length - 1) +
+      console.log( " ..*4.3a) collapse() Tweened " + ( animationElements.length - 1 ) +
                    " AnimationElements. *");
-      playSceneIfAutoPlay( _this, { scene: scene },
+      playSceneIfAutoPlay( _this, { scene: collapseScene },
       /*2a-Resume here when done*/ function( timeline ) {
       if ( typeof callback == 'function' ) { callback(); return; }
       return;

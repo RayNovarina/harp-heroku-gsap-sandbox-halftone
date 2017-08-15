@@ -24,7 +24,8 @@ function trr_init(/*Code to resume when done*/ callback ) {
         },
         ctxImgData: [],
       },
-      scenes: [ { tag: _this.settings.sceneTag,
+      scenes: [ { story: story,
+                  tag: _this.settings.sceneTag,
                   container: {
                     panelElem: elem,
                     html: {
@@ -45,6 +46,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
                       },
                     },
                   },
+                  proxyContainerTag: elements.scene.tag,
               } ],
       ]
   });
