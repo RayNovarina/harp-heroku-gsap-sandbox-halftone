@@ -15,6 +15,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
       tag: _this.settings.photoTag,
       particleMap: {
         particles: _this.particles,
+        gridSize: 5.568,
       },
       image: {
         html {
@@ -133,6 +134,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
       autoPlay: true,
       isRenderParticleMap: true,
       isCreateSceneInCenterPanel: true,
+      isRenderParticleMapAsSingleCanvas: false,
       isRenderParticleMapAsTweens: true,
       tweenDuration: 2,
     } );

@@ -125,7 +125,7 @@ function createSceneContainer( _this, options, /*Code to resume when done*/ call
       $sceneContainerElem = $( sceneContainerElem );
   $sceneContainerElem
     .addClass( 'trr-scene-container' )
-    .attr( 'id', _this.settings.sceneId)
+    .attr( 'id', _this.settings.sceneId )
     .attr( 'sceneTag', _this.settings.sceneTag )
     .attr( 'photoTag', _this.settings.photoTag )
     .attr( 'style', 'width: '           + _this.settings.createContainerParams.width + 'px; ' +
@@ -387,26 +387,21 @@ function playSceneIfAutoPlay( _this, options, callback ) {
 //------------------------------------------------------------------------------
 function playScene( _this, options, callback ) {
   //----------------------------------------------------------------------------
-  var numElements = parseInt( $(options.scene).attr( 'numElements' ) ),
-      sceneTag = $(options.scene).attr( 'sceneTag' );
+  var numElements = parseInt( $(options.scene.container.html.elem).attr('numElements') ),
+      sceneTag = options.scene.tag;
   console.log( " ..*3.7) playScene() SceneTag: '" + sceneTag +
                "'. For numElements: '" + numElements + "'. *");
 
   if ( sceneTag == 'particles' || sceneTag == 'elements' ) {
-    if ( _this.settings.isRenderParticleMapAsSingleCanvas ) {
-      if ( numElements !== '0' ) {
-        //options.scene.style.display = 'block';
-      }
-      return;
-    } else if ( _this.settings.isRenderParticleMapAsTweens ) {
-      if ( numElements !== '0' ) {
-        // Start animation at seek(starting seconds into animation)
-        _this.particlesTimeline.play();
-      }
-      return;
+    if ( _this.settings.isRenderParticleMapAsTweens &&
+         numElements !== '0' ) {
+      // Start animation at seek(starting seconds into animation)
+      _this.particlesTimeline.play();
     }
-  } else { //if ( $(options.scene).attr( 'sceneTag' ) == 'collapse' ) {
-      _this.collapseTimeline.play();
+    // Else "scene" does not have a timeLine, will just be displayed via DOM.
+  }
+  if ( sceneTag == 'collapse' ) {
+    _this.collapseTimeline.play();
   }
 }; // end: playScene()
 
