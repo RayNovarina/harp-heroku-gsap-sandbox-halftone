@@ -230,6 +230,68 @@ function eraseCanvas( _this, canvas, context, color ) {
   context.fillRect( 0, 0, canvas.width, canvas.height );
 };
 
+
+  /* per: https://stackoverflow.com/questions/32637811/how-can-i-add-a-svg-graphic-dynamically-using-javascript-or-jquery
+  var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", "640");
+    ...
+    document.getElementById("div").appendChild(svg);
+
+    per: http://chubao4ever.github.io/tech/2015/07/16/jquerys-append-not-working-with-svg-element.html
+
+    ###html file
+    < svg version="1.1" id="circle" width="400px" height="400px">
+      < circle fill="#FFFFFF" stroke="#000000" stroke-width="4" stroke-miterlimit="10" cx="300" cy="300" r="55.5"/>
+    </ svg>
+
+    ###js file
+    (function() {
+      $(document).ready(function() {
+        drawCircle();
+        drawCircle(100,100,"red");
+        drawCircle(200,200,"blue");
+        drawCircle(400,400,"gray");
+      });
+    })();
+
+    function SVG(tag) {
+      return document.createElementNS('http://www.w3.org/2000/svg', tag);
+    }
+
+    var drawCircle = function(x,y,color) {
+        var $svg = $("svg");
+        $(SVG('circle'))
+            .attr('cx', x)
+            .attr('cy', y)
+            .attr('r', 50)
+            .attr('fill', color)
+            .appendTo($svg);
+    };
+  */
+
+//------------------------------------------------------------------------------
+function makeSvgElementNS( tag ) {
+  //----------------------------------------------------------------------------
+  // per: http://chubao4ever.github.io/tech/2015/07/16/jquerys-append-not-working-with-svg-element.html
+  return document.createElementNS('http://www.w3.org/2000/svg', tag);
+}; // end makeSvgElementNS()
+
+//----------------------------------------------------------------------------
+function setAnimationBoundaries( _this, options ) {
+  //----------------------------------------------------------------------------
+  // NOTE: options.sceneTag = scene id.
+  var $sceneContainer = $( _this.activeScene.container.html.elem ),
+      panel_bottom = $sceneContainer.height(),
+      panel_width = $sceneContainer.width();
+  // Set boundaries for "collapsed" view.
+  _this.settings.animationPanelTop = 0;
+  _this.settings.animationPanelTopBoundary = Math.round( panel_bottom * .45 );
+  _this.settings.animationPanelBottom = panel_bottom;
+  _this.settings.animationPanelWidth = panel_width;
+  _this.settings.animationPanelLeftBoundaryX = Math.round( panel_width * .42 );
+  _this.settings.animationPanelRightBoundaryX = Math.round( panel_width - _this.settings.animationPanelLeftBoundaryX );
+}; // end setAnimationBoundaries()
+
 //----------------------------------------------------------------------------
 function copyConversionContainerToAnimationContainer( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
@@ -299,6 +361,7 @@ function newStory( _this, photoTag ) {
   _this.movie.stories.push( {
     movie: _this.movie,
     tag: photoTag,
+    collapseTimeline: null,
     particleMap: {},
     image: {},
     scenes: [],
@@ -392,21 +455,28 @@ function playSceneIfAutoPlay( _this, options, callback ) {
 function playScene( _this, options, callback ) {
   //----------------------------------------------------------------------------
   var numElements = parseInt( $(options.scene.container.html.elem).attr('numElements') ),
-      sceneTag = options.scene.tag;
+      sceneTag = options.scene.tag,
+      timeline = null;
   console.log( " ..*3.7) playScene() SceneTag: '" + sceneTag +
+               "'. Story: '" + options.scene.story.tag +
                "'. For numElements: '" + numElements + "'. *");
 
-  if ( sceneTag == 'particles' || sceneTag == 'elements' ) {
+  if ( sceneTag == 'particles' ) {
     if ( _this.settings.isRenderParticleMapAsTweens &&
          numElements !== '0' ) {
       // Start animation at seek(starting seconds into animation)
-      _this.particlesTimeline.play();
+      options.scene.story.particlesTimeline.play();
     }
     // Else "scene" does not have a timeLine, will just be displayed via DOM.
+  } else if ( sceneTag == 'elements' ) {
+    options.scene.story.elementsTimeline.play();
+  } else if ( sceneTag == 'collapse' ) {
+    options.scene.story.collapseTimeline.play();
+  } else if ( sceneTag == 'expand' ) {
+    options.scene.story.collapseTimeline.reverse();
   }
-  if ( sceneTag == 'collapse' ) {
-    _this.collapseTimeline.play();
-  }
+  if ( typeof callback == 'function' ) { callback( timeline ); return; }
+  return timeline;
 }; // end: playScene()
 
 //------------------------------------------------------------------------------
@@ -417,6 +487,45 @@ function playScene_reset( _this, options ) {
 
 //======== ACTIONS Checkboxes =================
 //=============================================
+
+//----------------------------------------------------------------------------
+function cbox_particles_mode( _this, options, /*Code to resume when done*/ callback ) {
+  //--------------------------------------------------------------------------
+  console.log( " ..*4.5) cbox_particles_mode() Box checked = '" + $( '#cbox_particles_mode' ).prop('checked') + "'. *");
+  _this.settings.isParticlesMode = $( '#cbox_particles_mode' ).prop('checked');
+  _this.settings.isElementsMode = !_this.settings.isParticlesMode;
+  update_ep_mode_cboxes( _this );
+  if ( typeof callback == 'function' ) { callback(); return; }
+}; // end: function cbox_particles_mode()
+
+//----------------------------------------------------------------------------
+function update_ep_mode_cboxes( _this ){
+    //----------------------------------------------------------------------------
+  if ( _this.settings.isParticlesMode ) {
+    _this.settings.isUseSVGelements = false;
+    _this.settings.isUseDivElements = false;
+    _this.settings.isUseCanvasElements = false;
+  } else {
+    _this.settings.isUseSVGelements = _this.defaults.isUseSVGelements;
+    _this.settings.isUseDivElements = _this.defaults.isUseDivElements;
+    _this.settings.isUseCanvasElements = _this.defaults.isUseCanvasElements;
+  }
+  $( '#cbox_particles_mode' ).prop('checked', _this.settings.isParticlesMode );
+  $( '#cbox_elements_mode' ).prop('checked', _this.settings.isElementsMode );
+  $( '#cbox_useCanvas' ).prop('checked', _this.settings.isUseCanvasElements );
+  $( '#cbox_useSVG' ).prop('checked', _this.settings.isUseSVGelements );
+  $( '#cbox_useDiv' ).prop('checked', _this.settings.isUseDivElements );
+};// end: function update_elements_particle_mode_cboxes()
+
+//----------------------------------------------------------------------------
+function cbox_elements_mode( _this, options, /*Code to resume when done*/ callback ) {
+  //--------------------------------------------------------------------------
+  console.log( " ..*4.5) cbox_elements_mode() Box checked = '" + $( '#cbox_elements_mode' ).prop('checked') + "'. *");
+  _this.settings.isElementsMode = $( '#cbox_elements_mode' ).prop('checked');
+  _this.settings.isParticlesMode = !_this.settings.isElementsMode;
+  update_ep_mode_cboxes( _this );
+  if ( typeof callback == 'function' ) { callback(); return; }
+}; // end: function cbox_elements_mode()
 
 //----------------------------------------------------------------------------
 function cbox_transform( _this, options, /*Code to resume when done*/ callback ) {

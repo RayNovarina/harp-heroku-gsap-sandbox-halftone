@@ -4,19 +4,45 @@
 //----------------------------------------------------------------------------
 function collapse( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
+  selectedPhotoToStory( _this,
+  /*1-Resume here when done*/ function( result ) {
+  _this.activeStory = result.item;
+  console.log( " ..*4.2) collapse() *");
+  _this.activeStory.expandTimeline.reverse();
+  if ( typeof callback == 'function' ) { callback(); return; }
+  return;
+  /*1-*/});
+}; // end: collapse()
+
+
+/*
+//----------------------------------------------------------------------------
+function collapse( _this, options, /*Code to resume when done/ callback ) {
+  //--------------------------------------------------------------------------
   options.sceneTag = 'collapse';
   collapse_reset( _this, { sceneTag: options.sceneTag } );
   updateSettings( _this, options );
 
   selectedPhotoToStory( _this,
-  /*1-Resume here when done*/ function( result ) {
+  /*1-Resume here when done/ function( result ) {
   _this.activeStory = result.item;
+
+  // animationElements MUST have already been created.
+  if ( !_this.activeStory.animationElements ||
+       !_this.activeStory.animationElements.container ||
+       _this.activeStory.animationElements.domElements.html.elems.length == 0 ) {
+    alert('You MUST create Animation Elements first via the "Elements" link.');
+    if ( typeof callback == 'function' ) { callback( null ); return; }
+    return null;
+  }
+
   tagToScene( _this, 'elements', _this.activeStory,
-  /*2-Resume here when done*/ function( result ) {
+  /*2-Resume here when done/ function( result ) {
   var elementsScene = result.item
   // We need to create a new scene that uses the animationElements[] for the
   // activeStory.
   var collapseScene = newScene( _this, options.sceneTag );
+  collapseScene.tag = options.sceneTag;
   collapseScene.container = elementsScene.container;
   collapseScene.animationElements = elementsScene.animationElements;
   collapseScene.proxyContainerTag = 'elements';
@@ -27,7 +53,7 @@ function collapse( _this, options, /*Code to resume when done*/ callback ) {
                "' which has " + animationElements.length + " elements" +
                ". Tween Duration: '" + options.tweenDuration + "'. *");
 
-  _this.collapseTimeline = new TimelineMax( { repeat: 0, yoyo: false, repeatDelay: 0, paused: true } );
+  _this.activeStory.collapseTimeline = new TimelineMax( { repeat: 0, yoyo: false, repeatDelay: 0, paused: true } );
   // Just collaspe down to our "compressed core". If we wanted the position of
   // all particles, we could call a function upon pause() and get the pos info.  via "vars"?
   //_this.collapseTimeline.addPause( options.tweenDuration - ( options.tweenDuration * .30) );
@@ -41,7 +67,7 @@ function collapse( _this, options, /*Code to resume when done*/ callback ) {
 
     // NOTE: maybe each element should have attributes for home.x/y, collasped.x/y?
     // NOTE: if ( isSVGanimationElements)
-    _this.collapseTimeline.insert(
+    _this.activeStory.collapseTimeline.insert(
       TweenMax.to(
         element, _this.settings.tweenDuration,
         { attr: { cx: getRandom( _this.settings.animationPanelLeftBoundaryX, _this.settings.animationPanelRightBoundaryX ),
@@ -53,17 +79,17 @@ function collapse( _this, options, /*Code to resume when done*/ callback ) {
         }
     )); // end Timeline.insert()
     if ( idx == animationElements.length - 1 ) {
-      /**-Resume here when done with $.each() loop.*/
+      /**-Resume here when done with $.each() loop./
       console.log( " ..*4.3a) collapse() Tweened " + ( animationElements.length - 1 ) +
                    " AnimationElements. *");
       playSceneIfAutoPlay( _this, { scene: collapseScene },
-      /*2a-Resume here when done*/ function( timeline ) {
+      /*2a-Resume here when done/ function( timeline ) {
       if ( typeof callback == 'function' ) { callback(); return; }
       return;
-      /*2a-*/});
+      /*2a-/});
     }
   }); // end $.each()
-  /*2-*/});/*1-*/});
+  /*2-/});/*1-/});
 }; // end: collapse()
 
 //----------------------------------------------------------------------------
@@ -72,8 +98,13 @@ function collapse_reset( _this, options ) {
   if ( _this.settings == 'undefined' ) {
     // onDomReady() init.
   } else {
+    if ( _this.activeScene ) {
+      // Hide the active/visible sceneContainer, we will replace it with ours.
+      _this.activeScene.container.html.elem.style.display = 'none';
+    }
   }
 };// end: collapse_reset()
+*/
 
 /*
 var main_tl = new TimelineMax({repeat:-1});

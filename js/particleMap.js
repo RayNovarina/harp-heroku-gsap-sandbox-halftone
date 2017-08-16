@@ -8,7 +8,10 @@ function createParticleMap( _this, options, /*Code to resume when done*/ callbac
   updateSettings( _this, options );
   console.log( " ..*5) createParticleMap() for id: '" + options.id +
                "'. useTrrData: '" + _this.settings.isUseTrrData +
-               "'. RenderParticleMap: '" + _this.settings.isRenderParticleMap + "'. *");
+               "'. RenderParticleMap: '" + _this.settings.isRenderParticleMap +
+               "'. particlesHomeOffsetLeft: '" + _this.settings.particlesHomeOffsetLeft +
+               "'. particlesHomeOffsetTop: '" + _this.settings.particlesHomeOffsetTop +
+               "'. *");
   _this.containerBackgroundRGB = _this.imgDataBackgroundRGB;
   _this.containerBackgroundRGBA = _this.imgDataBackgroundRGBA;
 
@@ -16,16 +19,16 @@ function createParticleMap( _this, options, /*Code to resume when done*/ callbac
     results = makeParticlesFromTrrMap( _this, {
       id: options.id,
       effectsDataAsJSONstring: effectsDataForRender[0].effectsDataAsJSONstring,
-      particlesHomeOffsetLeft: 80,
-      particlesHomeOffsetTop: 20,
+      additionalHomeOffsetLeft: 0,
+      additionalHomeOffsetTop: 0,
       isMakeHomePositionMap: true,
       isMakePooledAtBottomMap: true,
     } );
   } else {
     results = makeCartesianGridParticles( _this, {
       id: options.id,
-      particlesHomeOffsetLeft: 82,
-      particlesHomeOffsetTop: 20,
+      additionalHomeOffsetLeft: 2,
+      additionalHomeOffsetTop: 0,
       isMakeHomePositionMap: true,
       isMakePooledAtBottomMap: true,
     } );
@@ -34,6 +37,8 @@ function createParticleMap( _this, options, /*Code to resume when done*/ callbac
   _this.activeStory.particleMap = {
     particles: results.particles,
     gridSize: results.gridSize,
+    homeOffsetLeft: results.homeOffsetLeft,
+    homeOffsetTop: results.homeOffsetTop,
   };
   console.log( " ..*5a) createParticleMap() Created HomePositionParticles[" + _this.activeStory.particleMap.particles.length + "] *");
   if ( typeof callback == 'function' ) { callback( particles ); return; }
@@ -45,6 +50,11 @@ function makeParticlesFromTrrMap( _this, options, /*Code to resume when done*/ c
   //--------------------------------------------------------------------------
   updateSettings( _this, options );
   var effectsData = JSON.parse( _this.settings.effectsDataAsJSONstring );
+  var particles = [],
+      effectsDataParticles = effectsData.particles,
+      edpParticle = {},
+      homeOffsetLeft = _this.settings.particlesHomeOffsetLeft + _this.settings.additionalHomeOffsetLeft,
+      homeOffsetTop = _this.settings.particlesHomeOffsetTop + _this.settings.additionalHomeOffsetTop;
   console.log( " ..*5.1) makeParticlesFromTrrMap() for id: " + _this.settings.id +
                ". effectsData.particles.len = " + effectsData.particles.length +
                ". effectsDataAsJSONstring.len = " + _this.settings.effectsDataAsJSONstring.length +
@@ -52,12 +62,6 @@ function makeParticlesFromTrrMap( _this, options, /*Code to resume when done*/ c
                ". top: " + _this.settings.particlesHomeOffsetTop +
                ". MakeHomePositionMap: " + _this.settings.isMakeHomePositionMap +
                ".");
-
-  var particles = [],
-      effectsDataParticles = effectsData.particles,
-      edpParticle = {},
-      homeOffsetLeft = _this.settings.particlesHomeOffsetLeft,
-      homeOffsetTop = _this.settings.particlesHomeOffsetTop;
 
   if (_this.settings.isMakeHomePositionMap) {
     for( var i = 0; i < (effectsData.particles.length); i += 1 ) {
@@ -72,6 +76,8 @@ function makeParticlesFromTrrMap( _this, options, /*Code to resume when done*/ c
   var results = {
     particles: particles,
     gridSize: null,
+    homeOffsetLeft: homeOffsetLeft,
+    homeOffsetTop: homeOffsetTop,
   };
   if ( typeof callback == 'function' ) { callback( results ); return; }
   return results;
@@ -84,7 +90,9 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
   console.log( " ..*5.2) makeCartesianGridParticles() for id: " + _this.settings.id +
                ". Particles Home position Offset left: " + _this.settings.particlesHomeOffsetLeft +
                ". top: " + _this.settings.particlesHomeOffsetTop +
-                ". MakeHomePositionMap: " + _this.settings.isMakeHomePositionMap +
+               ". Particles additional Offset left: " + _this.settings.additionalHomeOffsetLeft +
+               ". top: " + _this.settings.additionalHomeOffsetTop +
+               ". MakeHomePositionMap: " + _this.settings.isMakeHomePositionMap +
                ". maxHalftoneDotSize: " + _this.settings.maxHalftoneDotSize +
                ". pixelChannelIntensityThreshold: " + _this.settings.pixelChannelIntensityThreshold +
                ". imageScale: " + _this.settings.imageScale +
@@ -102,8 +110,8 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
                ". isRejectParticlesSameAsContainerBackground: " + _this.settings.isRejectParticlesSameAsContainerBackground +                 ".");
 
   // Create local variables to reduce loop overhead.
-  var homeOffsetLeft = _this.settings.particlesHomeOffsetLeft,
-      homeOffsetTop = _this.settings.particlesHomeOffsetTop,
+  var homeOffsetLeft = _this.settings.particlesHomeOffsetLeft + _this.settings.additionalHomeOffsetLeft,
+      homeOffsetTop = _this.settings.particlesHomeOffsetTop + _this.settings.additionalHomeOffsetTop,
       pixelsPerCluster = _this.settings.pixelsPerCluster,
       image_width = _this.settings.img.width,
       image_heigth = _this.settings.img.height,
@@ -169,7 +177,11 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
       if ( filterResults.isAccepted ) {
         particles.push( {
           x: filterResults.x + homeOffsetLeft,
-          y: filterResults.y+ homeOffsetTop,
+          y: filterResults.y + homeOffsetTop,
+          // NOTE: performance tradeoff? if particle.i is stored as pixelIntensity (0-255) then Less
+          // chars are stored in string so we can just multiply with the CONSTANT gridSize. BUT we
+          // have the multiplication overhead. IF calc when mapped, about 20chars are stored for
+          // particle.r versus 3 for particle.i
           r: filterResults.pixelChannelIntensity * gridSize,
         });
       }
@@ -178,6 +190,8 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
   var results = {
     particles: particles,
     gridSize: gridSize,
+    homeOffsetLeft: homeOffsetLeft,
+    homeOffsetTop: homeOffsetTop,
   };
 
   console.log( " ..*5.2b) makeCartesianGridParticles(): END LOOP: HomePositionParticles[].len = " +

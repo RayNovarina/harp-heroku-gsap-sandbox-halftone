@@ -85,22 +85,20 @@ One way to explode items at: https://greensock.com/forums/topic/7622-one-way-to-
   </div>
 
   <div class="actionsMiddleRow1">
+    <input id="cbox_particles_mode" type="checkbox"
+           title="Particles Mode. Canvas/SVG/Div checkboxes apply to Particles link." >
     <a id="particles" style="margin-left: 0px;"
        title="Display converted particle map once it is done as a halftone
            image. Create particle map and then create a canvas in the center
            Panel and write the particle halftone dots on it in one pass,
            i.e. without animation."
        >Particles</a>
-    <a id="elements" style="margin-left: 4px;"
+    <input id="cbox_elements_mode" type="checkbox"
+           title="Elements Mode. Canvas/SVG/Div checkboxes apply to Elements link." >
+    <a id="elements" style="margin-left: 0px;"
        title="Create AnimationElements in the center Panel based on the particles.
            Pin them to their collapsed position."
        >Elements</a>
-    <a id="collapse" style="margin-left: 4px;"
-       title="AnimationElements in the center Panel, i.e. play GSAP
-           timeline at label 'start'. Re-create them in the right panel. Delay
-           and then apply the collapse animation effect. Elements move down and
-           inward. This is GSAP timeline label 'collapse' to label 'collapsed'."
-       >Collapse</a>
     <a id="expand" style="margin-left: 4px;"
        title="AnimationElements in the center Panel, i.e. play GSAP
            timeline at label 'start'. Re-create them in the right panel. Delay
@@ -109,9 +107,15 @@ One way to explode items at: https://greensock.com/forums/topic/7622-one-way-to-
            photo image. This is GSAP timeline label 'collasped' to label
            'expanded'."
        >Expand</a>
-    <a id="play" style="margin-left: 4px;"
+    <a id="collapse" style="margin-left: 4px;"
+       title="AnimationElements in the center Panel, i.e. play GSAP
+         timeline at label 'start'. Re-create them in the right panel. Delay
+         and then apply the collapse animation effect. Elements move down and
+         inward. This is GSAP timeline label 'collapse' to label 'collapsed'."
+       >Collapse</a>
+    <!-- <a id="play" style="margin-left: 4px;"
          title="Play GSAP animation timeLine segment for Particles or Elements."
-         >Play</a>
+         >Play</a> -->
     <a id="playStory" style="margin-left: 4px;"
       title="AnimationElements in the center Panel. Play all scenes for selected
           photo. i.e. start in collapsed postion, expand to full image."
@@ -190,7 +194,7 @@ One way to explode items at: https://greensock.com/forums/topic/7622-one-way-to-
   <div id="leftPanel" class="leftPanel">
     <img id="selectedPhoto" photoType="color" photoTag="" src="" data-src="" />
   </div>
-  <div id="centerPanel" class="centerPanel"></div>
+  <div id="centerPanel" class="trr-elements-stage centerPanel"></div>
   <div id="rightPanel" class="rightPanel" style="display:none"></div>
 
 <script type="text/javascript" src="js/TrrEffect.js"></script>
@@ -203,6 +207,7 @@ One way to explode items at: https://greensock.com/forums/topic/7622-one-way-to-
 <!-- <script type="text/javascript" src="js/action_explode.js"></script> -->
 <script type="text/javascript" src="js/action_collapse.js"></script>
 <script type="text/javascript" src="js/action_expand.js"></script>
+<script type="text/javascript" src="js/action_story.js"></script>
 <!-- <script type="text/javascript" src="js/action_rise_up.js"></script> -->
 <!-- <script type="text/javascript" src="js/action_reset.js"></script> -->
 

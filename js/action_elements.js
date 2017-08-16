@@ -18,7 +18,9 @@ function elements( _this, options, /*Code to resume when done*/ callback ) {
     return null;
   }
 
-  // display particles in Panel specified by options (now in .settings).
+  // Create animationElements from particles and build array of DOM elements
+  // that can be animated via GSAP timeLine.
+  // Optionally display default image in Panel specified by options (now in .settings).
   createScene( _this, {
     id: _this.activeStory.tag + '_particleMap',
     sceneTag: options.sceneTag,
@@ -33,22 +35,23 @@ function elements( _this, options, /*Code to resume when done*/ callback ) {
       border: '',
     },
     createAnimationElementsParams: {
-      method:   _this.settings.isRenderParticleMapAsSingleCanvas ? 'renderParticleMapAsSingleCanvas'
-              : _this.settings.isUseSVGelements ? 'renderParticleMapAsSvgElements'
-              : _this.settings.isUseCanvasElements ? 'renderParticleMapAsCanvasElements'
+      method: _this.settings.isUseSVGelements ? 'createSvgElementsFromParticleMap'
+              : _this.settings.isUseCanvasElements ? 'createCanvasElementsFromParticleMap'
               //: _this.settings.isUseDivElements ?
-              : 'renderParticleMapAsDivElements',
+              : 'createDivElementsFromParticleMap',
       offsetX: 0, //-80,
       offsetY: 0, //-20,
     },
   },
   /*1-Resume here when done*/ function( scene ) {
-  // _this.movie.stories[0].scenes[0].animationElements.domElements.objects
-  playSceneIfAutoPlay( _this, { scene: scene },
-  /*2-Resume here when done*/ function( timeline ) {
+  if ( _this.settings.autoPlay ) {
+    _this.activeStory.expandTimeline.play();
+  }
+  //playSceneIfAutoPlay( _this, { scene: scene },
+  ///*2-Resume here when done*/ function( timeline ) {
   if ( typeof callback == 'function' ) { callback( scene ); return; }
   return scene;
-  /*2-*/});/*1-*/});
+  /*1-*/});
 };// end: elements()
 
 //----------------------------------------------------------------------------
@@ -57,21 +60,34 @@ function elements_reset( _this, options ) {
   if ( _this.settings == 'undefined' ) {
     // onDomReady() init.
   } else {
-
+    // Reset mode cboxes if out of sync.
+    if ( !_this.settings.isElementsMode ) {
+      _this.settings.isParticlesMode = false;
+      _this.settings.isElementsMode = true;
+      update_ep_mode_cboxes( _this );
+    }
+    if ( _this.activeScene ) {
+      // Hide the active/visible sceneContainer, we will replace it with ours.
+      _this.activeScene.container.html.elem.style.display = 'none';
+    }
   }
 }; // end: elements_reset()
 
 //----------------------------------------------------------------------------
-function renderParticleMapAsSvgElements( _this, options, callback ) {
+function createSvgElementsFromParticleMap( _this, options, callback ) {
   //----------------------------------------------------------------------------
   updateSettings( _this, options );
-  var particleAnimationElementMethod = '',
-      particles = _this.activeStory.particleMap.particles,
+  var particles = _this.activeStory.particleMap.particles,
       sceneContainerElem = _this.activeScene.container.html.elem,
       $sceneContainerElem = $( sceneContainerElem ),
       elementsContainer = _this.activeScene.animationElements.container,
-      domElementsObjsArray = [];
-  console.log( " ..*5a.1) For HomePositionParticles[].len = " + particles.length + ". *");
+      domElementsObjsArray = [],
+      animationElementOffsetX = _this.settings.createAnimationElementsParams.offsetX,
+      animationElementOffsetY = _this.settings.createAnimationElementsParams.offsetY;
+  console.log( " ..*5a.1) createSvgElementsFromParticleMap() For Particles[].len = " + particles.length +
+               "'. animationElementOffsetX: '" + animationElementOffsetX +
+               "'. animationElementOffsetY: '" + animationElementOffsetY +
+               ". *");
 
   // Insert the REQUIRED <svg> tag within the sceneContainer to contain the svg <circle> elements.
   // NOTE: browser can not directly add <svg> or <circle> tags, need to use "w3.org namespace".
@@ -87,37 +103,45 @@ function renderParticleMapAsSvgElements( _this, options, callback ) {
   var elementsContainerElem = elementsContainer.html.elem,
       $elementsContainerElem = $( elementsContainerElem );
 
-  // Assume container.style.display = 'none'. Now attach to specified Panel.
+  // attach to specified Panel.
   $( _this.centerPanel ).children().last().append( elementsContainerElem );
+  // Assume activeScene container was made invisible in our _reset() and
+  // make our container visible before we start filling it up.
   sceneContainerElem.style.display = 'block';
   setAnimationBoundaries( _this, options );
 
   var numElements = 0;
-  _this.particlesTimeline = new TimelineMax( { repeat: 0, yoyo: false, repeatDelay: 0, paused: true } );
+  _this.activeStory.expandTimeline = new TimelineMax(
+    { repeat: 0, yoyo: false, repeatDelay: 0, delay: 0, paused: true } );
 
   $.each( particles, function( idx, particle ) {
     // NOTE: particleAnimationMethod should return a Tween for the element. And it
     // should call its own "make an element" method.
-    // Create element "below the fold", i.e. element.y is off the bottom of the page.
-    var element = createParticleAnimationSVGelement( _this, particle );
+    // Create element in the "collapsed position column".
+    var element = createCollapsedPositionSVGelement( _this, particle );
     if ( element ) {
-
-      // Move element from element.x, element.y to home.x, home.y.
       $elementsContainerElem.append( element );
       domElementsObjsArray.push( element );
 
-      _this.particlesTimeline.insert(
-        TweenMax.to(
-          element, _this.settings.tweenDuration,
-          { attr: { cx: particle.x + _this.settings.animationElementOffsetX,
-                    cy: particle.y + _this.settings.animationElementOffsetY,
-                  },
-    	      //autoAlpha: 0,
-            //ease: Power0.easeInOut,
-            ease: Power2.easeOut,
-          }
-        ) // end TweenMax.to()
-      ); // end Timeline.insert()
+      // We can optionally "animate" the collapsed elements to an expaded view.
+      // Move elements from collapsed position to image home position.
+      //if ( _this.settings.isRenderParticleMapAsTweens ) {
+        _this.activeStory.expandTimeline.insert(
+          TweenMax.to(
+            element, _this.settings.tweenDuration,
+            // NOTE: we don't want to do math calculations when creating DOM elements.
+            //       So require that all adjustments were made when the particle
+            //       map was created.
+            { attr: { cx: particle.x, // + animationElementOffsetX,
+                      cy: particle.y, // + animationElementOffsetY,
+                    },
+    	        //autoAlpha: 0,
+              //ease: Power0.easeInOut,
+              ease: Power2.easeOut,
+            }
+          ) // end TweenMax.to()
+        ); // end Timeline.insert()
+      //} // end if ( RenderParticleMapAsTweens )
       numElements += 1;
     } // end if ( element )
   }); // end $.each()
@@ -127,91 +151,50 @@ function renderParticleMapAsSvgElements( _this, options, callback ) {
     animationElementsContainerElem: elementsContainerElem,
     domElementsObjsArray: domElementsObjsArray,
   };
-  console.log( " ..*5a.2) renderParticleMapAsTweens(): Made " + $sceneContainerElem.attr( 'numElements' ) +
+  console.log( " ..*5a.2)createSvgElementsFromParticleMap(): Made " + $sceneContainerElem.attr( 'numElements' ) +
                " canvas AnimationElements. *");
 
   if ( typeof callback == 'function' ) { callback( results ); return; }
   return results;
-}; // end renderParticleMapAsSvgElements()
+}; // end createSvgElementsFromParticleMap()
 
 //----------------------------------------------------------------------------
-function createParticleAnimationSVGelement( _this, particle ) {
+function createCollapsedPositionSVGelement( _this, particle ) {
   //----------------------------------------------------------------------------
-  //var panel_bottom = $(_this.settings.sceneContainer).height(),
-  //    panel_width = $(_this.settings.sceneContainer).width(),
-  //    left_boundaryX = Math.round( panel_width * 3/8 ),
-  //    right_boundaryX = Math.round( panel_width - (panel_width * 3/8) );
-
-  // Create element "below the fold" and in a column in the middle of the panel.
-  // i.e. element.y is off the bottom of the page, element.x is in middle.
+  // Create elements to start at our "collapsed core". i.e. in a column in the
+  // middle of the panel.
   var circle = $( makeSvgElementNS( 'circle' ) )
       .attr( 'cx', getRandom( _this.settings.animationPanelLeftBoundaryX, _this.settings.animationPanelRightBoundaryX ) )
-      .attr( 'cy', _this.settings.animationPanelBottom - getRandom( 40, 50 ) )
+      .attr( 'cy', getRandom( _this.settings.animationPanelTopBoundary, _this.settings.animationPanelBottom ) )
       .attr( 'r', particle.r )
-      .attr( 'fill', _this.settings.animationElementColor )
-      .attr( 'hx', particle.x )
-      .attr( 'hy', particle.y );
+      .attr( 'fill', _this.settings.animationElementColor );
+      // NOTE: hx/hy is the "home" position x,y for this particle.
+      //.attr( 'hx', particle.x )
+      //.attr( 'hy', particle.y );
   return circle;
-}; // end createParticleAnimationSVGelement()
-
-
-  /* per: https://stackoverflow.com/questions/32637811/how-can-i-add-a-svg-graphic-dynamically-using-javascript-or-jquery
-  var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("width", "640");
-    ...
-    document.getElementById("div").appendChild(svg);
-
-    per: http://chubao4ever.github.io/tech/2015/07/16/jquerys-append-not-working-with-svg-element.html
-
-    ###html file
-    < svg version="1.1" id="circle" width="400px" height="400px">
-      < circle fill="#FFFFFF" stroke="#000000" stroke-width="4" stroke-miterlimit="10" cx="300" cy="300" r="55.5"/>
-    </ svg>
-
-    ###js file
-    (function() {
-      $(document).ready(function() {
-        drawCircle();
-        drawCircle(100,100,"red");
-        drawCircle(200,200,"blue");
-        drawCircle(400,400,"gray");
-      });
-    })();
-
-    function SVG(tag) {
-      return document.createElementNS('http://www.w3.org/2000/svg', tag);
-    }
-
-    var drawCircle = function(x,y,color) {
-        var $svg = $("svg");
-        $(SVG('circle'))
-            .attr('cx', x)
-            .attr('cy', y)
-            .attr('r', 50)
-            .attr('fill', color)
-            .appendTo($svg);
-    };
+  /*
+  // Create element "below the fold" and in a column in the middle of the panel.
+  // i.e. element.y is off the bottom of the page, element.x is in middle.
+  .attr( 'cx', getRandom( _this.settings.animationPanelLeftBoundaryX, _this.settings.animationPanelRightBoundaryX ) )
+  .attr( 'cy', _this.settings.animationPanelBottom - getRandom( 40, 50 ) )
   */
-
-//------------------------------------------------------------------------------
-function makeSvgElementNS( tag ) {
-  //----------------------------------------------------------------------------
-  // per: http://chubao4ever.github.io/tech/2015/07/16/jquerys-append-not-working-with-svg-element.html
-  return document.createElementNS('http://www.w3.org/2000/svg', tag);
-}; // end makeSvgElementNS()
-
+}; // end createCollapsedPositionSVGelement()
 
 //----------------------------------------------------------------------------
-function renderParticleMapAsDivElements( _this, options, callback ) {
+function createDivElementsFromParticleMap( _this, options, callback ) {
   //----------------------------------------------------------------------------
   updateSettings( _this, options );
-  var particleAnimationElementMethod = '',
-      particles = _this.activeStory.particleMap.particles,
+  var particles = _this.activeStory.particleMap.particles,
       sceneContainerElem = _this.activeScene.container.html.elem,
       $sceneContainerElem = $( sceneContainerElem ),
       elementsContainer = _this.activeScene.animationElements.container,
-      domElementsObjsArray = [];
-  console.log( " ..*5a.1) renderParticleMapAsDivElements() For Particles[].len = " + particles.length + ". *");
+      domElementsObjsArray = [],
+      animationElementOffsetX = _this.settings.createAnimationElementsParams.offsetX,
+      animationElementOffsetY = _this.settings.createAnimationElementsParams.offsetY;
+  console.log( " ..*5a.1) createDivElementsFromParticleMap() For Particles[].len = " + particles.length +
+               "'. animationElementOffsetX: '" + animationElementOffsetX +
+               "'. animationElementOffsetY: '" + animationElementOffsetY +
+               ". *");
 
   elementsContainer.html = {
     elem: $( document.createElement( "div" ) )
@@ -225,38 +208,42 @@ function renderParticleMapAsDivElements( _this, options, callback ) {
   var elementsContainerElem = elementsContainer.html.elem,
       $elementsContainerElem = $( elementsContainerElem );
 
-  // Assume container.style.display = 'none'. Now attach to specified Panel.
+  // attach to specified Panel.
   $( _this.centerPanel ).children().last().append( elementsContainerElem );
+  // Assume activeScene container was made invisible in our _reset() and
+  // make our container visible before we start filling it up.
   sceneContainerElem.style.display = 'block';
   setAnimationBoundaries( _this, options );
 
   var numElements = 0;
-  _this.particlesTimeline = new TimelineMax( { repeat: 0, yoyo: false, repeatDelay: 0, paused: true } );
-
-// Assume container.style.display = 'none'. Now attach to specified Panel.
-//_this.settings.sceneContainer.style.display = 'block';
-//_this.settings.sceneContainer.panel.appendChild( _this.settings.sceneContainer );
+  _this.activeStory.elementsTimeline = new TimelineMax( { repeat: 0, yoyo: false, repeatDelay: 0, paused: true } );
 
   $.each( particles, function( idx, particle ) {
-    // Create element "below the fold", i.e. element.y is off the bottom of the page.
-    var element = createParticleAnimationDivElement( _this, particle );
+    // Create element in the "collapsed position column".
+    var element = createCollapsedPositionDivElement( _this, particle );
     if ( element ) {
       elementsContainerElem.append( element );
       domElementsObjsArray.push( element );
 
-      // Move element from element.x, element.y to home.x, home.y.
-      _this.particlesTimeline.insert(
-        TweenMax.to(
-          element, _this.settings.tweenDuration,
-          { left: particle.x + _this.settings.animationElementOffsetX,
-            top:  particle.y + _this.settings.animationElementOffsetY,
-    	      //autoAlpha: 0,
-            //ease: Power0.easeInOut,
-            ease: Power2.easeOut,
-          }
-        ) // end TweenMax.to()
-      ); // end Timeline.insert()
-      numElements += 1;
+      // We can optionally "animate" the collapsed elements to an expaded view.
+      // Move elements from collapsed position to image home position.
+      if ( _this.settings.isRenderParticleMapAsTweens ) {
+        _this.activeStory.elementsTimeline.insert(
+          TweenMax.to(
+            element, _this.settings.tweenDuration,
+            // NOTE: we don't want to do math calculations when creating DOM elements.
+            //       So require that all adjustments were made when the particle
+            //       map was created.
+            { left: particle.x, // + animationElementOffsetX,
+              top:  particle.y, // + animationElementOffsetY,
+    	        //autoAlpha: 0,
+              //ease: Power0.easeInOut,
+              ease: Power2.easeOut,
+            }
+          ) // end TweenMax.to()
+        ); // end Timeline.insert()
+        numElements += 1;
+      } // end if ( RenderParticleMapAsTweens )
     } // end if ( element )
   }); // end $.each()
 
@@ -265,22 +252,24 @@ function renderParticleMapAsDivElements( _this, options, callback ) {
     animationElementsContainerElem: elementsContainerElem,
     domElementsObjsArray: domElementsObjsArray,
   };
-  console.log( " ..*5a.1a) renderParticleMapAsDivElements(): Made " + $sceneContainerElem.attr( 'numElements' ) +
+  console.log( " ..*5a.1a) createDivElementsFromParticleMap(): Made " + $sceneContainerElem.attr( 'numElements' ) +
                " <div> AnimationElements. *");
   if ( typeof callback == 'function' ) { callback( results ); return; }
   return results;
-}; // end renderParticleMapAsDivElements()
+}; // end createDivElementsFromParticleMap()
 
 //----------------------------------------------------------------------------
-function createParticleAnimationDivElement( _this, particle, gridSize ) {
+function createCollapsedPositionDivElement( _this, particle ) {
   //----------------------------------------------------------------------------
+  var circle = $( makeSvgElementNS( 'circle' ) )
+      .attr( 'cx', getRandom( _this.settings.animationPanelLeftBoundaryX, _this.settings.animationPanelRightBoundaryX ) )
+      .attr( 'cy', getRandom( _this.settings.animationPanelTopBoundary, _this.settings.animationPanelBottom ) )
+
   var gridSize = _this.activeStory.particleMap.gridSize;
-  // Create element "below the fold" and in a column in the middle of the panel.
-  // i.e. element.y is off the bottom of the page, element.x is in middle.
   var div = document.createElement( 'div' );
   div.style.position = 'absolute';
-  div.style.left = getRandom( 225, 425 ) + "px";
-  div.style.top = _this.settings.animationPanelBottom - getRandom( 40, 50 ) + "px";
+  div.style.left = getRandom( _this.settings.animationPanelLeftBoundaryX, _this.settings.animationPanelRightBoundaryX ) + "px";
+  div.style.top = getRandom( _this.settings.animationPanelTopBoundary, _this.settings.animationPanelBottom ) + "px";
   // Math.round( particle.r * _this.particleMaps.gridSize
   // // max 8px, min 2px.
   var diameter = Math.round( particle.r * gridSize );
@@ -300,24 +289,16 @@ function createParticleAnimationDivElement( _this, particle, gridSize ) {
   div.style.borderRadius = '50%';
 
   return div;
-}; // end createParticleAnimationDivElement()
+  /*
+  // Create element "below the fold" and in a column in the middle of the panel.
+  // i.e. element.y is off the bottom of the page, element.x is in middle.
+  div.style.left = getRandom( 225, 425 ) + "px";
+  div.style.top = _this.settings.animationPanelBottom - getRandom( 40, 50 ) + "px";
+  */
+}; // end createCollapsedPositionDivElement()
 
 //----------------------------------------------------------------------------
-function setAnimationBoundaries( _this, particle ) {
-  //----------------------------------------------------------------------------
-  var $sceneContainer = $( _this.activeScene.container.html.elem ),
-      panel_bottom = $sceneContainer.height(),
-      panel_width = $sceneContainer.width();
-  _this.settings.animationPanelTop = 0;
-  _this.settings.animationPanelTopBoundary = Math.round( panel_bottom * .45 );
-  _this.settings.animationPanelBottom = panel_bottom;
-  _this.settings.animationPanelWidth = panel_width;
-  _this.settings.animationPanelLeftBoundaryX = Math.round( panel_width * .42 );
-  _this.settings.animationPanelRightBoundaryX = Math.round( panel_width - _this.settings.animationPanelLeftBoundaryX );
-}; // end setAnimationBoundaries()
-
-//----------------------------------------------------------------------------
-function createParticleAnimationCanvasElement( _this, particle ) {
+function createCollapsedPositionCanvasElement( _this, particle ) {
   //----------------------------------------------------------------------------
   var canvasAndCtx = makeCanvasAndCtx(),
       canvas = canvasAndCtx.canvas,
@@ -341,4 +322,4 @@ function createParticleAnimationCanvasElement( _this, particle ) {
   context.fill();
   context.closePath();
   return canvas;
-}; // end createParticleAnimationCanvasElement()
+}; // end createCollapsedPositionCanvasElement()

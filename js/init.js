@@ -13,6 +13,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
   _this.movie {
     stories: [ {
       tag: _this.settings.photoTag,
+      collapseTimeline: TimelineMax,
       particleMap: {
         particles: _this.particles,
         gridSize: 5.568,
@@ -60,6 +61,8 @@ function trr_init(/*Code to resume when done*/ callback ) {
     photoTag: 'meg',
     photoType: 'color',
     imgSrc: './images/meg_makalou_CC_581x600.jpg',
+    isParticlesMode: true,
+    isElementsMode: false,
     isTransformPixels: true,
     isAutoPlay: false,
     isExcludePixels: false,
@@ -124,20 +127,25 @@ function trr_init(/*Code to resume when done*/ callback ) {
   });
   //----------------------------------------------------------------------------
   // Actions
+  $( "#cbox_particles_mode" ).click( function( event ) {
+    cbox_particles_mode( trrPlugin, { event: event } );
+  });
+  $( "#cbox_elements_mode" ).click( function( event ) {
+    cbox_elements_mode( trrPlugin, { event: event } );
+  });
+
   $( "#particles" ).click( function() {
     particles( trrPlugin, {
+      // Display full image as halftone made from particleMap particles.
       isRenderParticleMap: true,
       isCreateSceneInCenterPanel: true,
-      isRenderParticleMapAsSingleCanvas: true,
     } );
   });
   $( "#elements" ).click( function() {
     elements( trrPlugin, {
-      autoPlay: true,
-      isRenderParticleMap: true,
+      autoPlay: false, // expand from collapsed view to full image.
+      isRenderParticleMapAsTweens: false,
       isCreateSceneInCenterPanel: true,
-      isRenderParticleMapAsSingleCanvas: false,
-      isRenderParticleMapAsTweens: true,
       tweenDuration: 2,
     } );
   });
@@ -147,16 +155,15 @@ function trr_init(/*Code to resume when done*/ callback ) {
   $( "#expand" ).click( function() {
     expand( trrPlugin, { autoPlay: true, tweenDuration: 2.5 } );
   });
-  $( "#play" ).click( function() {
-    playSegment( trrPlugin, {} );
-  });
+  //$( "#play" ).click( function() {
+  //  playSegment( trrPlugin, {} );
+  //});
   $( "#playStory" ).click( function() {
     playStory( trrPlugin, {} );
   });
   $( "#playMovie" ).click( function() {
     playMovie( trrPlugin, {} );
   });
-
 
 
   //----------------------------------------------------------------------------
@@ -229,12 +236,20 @@ function init_reset( _this ) {
   updateSettings( _this, { timeNow: _this.timeNow, id: 'mapTrrEffect_' + _this.timeNow } );
 
   // Set default state of checkboxes.
+  $( '#cbox_particles_mode' ).prop('checked', _this.defaults.isParticlesMode );
+  $( '#cbox_elements_mode' ).prop('checked', _this.defaults.isElementsMode );
   $( '#cbox_transform' ).prop('checked', _this.defaults.isTransformPixels );
   $( '#cbox_exclude' ).prop('checked', _this.defaults.isExcludePixels );
   $( '#cbox_useTrr' ).prop('checked', _this.defaults.isUseTrrData );
-  $( '#cbox_useCanvas' ).prop('checked', _this.defaults.isUseCanvasElements );
-  $( '#cbox_useSVG' ).prop('checked', _this.defaults.isUseSVGelements );
-  $( '#cbox_useDiv' ).prop('checked', _this.defaults.isUseDivElements );
+
+  if ( _this.defaults.isParticlesMode ) {
+    _this.settings.isUseCanvasElements = false;
+    _this.settings.isUseSVGelements = false;
+    _this.settings.isUseDivElements = false;
+  }
+  $( '#cbox_useCanvas' ).prop('checked', _this.settings.isUseCanvasElements );
+  $( '#cbox_useSVG' ).prop('checked', _this.settings.isUseSVGelements );
+  $( '#cbox_useDiv' ).prop('checked', _this.settings.isUseDivElements );
 
   $( '#cbox_every1' ).prop('checked', _this.defaults.isEvery1 );
   $( '#cbox_every2' ).prop('checked', _this.defaults.isEvery2 );
