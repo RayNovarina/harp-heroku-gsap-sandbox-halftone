@@ -261,8 +261,7 @@ function createDivElementsFromParticleMap( _this, options, callback ) {
   var results = {
     animationElementsContainerElem: elementsContainerElem,
     domElementsObjsArray: domElementsObjsArray,
-    expandTimeline: expandTimeline,
-    storyTimeline: storyTimeline,
+    expandTimeline: expandTimeline
   };
   console.log( " ..*5a.1a) createDivElementsFromParticleMap(): Made " + $sceneContainerElem.attr( 'numElements' ) +
                " <div> AnimationElements. *");
