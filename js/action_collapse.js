@@ -4,14 +4,27 @@
 //----------------------------------------------------------------------------
 function collapse( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  selectedPhotoToStory( _this,
-  /*1-Resume here when done*/ function( result ) {
-  _this.activeStory = result.item;
-  console.log( " ..*4.2) collapse() *");
-  _this.activeStory.expandTimeline.reverse();
+  console.log( " ..*4.2) collapse() for activeStory: '" + _this.activeStory.tag + "' *");
+
+  // animationElements MUST have already been created.
+  if ( !_this.activeStory.timelines ||
+       !_this.activeStory.timelines.expandTimeline ) {
+    alert('You MUST create animationElements first via the "Particles, Elements" links.');
+    if ( typeof callback == 'function' ) { callback(); return; }
+    return;
+  }
+
+  // Hide the active/visible sceneContainer, we will replace it with ours.
+  closeActiveSceneContainer( _this,
+  /*1-Resume here when done*/ function( activeScene ) {
+  tagToScene( _this, 'elements', _this.activeStory,
+  /*2-Resume here when done*/ function( result ) {
+  openSceneContainer( _this, result.item );
+  _this.activeStory.timelines.expandTimeline.reverse();
+  _this.activeStory.timelines.expandTimelineIsReversed = true;
   if ( typeof callback == 'function' ) { callback(); return; }
   return;
-  /*1-*/});
+  /*2-*/});/*1-*/});
 }; // end: collapse()
 
 

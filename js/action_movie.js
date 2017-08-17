@@ -2,9 +2,9 @@
 // // NOTE: Private methods MUST use _this to get 'this' for this instance of TrrPlugin
 
 //----------------------------------------------------------------------------
-function playStory( _this, options, /*Code to resume when done*/ callback ) {
+function playMovie( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.2) playStory() for activeStory: '" + _this.activeStory.tag + "' *");
+  console.log( " ..*4.2) playMovie() for activeStory: '" + _this.activeStory.tag + "' *");
 
   // animationElements MUST have already been created.
   if ( !_this.activeStory.timelines ||
@@ -41,4 +41,4 @@ function playStory( _this, options, /*Code to resume when done*/ callback ) {
   }, delayMsToWaitForCollapsedState); // end /*2a-timeout*/
 
   /*2-*/});/*1-*/});
-}; // end: playStory()
+}; // end: playMovie()

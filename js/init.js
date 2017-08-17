@@ -11,9 +11,16 @@ function trr_init(/*Code to resume when done*/ callback ) {
   trrPlugin.rightPanel = document.getElementById( 'rightPanel' );
   /*
   _this.movie {
+    lastActiveStory: story,
     stories: [ {
+      lastActiveScene: scene,
       tag: _this.settings.photoTag,
-      collapseTimeline: TimelineMax,
+      timelines: {
+        particles: particlesTimeline,
+        expand: expandTimeline,
+        expandTimelineIsReversed: false,
+        story: storyTimeline,
+      },
       particleMap: {
         particles: _this.particles,
         gridSize: 5.568,
@@ -27,6 +34,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
       },
       scenes: [ { story: story,
                   tag: _this.settings.sceneTag,
+                  proxyContainerTag: elements.scene.tag,
                   container: {
                     panelElem: elem,
                     html: {
@@ -47,13 +55,11 @@ function trr_init(/*Code to resume when done*/ callback ) {
                       },
                     },
                   },
-                  proxyContainerTag: elements.scene.tag,
               } ],
       ]
   });
   */
-  trrPlugin.movieTimeLine = new TimelineMax( { repeat: 0, yoyo: false, repeatDelay: 0, paused: true } );
-  trrPlugin.movie = newMovie( trrPlugin, trrPlugin.movieTimeLine );
+  trrPlugin.movie = newMovie( trrPlugin );
 
   trrPlugin.defaults = {
     img: document.getElementById( 'selectedPhoto'),
@@ -144,7 +150,6 @@ function trr_init(/*Code to resume when done*/ callback ) {
   $( "#elements" ).click( function() {
     elements( trrPlugin, {
       autoPlay: false, // expand from collapsed view to full image.
-      isRenderParticleMapAsTweens: false,
       isCreateSceneInCenterPanel: true,
       tweenDuration: 2,
     } );

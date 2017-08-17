@@ -41,8 +41,8 @@ function createParticleMap( _this, options, /*Code to resume when done*/ callbac
     homeOffsetTop: results.homeOffsetTop,
   };
   console.log( " ..*5a) createParticleMap() Created HomePositionParticles[" + _this.activeStory.particleMap.particles.length + "] *");
-  if ( typeof callback == 'function' ) { callback( particles ); return; }
-  return particles;
+  if ( typeof callback == 'function' ) { callback( results.particles ); return; }
+  return results.particles;
 }; // end: createParticleMap()
 
 //----------------------------------------------------------------------------
@@ -63,7 +63,7 @@ function makeParticlesFromTrrMap( _this, options, /*Code to resume when done*/ c
                ". MakeHomePositionMap: " + _this.settings.isMakeHomePositionMap +
                ".");
 
-  if (_this.settings.isMakeHomePositionMap) {
+  if ( _this.settings.isMakeHomePositionMap ) {
     for( var i = 0; i < (effectsData.particles.length); i += 1 ) {
       edpParticle = effectsDataParticles[ i ];
       particles.push( {

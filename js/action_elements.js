@@ -43,14 +43,13 @@ function elements( _this, options, /*Code to resume when done*/ callback ) {
       offsetY: 0, //-20,
     },
   },
-  /*1-Resume here when done*/ function( scene ) {
-  if ( _this.settings.autoPlay ) {
-    _this.activeStory.expandTimeline.play();
+  /*1-Resume here when done*/ function( activeScene ) {
+  if ( _this.settings.autoPlay &&
+       activeScene.story.timelines.expandTimeline ) {
+    activeScene.story.timelines.expandTimeline.play();
   }
-  //playSceneIfAutoPlay( _this, { scene: scene },
-  ///*2-Resume here when done*/ function( timeline ) {
-  if ( typeof callback == 'function' ) { callback( scene ); return; }
-  return scene;
+  if ( typeof callback == 'function' ) { callback( activeScene ); return; }
+  return activeScene;
   /*1-*/});
 };// end: elements()
 
@@ -65,10 +64,6 @@ function elements_reset( _this, options ) {
       _this.settings.isParticlesMode = false;
       _this.settings.isElementsMode = true;
       update_ep_mode_cboxes( _this );
-    }
-    if ( _this.activeScene ) {
-      // Hide the active/visible sceneContainer, we will replace it with ours.
-      _this.activeScene.container.html.elem.style.display = 'none';
     }
   }
 }; // end: elements_reset()
@@ -107,12 +102,14 @@ function createSvgElementsFromParticleMap( _this, options, callback ) {
   $( _this.centerPanel ).children().last().append( elementsContainerElem );
   // Assume activeScene container was made invisible in our _reset() and
   // make our container visible before we start filling it up.
-  sceneContainerElem.style.display = 'block';
+  openSceneContainer( _this, _this.activeScene );
   setAnimationBoundaries( _this, options );
 
   var numElements = 0;
-  _this.activeStory.expandTimeline = new TimelineMax(
-    { repeat: 0, yoyo: false, repeatDelay: 0, delay: 0, paused: true } );
+  var expandTimeline = new TimelineMax(
+          { repeat: 0, yoyo: false, repeatDelay: 0, delay: 0, paused: true } ),
+      storyTimeline = new TimelineMax(
+          { repeat: 0, yoyo: false, repeatDelay: 0, delay: 0, paused: true } );
 
   $.each( particles, function( idx, particle ) {
     // NOTE: particleAnimationMethod should return a Tween for the element. And it
@@ -125,23 +122,36 @@ function createSvgElementsFromParticleMap( _this, options, callback ) {
 
       // We can optionally "animate" the collapsed elements to an expaded view.
       // Move elements from collapsed position to image home position.
-      //if ( _this.settings.isRenderParticleMapAsTweens ) {
-        _this.activeStory.expandTimeline.insert(
-          TweenMax.to(
-            element, _this.settings.tweenDuration,
-            // NOTE: we don't want to do math calculations when creating DOM elements.
-            //       So require that all adjustments were made when the particle
-            //       map was created.
-            { attr: { cx: particle.x, // + animationElementOffsetX,
-                      cy: particle.y, // + animationElementOffsetY,
-                    },
-    	        //autoAlpha: 0,
-              //ease: Power0.easeInOut,
-              ease: Power2.easeOut,
-            }
-          ) // end TweenMax.to()
-        ); // end Timeline.insert()
-      //} // end if ( RenderParticleMapAsTweens )
+      expandTimeline.insert(
+        TweenMax.to(
+          element, _this.settings.tweenDuration,
+          // NOTE: we don't want to do math calculations when creating DOM elements.
+          //       So require that all adjustments were made when the particle
+          //       map was created.
+          { attr: { cx: particle.x, // + animationElementOffsetX,
+                    cy: particle.y, // + animationElementOffsetY,
+                  },
+    	      //autoAlpha: 0,
+            //ease: Power0.easeInOut,
+            ease: Power2.easeOut,
+          }
+        ) // end TweenMax.to()
+      ); // end expandTimeline.insert()
+      storyTimeline.insert(
+        TweenMax.to(
+          element, _this.settings.tweenDuration,
+          // NOTE: we don't want to do math calculations when creating DOM elements.
+          //       So require that all adjustments were made when the particle
+          //       map was created.
+          { attr: { cx: particle.x, // + animationElementOffsetX,
+                    cy: particle.y, // + animationElementOffsetY,
+                  },
+            //autoAlpha: 0,
+            //ease: Power0.easeInOut,
+            ease: Power2.easeOut,
+          }
+        ) // end TweenMax.to()
+      ); // end storyTimeline.insert()
       numElements += 1;
     } // end if ( element )
   }); // end $.each()
@@ -150,6 +160,8 @@ function createSvgElementsFromParticleMap( _this, options, callback ) {
   var results = {
     animationElementsContainerElem: elementsContainerElem,
     domElementsObjsArray: domElementsObjsArray,
+    expandTimeline: expandTimeline,
+    storyTimeline: storyTimeline,
   };
   console.log( " ..*5a.2)createSvgElementsFromParticleMap(): Made " + $sceneContainerElem.attr( 'numElements' ) +
                " canvas AnimationElements. *");
@@ -212,11 +224,14 @@ function createDivElementsFromParticleMap( _this, options, callback ) {
   $( _this.centerPanel ).children().last().append( elementsContainerElem );
   // Assume activeScene container was made invisible in our _reset() and
   // make our container visible before we start filling it up.
-  sceneContainerElem.style.display = 'block';
+  openSceneContainer( _this, _this.activeScene );
   setAnimationBoundaries( _this, options );
 
   var numElements = 0;
-  _this.activeStory.elementsTimeline = new TimelineMax( { repeat: 0, yoyo: false, repeatDelay: 0, paused: true } );
+  var expandTimeline = new TimelineMax(
+          { repeat: 0, yoyo: false, repeatDelay: 0, delay: 0, paused: true } ),
+      storyTimeline = new TimelineMax(
+          { repeat: 3, yoyo: true, repeatDelay: 0, delay: 0, paused: true } );
 
   $.each( particles, function( idx, particle ) {
     // Create element in the "collapsed position column".
@@ -227,23 +242,35 @@ function createDivElementsFromParticleMap( _this, options, callback ) {
 
       // We can optionally "animate" the collapsed elements to an expaded view.
       // Move elements from collapsed position to image home position.
-      if ( _this.settings.isRenderParticleMapAsTweens ) {
-        _this.activeStory.elementsTimeline.insert(
-          TweenMax.to(
-            element, _this.settings.tweenDuration,
-            // NOTE: we don't want to do math calculations when creating DOM elements.
-            //       So require that all adjustments were made when the particle
-            //       map was created.
-            { left: particle.x, // + animationElementOffsetX,
-              top:  particle.y, // + animationElementOffsetY,
-    	        //autoAlpha: 0,
-              //ease: Power0.easeInOut,
-              ease: Power2.easeOut,
-            }
-          ) // end TweenMax.to()
-        ); // end Timeline.insert()
-        numElements += 1;
-      } // end if ( RenderParticleMapAsTweens )
+      expandTimeline.insert(
+        TweenMax.to(
+          element, _this.settings.tweenDuration,
+          // NOTE: we don't want to do math calculations when creating DOM elements.
+          //       So require that all adjustments were made when the particle
+          //       map was created.
+          { left: particle.x, // + animationElementOffsetX,
+            top:  particle.y, // + animationElementOffsetY,
+    	      //autoAlpha: 0,
+            //ease: Power0.easeInOut,
+            ease: Power2.easeOut,
+          }
+        ) // end TweenMax.to()
+      ); // end expandTimeline.insert()
+      storyTimeline.insert(
+        TweenMax.to(
+          element, _this.settings.tweenDuration,
+          // NOTE: we don't want to do math calculations when creating DOM elements.
+          //       So require that all adjustments were made when the particle
+          //       map was created.
+          { left: particle.x, // + animationElementOffsetX,
+            top:  particle.y, // + animationElementOffsetY,
+    	      //autoAlpha: 0,
+            //ease: Power0.easeInOut,
+            ease: Power2.easeOut,
+          }
+        ) // end TweenMax.to()
+      ); // end storyTimeline.insert()
+      numElements += 1;
     } // end if ( element )
   }); // end $.each()
 
@@ -251,6 +278,8 @@ function createDivElementsFromParticleMap( _this, options, callback ) {
   var results = {
     animationElementsContainerElem: elementsContainerElem,
     domElementsObjsArray: domElementsObjsArray,
+    expandTimeline: expandTimeline,
+    storyTimeline: storyTimeline,
   };
   console.log( " ..*5a.1a) createDivElementsFromParticleMap(): Made " + $sceneContainerElem.attr( 'numElements' ) +
                " <div> AnimationElements. *");

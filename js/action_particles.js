@@ -46,15 +46,12 @@ function particles( _this, options, /*Code to resume when done*/ callback ) {
       offsetY: 0,
     },
   },
-  /*2-Resume here when done*/ function( scene ) {
-  if ( _this.settings.isRenderParticleMapAsTweens &&
-       numElements !== '0' ) {
-    _this.activeStory.particlesTimeline.play();
+  /*2-Resume here when done*/ function( activeScene ) {
+  if ( activeScene.story.timelines.particlesTimeline ) {
+    activeScene.story.timelines.particlesTimeline.play();
   }
-  //playSceneIfAutoPlay( _this, { scene: scene },
-  ///*3-Resume here when done*/ function( timeline ) {
-  if ( typeof callback == 'function' ) { callback( scene ); return; }
-  return scene;
+  if ( typeof callback == 'function' ) { callback( activeScene ); return; }
+  return activeScene;
   /*2-*/});/*1-*/});
 };// end: particles()
 
@@ -67,10 +64,6 @@ function particles_reset( _this, options ) {
     _this.settings.isParticlesMode = true;
     _this.settings.isElementsMode = false;
     update_ep_mode_cboxes( _this );
-    if ( _this.activeScene ) {
-      // Hide the active/visible sceneContainer, we will replace it with ours.
-      _this.activeScene.container.html.elem.style.display = 'none';
-    }
     _this.particles = [];
     _this.settings.rgbChannel = 'blue'; // _this.settings.halftoneColor
     _this.particlesRejectedBecauseParticleIsOutOfBounds = 0;
@@ -117,7 +110,7 @@ function renderParticleMapAsSingleCanvas( _this, options, callback ) {
   $( _this.centerPanel ).children().last().append( elementsContainerElem );
   // Assume activeScene container was made invisible in our _reset() and
   // make our container visible before we start filling it up.
-  sceneContainerElem.style.display = 'block';
+  openSceneContainer( _this, _this.activeScene );
 
   var numElements = 1,
       canvasAndCtx = makeCanvasAndCtx(),
@@ -158,6 +151,7 @@ function renderParticleMapAsSingleCanvas( _this, options, callback ) {
   var results = {
     animationElementsContainerElem: elementsContainerElem,
     domElementsObjsArray: domElementsObjsArray,
+    particlesTimeline: null,
   };
   console.log( " ..*5b.2) renderParticleMapAsSingleCanvas(): Made " + $sceneContainerElem.attr( 'numElements' ) +
                " canvas AnimationElements. *");
@@ -195,11 +189,11 @@ function renderParticleMapAsSvgElements( _this, options, callback ) {
   var elementsContainerElem = elementsContainer.html.elem,
       $elementsContainerElem = $( elementsContainerElem );
 
-  // Assume container.style.display = 'none'. Now attach to specified Panel.
+  // attach to specified Panel.
   $( _this.centerPanel ).children().last().append( elementsContainerElem );
   // Assume activeScene container was made invisible in our _reset() and
   // make our container visible before we start filling it up.
-  sceneContainerElem.style.display = 'block';
+  openSceneContainer( _this, _this.activeScene );
   setAnimationBoundaries( _this, options );
   var numElements = 0;
 
@@ -219,6 +213,7 @@ function renderParticleMapAsSvgElements( _this, options, callback ) {
   var results = {
     animationElementsContainerElem: elementsContainerElem,
     domElementsObjsArray: domElementsObjsArray,
+    particlesTimeline: null,
   };
   console.log( " ..*5a.2) renderParticleMapAsSvgElements(): Made " + $sceneContainerElem.attr( 'numElements' ) +
                " canvas AnimationElements. *");
@@ -260,7 +255,7 @@ function renderParticleMapAsDivElements( _this, options, callback ) {
   $( _this.centerPanel ).children().last().append( elementsContainerElem );
   // Assume activeScene container was made invisible in our _reset() and
   // make our container visible before we start filling it up.
-  sceneContainerElem.style.display = 'block';
+  openSceneContainer( _this, _this.activeScene );
   setAnimationBoundaries( _this, options );
 
   var numElements = 0;
@@ -278,6 +273,7 @@ function renderParticleMapAsDivElements( _this, options, callback ) {
   var results = {
     animationElementsContainerElem: elementsContainerElem,
     domElementsObjsArray: domElementsObjsArray,
+    particlesTimeline: null,
   };
   console.log( " ..*5a.1a) renderParticleMapAsDivElements(): Made " + $sceneContainerElem.attr( 'numElements' ) +
                " <div> AnimationElements. *");

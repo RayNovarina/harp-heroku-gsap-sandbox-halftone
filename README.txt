@@ -106,6 +106,61 @@ Create Animation Elements: Get <svg Ball> working, <div>ball</div> working.
 All effects link: Add option to animate as GASP TimeLine of effects.
 
 ==============================================
+problem:
+
+load page
+meg -> particles -> elements -> expand
+mike: center panel is blank. ok.
+    -> partiles -> elements
+meg: center panel is blank. should be her active (expand) scene. says activeScene: *none*
+
+===================================
+
+//----------------------------------------------------------------------------
+function storyToActiveScene( _this, story, callback ) {
+  //----------------------------------------------------------------------------
+  tagToScene( _this, 'particles', story,
+  /*1-Resume here when done*/ function( result ) {
+  if ( result.isFound &&
+       result.item.container.html.elem.style.display == 'block' ) {
+    if ( typeof callback == 'function' ) { callback( result.item ); return; }
+    return result.item;
+  }
+  tagToScene( _this, 'elements', story,
+  /*2-Resume here when done*/ function( result ) {
+  if ( result.isFound &&
+       result.item.container.html.elem.style.display == 'block' ) {
+    if ( typeof callback == 'function' ) { callback( result.item ); return; }
+    return result.item;
+  }
+  if ( typeof callback == 'function' ) { callback( null ); return; }
+  return null;
+  /*2-*/});/*1-*/});
+};// end: storyToActiveScene()
+
+==================================
+
+//----------------------------------------------------------------------------
+function expand( _this, options, /*Code to resume when done*/ callback ) {
+  //--------------------------------------------------------------------------
+  selectedPhotoToStory( _this,
+  /*1-Resume here when done*/ function( result ) {
+  var selectedStory = result.item;
+  console.log( " ..*4.2) expand() *");
+  // Hide the active/visible sceneContainer, we will replace it with ours.
+  _this.activeScene.container.html.elem.style.display = 'none';
+  tagToScene( _this, 'elements', selectedStory,
+  /*2-Resume here when done*/ function( result ) {
+  var elementsSceneForSelectedStory = result.item
+  elementsSceneForSelectedStory.container.html.elem.style.display = 'block';
+  selectedStory.expandTimeline.play();
+  if ( typeof callback == 'function' ) { callback(); return; }
+  return;
+  /*2-*/});/*1-*/});
+}; // end: expand()
+
+
+===================================
 // Private methods in context of plugIn instance, i.e. this
 // // NOTE: Private methods MUST use _this to get 'this' for this instance of TrrPlugin
 

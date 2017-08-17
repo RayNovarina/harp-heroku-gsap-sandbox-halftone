@@ -32,13 +32,20 @@ function newPhoto( _this, options, /*Code to resume when done*/ callback ) {
   getImgData( _this,
   /*2-Resume here when done*/ function( imgDataObj ) {
   _this.isVisiblePhoto = true;
+  // Hide the active/visible sceneContainer.
+  closeActiveSceneContainer( _this,
+  /*3-Resume here when done*/ function( activeScene ) {
+  if ( _this.activeStory ) {
+    _this.activeStory.lastActiveScene = _this.activeScene || null;
+  }
   _this.selectedPhotoTag = _this.settings.photoTag;
   selectedPhotoToStory( _this,
-  /*3-Resume here when done*/ function( result ) {
+  /*4-Resume here when done*/ function( result ) {
   if ( !result.isFound ) {
     // This photo has not been selected before.
     result.item = newStory( _this, _this.selectedPhotoTag );
   }
+  _this.movie.lastActiveStory = _this.activeStory || null;
   _this.activeStory = result.item;
   _this.activeStory.image = {
     html: {
@@ -47,9 +54,12 @@ function newPhoto( _this, options, /*Code to resume when done*/ callback ) {
     },
     ctxImgData: imgDataObj.data,
   };
+  // Recover our last activeScene, if any, and make it visible.
+  _this.activeScene = _this.activeStory.lastActiveScene;
+  openSceneContainer( _this, _this.activeStory.lastActiveScene );
   if ( typeof callback == 'function' ) { callback( _this.activeStory.imgage ); return; }
   return _this.activeStory.imgage;
-  /*3-*/});/*2-*/});/*1-*/}; // end img.onload()
+  /*4-*/});/*3-*/});/*2-*/});/*1-*/}; // end img.onload()
 
   $img.attr('src', src); // causes photo to be loaded and rendered.
 }; // end: newPhoto()
@@ -204,6 +214,7 @@ function createAnimationElements( _this, options, /*Code to resume when done*/ c
     container: { html: { elem: results.animationElementsContainerElem, string: '', }, },
     domElements: { html: { elems: results.domElementsObjsArray, string: '', }, },
   };
+  addTimelineToStory( _this, _this.activeStory, results );
   if ( typeof callback == 'function' ) { callback( results.animationElementsContainerElem ); return; }
   return results.animationElementsContainerElem;
   /*2-*/});/*1-*/});
@@ -347,10 +358,10 @@ function settingsToPanel( _this ) {
 }; // end settingsToPanel()
 
 //------------------------------------------------------------------------------
-function newMovie( _this, timeLine ) {
+function newMovie( _this ) {
   //----------------------------------------------------------------------------
   return {
-    timeLine: timeLine,
+    lastActiveStory: null,
     stories: [],
   };
 };// end: newMovie()
@@ -360,11 +371,12 @@ function newStory( _this, photoTag ) {
   //----------------------------------------------------------------------------
   _this.movie.stories.push( {
     movie: _this.movie,
+    lastActiveScene: null,
     tag: photoTag,
-    collapseTimeline: null,
     particleMap: {},
     image: {},
     scenes: [],
+    timelines: {},
   } );
   return _this.movie.stories[ _this.movie.stories.length - 1 ];
 };// end: newStory()
@@ -391,6 +403,21 @@ function newAnimationElements( _this, scene ) {
     domElements: {},
   }
 }// end: newAnimationElements()
+
+//----------------------------------------------------------------------------
+function addTimelineToStory( _this, story, results ) {
+  //----------------------------------------------------------------------------
+  if ( results.particlesTimeline ) {
+    story.timelines.particlesTimeline = results.particlesTimeline;
+  }
+  if ( results.expandTimeline ) {
+    story.timelines.expandTimeline = results.expandTimeline;
+    story.timelines.expandTimelineIsReversed = false;
+  }
+  if ( results.storyTimeline ) {
+    story.timelines.storyTimeline = results.storyTimeline;
+  }
+}// end: addTimelineToStory()
 
 //----------------------------------------------------------------------------
 function selectedPhotoToStory( _this, callback ) {
@@ -443,6 +470,73 @@ function tagToScene( _this, sceneTag, story, callback ) {
   }, callback );
 };// end: tagToScene()
 
+//----------------------------------------------------------------------------
+function openSceneContainer( _this, scene ) {
+  //----------------------------------------------------------------------------
+  console.log( " ..*3.7) openSceneContainer() sceneTag: '" +
+               ( scene ? (scene.tag + "'. sceneContainer.id: '" + scene.container.html.elem.id)
+                       : '*none' ) + "'. *");
+  if ( !scene ) {
+    return;
+  }
+  scene.container.html.elem.style.display = 'block';
+};// end: openSceneContainer()
+
+//----------------------------------------------------------------------------
+function closeSceneContainer( _this, scene ) {
+  //----------------------------------------------------------------------------
+  console.log( " ..*3.7) closeSceneContainer() sceneTag: '" +
+               ( scene ? (scene.tag + "'. sceneContainer.id: '" + scene.container.html.elem.id)
+                       : '*none' ) + "'. *");
+  if ( !scene ) {
+    return;
+  }
+  scene.container.html.elem.style.display = 'none';
+};// end: closeSceneContainer()
+
+//----------------------------------------------------------------------------
+function closeActiveSceneContainer( _this, callback ) {
+  //----------------------------------------------------------------------------
+  // NOTE: photo can be selected and is the activeStory but a sceneContainer may
+  // not have been created yet for its particles or elements scene.
+  if ( !_this.activeStory || !_this.activeScene ) {
+    if ( typeof callback == 'function' ) { callback( null ); return; }
+    return null;
+  }
+  console.log( " ..*3.7) closeActiveSceneContainer() activeStory: '" + _this.activeStory.tag +
+               "'. activeScene: '" + _this.activeScene.tag +
+               "'. activeSceneContainer: '" + _this.activeScene.container.html.elem.id + "'. *");
+
+  _this.activeScene.container.html.elem.style.display = 'none';
+  if ( typeof callback == 'function' ) { callback( _this.activeScene ); return; }
+  return _this.activeScene;
+};// end: closeActiveSceneContainer()
+
+//----------------------------------------------------------------------------
+function openLastActiveSceneContainer( _this, callback ) {
+  //----------------------------------------------------------------------------
+  // NOTE: photo can be selected and is the activeStory but a sceneContainer may
+  // not have been created yet for its particles or elements scene.
+  if ( !_this.activeStory ) {
+    if ( typeof callback == 'function' ) { callback( null ); return; }
+    return null;
+  }
+
+  // Recover our last activeScene, if any, and make it visible.
+  var activeScene = _this.activeStory.lastActiveScene;
+  if ( activeScene ) {
+    activeScene.container.html.elem.style.display = 'block';
+  }
+  console.log( " ..*3.7) openLastActiveSceneContainer() activeStory: '" + _this.activeStory.tag +
+               "'. activeScene: '" +
+                      (activeScene ? (activeScene.tag + "'. activeSceneContainer: '" + activeScene.container.html.elem.id)
+                                   : '*none*') +
+               "'. *");
+
+  if ( typeof callback == 'function' ) { callback( activeScene ); return; }
+  return activeScene;
+};// end: openLastActiveSceneContainer()
+
 //------------------------------------------------------------------------------
 function playSceneIfAutoPlay( _this, options, callback ) {
   //----------------------------------------------------------------------------
@@ -460,9 +554,9 @@ function playScene( _this, options, callback ) {
   console.log( " ..*3.7) playScene() SceneTag: '" + sceneTag +
                "'. Story: '" + options.scene.story.tag +
                "'. For numElements: '" + numElements + "'. *");
-
+  /*
   if ( sceneTag == 'particles' ) {
-    if ( _this.settings.isRenderParticleMapAsTweens &&
+    if ( _this.settings.is?? &&
          numElements !== '0' ) {
       // Start animation at seek(starting seconds into animation)
       options.scene.story.particlesTimeline.play();
@@ -475,6 +569,7 @@ function playScene( _this, options, callback ) {
   } else if ( sceneTag == 'expand' ) {
     options.scene.story.collapseTimeline.reverse();
   }
+  */
   if ( typeof callback == 'function' ) { callback( timeline ); return; }
   return timeline;
 }; // end: playScene()
