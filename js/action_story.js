@@ -39,8 +39,8 @@ function playFullStory( _this, photoTag, options, /*Code to resume when done*/ c
   /*1d-Resume here when done*/ function( story ) {
   if ( typeof callback == 'function' ) { callback( story ); return; }
   return story;
-/*1d-*/}); }, 2000); // end /*1c-timeout*/
-/*1b-*/}); }, 500); // end /*1a-timeout*/
+  /*1d-*/}); }, 2000); // end /*1c-timeout*/
+  /*1b-*/}); }, 500); // end /*1a-timeout*/
   /*1-*/});
 }; // end: playFullStory()
 
@@ -52,27 +52,27 @@ function playStory( _this, photoTag, options, /*Code to resume when done*/ callb
   photoTagToStory( _this, photoTag,
   /*1-Resume here when done*/ function( result ) {
   if ( !result.isFound ||
-       (!_this.activeStory.timelines ||
-        !_this.activeStory.timelines.expandTimeline ) ) {
+       (!result.item.timelines ||
+        !result.item.timelines.expandTimeline ) ) {
     alert( "photoTag: '" + photoTag + "'. A story has not been created for this photo yet! You MUST create animationElements first via the 'Particles, Elements' links." );
     if ( typeof callback == 'function' ) { callback( null ); return; }
     return null;
   }
   var story = result.item;
   var delayMsToWaitForCollapsedState = 0;
-  if ( !_this.activeStory.timelines.expandTimelineIsReversed ) {
+  if ( !story.timelines.expandTimelineIsReversed ) {
     delayMsToWaitForCollapsedState = 2000;
-    _this.activeStory.timelines.expandTimeline.reverse();
-    _this.activeStory.timelines.expandTimelineIsReversed = true;
+    story.timelines.expandTimeline.reverse();
+    story.timelines.expandTimelineIsReversed = true;
   }
   setTimeout(function() {
   /*1a-Resume here when Timeout done*/
-  _this.activeStory.timelines.expandTimeline.play();
-  _this.activeStory.timelines.expandTimelineIsReversed = false;
+  story.timelines.expandTimeline.play();
+  story.timelines.expandTimelineIsReversed = false;
   setTimeout(function() {
   /*1b-Resume here when Timeout done*/
-  _this.activeStory.timelines.expandTimeline.reverse();
-  _this.activeStory.timelines.expandTimelineIsReversed = true;
+  story.timelines.expandTimeline.reverse();
+  story.timelines.expandTimelineIsReversed = true;
   if ( typeof callback == 'function' ) { callback( story ); return; }
   return story;
   }, 2500); // end /*1b-timeout*/

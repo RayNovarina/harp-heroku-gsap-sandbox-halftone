@@ -265,9 +265,14 @@ function init_reset( _this ) {
   $( '#cbox_5x5_cluster' ).prop('checked', _this.defaults.is5x5_cluster );
   $( '#cbox_7x7_cluster' ).prop('checked', _this.defaults.is7x7_cluster );
 
+  // Add click handlers for our "Scroll To" links.
+  jQuery( '.trr-scroll-to' ).click( function( attribs ) {
+    scrollTo( trrPlugin, { event: attribs } );
+  });
+
   // Select, display default photo.
   newPhoto( _this, { photoTag: _this.defaults.photoTag, photoType: _this.defaults.photoType, imgSrc: _this.defaults.imgSrc },
-  /*1-Resume here when done*/ function( imgage ) {
+  /*1-Resume here when done*/ function( image ) {
   /*1-*/});
 
 };// end: init_reset()
