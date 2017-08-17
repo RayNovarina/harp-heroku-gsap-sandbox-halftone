@@ -106,15 +106,117 @@ Create Animation Elements: Get <svg Ball> working, <div>ball</div> working.
 All effects link: Add option to animate as GASP TimeLine of effects.
 
 ==============================================
-problem:
 
-load page
-meg -> particles -> elements -> expand
-mike: center panel is blank. ok.
-    -> partiles -> elements
-meg: center panel is blank. should be her active (expand) scene. says activeScene: *none*
+// Private methods in context of plugIn instance, i.e. this
+// // NOTE: Private methods MUST use _this to get 'this' for this instance of TrrPlugin
+
+//----------------------------------------------------------------------------
+function playStory( _this, options, /*Code to resume when done*/ callback ) {
+  //--------------------------------------------------------------------------
+  console.log( " ..*4.2) playStory() for activeStory: '" + _this.activeStory.tag + "' *");
+
+  // Play story for active/selectedPhoto. All scenes, i.e. collapse and expand.
+
+  // animationElements MUST have already been created.
+  if ( !_this.activeStory.timelines ||
+       !_this.activeStory.timelines.storyTimeline ) {
+    alert('You MUST create animationElements first via the "Particles, Elements" links.');
+    if ( typeof callback == 'function' ) { callback(); return; }
+    return;
+  }
+
+
+  // Hide the active/visible sceneContainer, we will replace it with ours.
+  closeActiveSceneContainer( _this,
+  /*1-Resume here when done*/ function( activeScene ) {
+  tagToScene( _this, 'elements', _this.activeStory,
+  /*2-Resume here when done*/ function( result ) {
+  openSceneContainer( _this, result.item );
+
+  photoTagToStory( _this, _this.selectedPhotoTag,
+  /*3-Resume here when done*/ function( activeScene ) {
+
+  if ( !_this.activeStory.particleMap.particles ) {
+  particles( _this, { isOnlyIfNew: true, isRenderParticleMap: true, isCreateSceneInCenterPanel: true },
+  /*1-Resume here when done*/ function( activeScene ) {
+
+  /*1-*/});
+
+
+  var delayMsToWaitForCollapsedState = 0;
+  if ( !_this.activeStory.timelines.expandTimelineIsReversed ) {
+    delayMsToWaitForCollapsedState = 2000;
+    _this.activeStory.timelines.expandTimeline.reverse();
+    _this.activeStory.timelines.expandTimelineIsReversed = true;
+  }
+  setTimeout(function() {
+  /*2a-Resume here when Timeout done*/
+  _this.activeStory.timelines.expandTimeline.play();
+  _this.activeStory.timelines.expandTimelineIsReversed = false;
+  setTimeout(function() {
+  /*2b-Resume here when Timeout done*/
+  _this.activeStory.timelines.expandTimeline.reverse();
+  _this.activeStory.timelines.expandTimelineIsReversed = true;
+  if ( typeof callback == 'function' ) { callback(); return; }
+  return;
+  }, 2500); // end /*2b-timeout*/
+  }, delayMsToWaitForCollapsedState); // end /*2a-timeout*/
+
+  /*2-*/});/*1-*/});
+}; // end: playStory()
+
+
+/*
+// Private methods in context of plugIn instance, i.e. this
+// // NOTE: Private methods MUST use _this to get 'this' for this instance of TrrPlugin
+
+//----------------------------------------------------------------------------
+function playStory( _this, options, /*Code to resume when done/ callback ) {
+  //--------------------------------------------------------------------------
+  console.log( " ..*4.2) playStory() for activeStory: '" + _this.activeStory.tag + "' *");
+
+  // Play story for active/selectedPhoto. All scenes, i.e. collapse and expand.
+
+  // animationElements MUST have already been created.
+  if ( !_this.activeStory.timelines ||
+       !_this.activeStory.timelines.storyTimeline ) {
+    alert('You MUST create animationElements first via the "Particles, Elements" links.');
+    if ( typeof callback == 'function' ) { callback(); return; }
+    return;
+  }
+
+  // Hide the active/visible sceneContainer, we will replace it with ours.
+  closeActiveSceneContainer( _this,
+  /*1-Resume here when done/ function( activeScene ) {
+  tagToScene( _this, 'elements', _this.activeStory,
+  /*2-Resume here when done/ function( result ) {
+
+  openSceneContainer( _this, result.item );
+  var delayMsToWaitForCollapsedState = 0;
+  if ( !_this.activeStory.timelines.expandTimelineIsReversed ) {
+    delayMsToWaitForCollapsedState = 2000;
+    _this.activeStory.timelines.expandTimeline.reverse();
+    _this.activeStory.timelines.expandTimelineIsReversed = true;
+  }
+  setTimeout(function() {
+  /*2a-Resume here when Timeout done/
+  _this.activeStory.timelines.expandTimeline.play();
+  _this.activeStory.timelines.expandTimelineIsReversed = false;
+  setTimeout(function() {
+  /*2b-Resume here when Timeout done/
+  _this.activeStory.timelines.expandTimeline.reverse();
+  _this.activeStory.timelines.expandTimelineIsReversed = true;
+  if ( typeof callback == 'function' ) { callback(); return; }
+  return;
+  }, 2500); // end /*2b-timeout/
+  }, delayMsToWaitForCollapsedState); // end /*2a-timeout*/
+
+  /*2-/});/*1-/});
+}; // end: playStory()
+*/
 
 ===================================
+
 
 //----------------------------------------------------------------------------
 function storyToActiveScene( _this, story, callback ) {

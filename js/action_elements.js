@@ -8,12 +8,22 @@ function elements( _this, options, /*Code to resume when done*/ callback ) {
   elements_reset( _this, { sceneTag: options.sceneTag } );
   updateSettings( _this, options );
   console.log( " ..*4.2) elements() " + "'. RenderParticleMap: '" + _this.settings.isRenderParticleMap +
-               "' for active story '" + _this.activeStory.tag + "' *");
+               "' for active story '" + _this.activeStory.tag +
+               "'. isOnlyIfNewElements: '" + _this.settings.isOnlyIfNewElements + "' *");
+
+  if ( _this.settings.isOnlyIfNewElements &&
+       _this.activeStory.timelines &&
+       _this.activeStory.timelines.expandTimeline ) {
+    console.log( " ..*4.2a) elements() OnlyIfNewElements: Ignored, " +
+                 "we already have a expandTimeline. *");
+    //if ( typeof callback == 'function' ) { callback( _this.activeScene ); return; }
+    //return _this.activeScene;
+  }
 
   // particleMap MUST have already been created.
   if ( !_this.activeStory.particleMap.particles ||
        _this.activeStory.particleMap.particles.length == 0 ) {
-    alert('You MUST create Particles first via the "Particles" link.');
+    alert( "photoTag: '" + _this.activeStory.tag + "'. You MUST create Particles first via the 'Particles' link.'" );
     if ( typeof callback == 'function' ) { callback( null ); return; }
     return null;
   }
@@ -107,9 +117,14 @@ function createSvgElementsFromParticleMap( _this, options, callback ) {
 
   var numElements = 0;
   var expandTimeline = new TimelineMax(
-          { repeat: 0, yoyo: false, repeatDelay: 0, delay: 0, paused: true } ),
-      storyTimeline = new TimelineMax(
-          { repeat: 0, yoyo: false, repeatDelay: 0, delay: 0, paused: true } );
+          { repeat: 0, yoyo: false, repeatDelay: 0, delay: 0, paused: true,
+            //onComplete: expandTimelineCompleteCallback
+            //onComplete: function( timeline ) {
+            //  _this = window.trrPlugin;
+            //  alert( "expandTimeline animation is complete for '" + _this.activeStory.tag +
+            //  "'. expandTimelineIsReversed = '" + _this.activeStory.timelines.expandTimelineIsReversed + "'. " );
+            //}
+          } );
 
   $.each( particles, function( idx, particle ) {
     // NOTE: particleAnimationMethod should return a Tween for the element. And it
@@ -137,21 +152,6 @@ function createSvgElementsFromParticleMap( _this, options, callback ) {
           }
         ) // end TweenMax.to()
       ); // end expandTimeline.insert()
-      storyTimeline.insert(
-        TweenMax.to(
-          element, _this.settings.tweenDuration,
-          // NOTE: we don't want to do math calculations when creating DOM elements.
-          //       So require that all adjustments were made when the particle
-          //       map was created.
-          { attr: { cx: particle.x, // + animationElementOffsetX,
-                    cy: particle.y, // + animationElementOffsetY,
-                  },
-            //autoAlpha: 0,
-            //ease: Power0.easeInOut,
-            ease: Power2.easeOut,
-          }
-        ) // end TweenMax.to()
-      ); // end storyTimeline.insert()
       numElements += 1;
     } // end if ( element )
   }); // end $.each()
@@ -161,7 +161,6 @@ function createSvgElementsFromParticleMap( _this, options, callback ) {
     animationElementsContainerElem: elementsContainerElem,
     domElementsObjsArray: domElementsObjsArray,
     expandTimeline: expandTimeline,
-    storyTimeline: storyTimeline,
   };
   console.log( " ..*5a.2)createSvgElementsFromParticleMap(): Made " + $sceneContainerElem.attr( 'numElements' ) +
                " canvas AnimationElements. *");
@@ -229,9 +228,7 @@ function createDivElementsFromParticleMap( _this, options, callback ) {
 
   var numElements = 0;
   var expandTimeline = new TimelineMax(
-          { repeat: 0, yoyo: false, repeatDelay: 0, delay: 0, paused: true } ),
-      storyTimeline = new TimelineMax(
-          { repeat: 3, yoyo: true, repeatDelay: 0, delay: 0, paused: true } );
+          { repeat: 0, yoyo: false, repeatDelay: 0, delay: 0, paused: true } );
 
   $.each( particles, function( idx, particle ) {
     // Create element in the "collapsed position column".
@@ -256,20 +253,6 @@ function createDivElementsFromParticleMap( _this, options, callback ) {
           }
         ) // end TweenMax.to()
       ); // end expandTimeline.insert()
-      storyTimeline.insert(
-        TweenMax.to(
-          element, _this.settings.tweenDuration,
-          // NOTE: we don't want to do math calculations when creating DOM elements.
-          //       So require that all adjustments were made when the particle
-          //       map was created.
-          { left: particle.x, // + animationElementOffsetX,
-            top:  particle.y, // + animationElementOffsetY,
-    	      //autoAlpha: 0,
-            //ease: Power0.easeInOut,
-            ease: Power2.easeOut,
-          }
-        ) // end TweenMax.to()
-      ); // end storyTimeline.insert()
       numElements += 1;
     } // end if ( element )
   }); // end $.each()
@@ -352,3 +335,8 @@ function createCollapsedPositionCanvasElement( _this, particle ) {
   context.closePath();
   return canvas;
 }; // end createCollapsedPositionCanvasElement()
+
+//function expandTimelineCompleteCallback( timelineMax ) {
+//  _this = window.trrPlugin;
+//  alert( 'expandTimeline animation is complete for ' + _this.activeStory.tag + '.' );
+//}; // end expandTimelineCompleteCallback

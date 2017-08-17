@@ -164,7 +164,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
   //  playSegment( trrPlugin, {} );
   //});
   $( "#playStory" ).click( function() {
-    playStory( trrPlugin, {} );
+    playSelectedStory( trrPlugin, {} );
   });
   $( "#playMovie" ).click( function() {
     playMovie( trrPlugin, {} );

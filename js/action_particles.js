@@ -8,7 +8,17 @@ function particles( _this, options, /*Code to resume when done*/ callback ) {
   particles_reset( _this, { sceneTag: options.sceneTag } );
   updateSettings( _this, options );
   console.log( " ..*4.1) particles() " + "'. RenderParticleMap: '" + _this.settings.isRenderParticleMap +
-               "' for active story '" + _this.activeStory.tag + "' *");
+               "' for active story '" + _this.activeStory.tag +
+               "'. isOnlyIfNewParticleMap: '" + _this.settings.isOnlyIfNewParticleMap + "' *");
+
+  if ( _this.settings.isOnlyIfNewParticleMap &&
+       _this.activeStory.particleMap.particles &&
+       _this.activeStory.particleMap.particles.length > 0 ) {
+    console.log( " ..*4.1a) particles() OnlyIfNewParticleMap: Ignored, " +
+                 "we already have a particleMap with '" + _this.activeStory.particleMap.particles.length + "' particles. *");
+    //if ( typeof callback == 'function' ) { callback( _this.activeScene ); return; }
+    //return _this.activeScene;
+  }
 
   // Create particle array by selecting pixels we want for a halftone image.
   createParticleMap( _this, {
