@@ -10,7 +10,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
   trrPlugin.centerPanel = document.getElementById( 'centerPanel' );
   trrPlugin.rightPanel = document.getElementById( 'rightPanel' );
   /*
-  _this.movie {
+  trrPlugin.movie {
     lastActiveStory: story,
     stories: [ {
       lastActiveScene: scene,
@@ -64,11 +64,12 @@ function trr_init(/*Code to resume when done*/ callback ) {
   trrPlugin.defaults = {
     img: document.getElementById( 'selectedPhoto'),
     $img: $el,
-    photoTag: 'meg',
+    photoTag: 'gary',
     photoType: 'color',
-    imgSrc: './images/meg_makalou_CC_581x600.jpg',
+    imgSrc: './images/gary_crossland_422x436.jpg',
     isParticlesMode: true,
     isElementsMode: false,
+    isLoadReadyForScroll: true,
     isTransformPixels: true,
     isAutoPlay: false,
     isExcludePixels: false,
@@ -99,7 +100,37 @@ function trr_init(/*Code to resume when done*/ callback ) {
     animationElementOffsetX: -80,
     animationElementOffsetY: -20,
   };
-  init_reset( trrPlugin ); // includes selecting default photo.
+
+  // Create inital settings/options from defaults.
+  trrPlugin.settings = trrPlugin.defaults;
+  trrPlugin.timeNow = new Date().getTime();
+  updateSettings( trrPlugin, { timeNow: trrPlugin.timeNow, id: 'mapTrrEffect_' + trrPlugin.timeNow } );
+
+  // Set default state of checkboxes.
+  $( '#cbox_particles_mode' ).prop('checked', trrPlugin.defaults.isParticlesMode );
+  $( '#cbox_elements_mode' ).prop('checked', trrPlugin.defaults.isElementsMode );
+  $( '#cbox_load4scroll' ).prop('checked', false );
+  $( '#cbox_transform' ).prop('checked', trrPlugin.defaults.isTransformPixels );
+  $( '#cbox_exclude' ).prop('checked', trrPlugin.defaults.isExcludePixels );
+  $( '#cbox_useTrr' ).prop('checked', trrPlugin.defaults.isUseTrrData );
+
+  if ( trrPlugin.defaults.isParticlesMode ) {
+    trrPlugin.settings.isUseCanvasElements = false;
+    trrPlugin.settings.isUseSVGelements = false;
+    trrPlugin.settings.isUseDivElements = false;
+  }
+  $( '#cbox_useCanvas' ).prop('checked', trrPlugin.settings.isUseCanvasElements );
+  $( '#cbox_useSVG' ).prop('checked', trrPlugin.settings.isUseSVGelements );
+  $( '#cbox_useDiv' ).prop('checked', trrPlugin.settings.isUseDivElements );
+
+  $( '#cbox_every1' ).prop('checked', trrPlugin.defaults.isEvery1 );
+  $( '#cbox_every2' ).prop('checked', trrPlugin.defaults.isEvery2 );
+  $( '#cbox_every3' ).prop('checked', trrPlugin.defaults.isEvery3 );
+  $( '#cbox_every4' ).prop('checked', trrPlugin.defaults.isEvery4 );
+  $( '#cbox_1x1_cluster' ).prop('checked', trrPlugin.defaults.is1x1_cluster );
+  $( '#cbox_3x3_cluster' ).prop('checked', trrPlugin.defaults.is3x3_cluster );
+  $( '#cbox_5x5_cluster' ).prop('checked', trrPlugin.defaults.is5x5_cluster );
+  $( '#cbox_7x7_cluster' ).prop('checked', trrPlugin.defaults.is7x7_cluster );
 
   // Add click handlers for various functions.
   // NOTE: within click handler 'this' refers to the dom element clicked, i.e.
@@ -154,11 +185,11 @@ function trr_init(/*Code to resume when done*/ callback ) {
       tweenDuration: 2,
     } );
   });
-  $( "#collapse" ).click( function() {
-    collapse( trrPlugin, { autoPlay: true, tweenDuration: 3 } );
-  });
   $( "#expand" ).click( function() {
     expand( trrPlugin, { autoPlay: true, tweenDuration: 2.5 } );
+  });
+  $( "#collapse" ).click( function() {
+    collapse( trrPlugin, { autoPlay: true, tweenDuration: 3 } );
   });
   //$( "#play" ).click( function() {
   //  playSegment( trrPlugin, {} );
@@ -166,10 +197,17 @@ function trr_init(/*Code to resume when done*/ callback ) {
   $( "#playStory" ).click( function() {
     playSelectedStory( trrPlugin, {} );
   });
-  $( "#playMovie" ).click( function() {
-    playMovie( trrPlugin, {} );
+  //$( "#playMovie" ).click( function() {
+  //  playMovie( trrPlugin, {} );
+  //});
+  $( "#makeReadyForScroll" ).click( function( event ) {
+    loadReadyForScroll( trrPlugin, { event: event } );
   });
 
+  // "Scroll To" links.
+  jQuery( '.trr-scroll-to' ).click( function( attribs ) {
+    scrollTo( trrPlugin, { event: attribs } );
+  });
 
   //----------------------------------------------------------------------------
   // Action checkboxesRow1
@@ -219,6 +257,19 @@ function trr_init(/*Code to resume when done*/ callback ) {
   $( "#cbox_7x7_cluster" ).click( function( event ) {
     cbox_7x7_cluster( trrPlugin, { event: event } );
   });
+
+
+  // Select, display default photo.
+  newPhoto( trrPlugin, { photoTag: trrPlugin.defaults.photoTag, photoType: trrPlugin.defaults.photoType, imgSrc: trrPlugin.defaults.imgSrc },
+  /*1-Resume here when done*/ function( image ) {
+
+  // Preload all photos, particles, elements, timelines.
+  if ( trrPlugin.settings.isLoadReadyForScroll ) {
+      loadReadyForScroll( trrPlugin, {} );
+  }
+  /*1-*/});
+
+  // DONE
   if ( typeof callback == 'function' ) { callback( trrPlugin ); return; }
   return trrPlugin;
 }; // end: trr_init()
@@ -227,52 +278,5 @@ function trr_init(/*Code to resume when done*/ callback ) {
 // Private methods in context of plugIn instance, i.e. this
 // NOTE: Private methods MUST use _this to get 'this' for this instance of TrrPlugin
 //----------------------------------------------------------------------------
-function init_reset( _this ) {
-
-  if ( _this.settings == 'undefined' ) {
-    // onDomReady() init.
-  } else {
-    // Reset link clicked after load. Maybe conversion, actions done.
-    //var previousId = _this.settings.
-  }
-
-  _this.settings = _this.defaults;
-  _this.timeNow = new Date().getTime();
-  updateSettings( _this, { timeNow: _this.timeNow, id: 'mapTrrEffect_' + _this.timeNow } );
-
-  // Set default state of checkboxes.
-  $( '#cbox_particles_mode' ).prop('checked', _this.defaults.isParticlesMode );
-  $( '#cbox_elements_mode' ).prop('checked', _this.defaults.isElementsMode );
-  $( '#cbox_transform' ).prop('checked', _this.defaults.isTransformPixels );
-  $( '#cbox_exclude' ).prop('checked', _this.defaults.isExcludePixels );
-  $( '#cbox_useTrr' ).prop('checked', _this.defaults.isUseTrrData );
-
-  if ( _this.defaults.isParticlesMode ) {
-    _this.settings.isUseCanvasElements = false;
-    _this.settings.isUseSVGelements = false;
-    _this.settings.isUseDivElements = false;
-  }
-  $( '#cbox_useCanvas' ).prop('checked', _this.settings.isUseCanvasElements );
-  $( '#cbox_useSVG' ).prop('checked', _this.settings.isUseSVGelements );
-  $( '#cbox_useDiv' ).prop('checked', _this.settings.isUseDivElements );
-
-  $( '#cbox_every1' ).prop('checked', _this.defaults.isEvery1 );
-  $( '#cbox_every2' ).prop('checked', _this.defaults.isEvery2 );
-  $( '#cbox_every3' ).prop('checked', _this.defaults.isEvery3 );
-  $( '#cbox_every4' ).prop('checked', _this.defaults.isEvery4 );
-  $( '#cbox_1x1_cluster' ).prop('checked', _this.defaults.is1x1_cluster );
-  $( '#cbox_3x3_cluster' ).prop('checked', _this.defaults.is3x3_cluster );
-  $( '#cbox_5x5_cluster' ).prop('checked', _this.defaults.is5x5_cluster );
-  $( '#cbox_7x7_cluster' ).prop('checked', _this.defaults.is7x7_cluster );
-
-  // Add click handlers for our "Scroll To" links.
-  jQuery( '.trr-scroll-to' ).click( function( attribs ) {
-    scrollTo( trrPlugin, { event: attribs } );
-  });
-
-  // Select, display default photo.
-  newPhoto( _this, { photoTag: _this.defaults.photoTag, photoType: _this.defaults.photoType, imgSrc: _this.defaults.imgSrc },
-  /*1-Resume here when done*/ function( image ) {
-  /*1-*/});
-
-};// end: init_reset()
+//function init_reset( _this ) {
+//};// end: init_reset()

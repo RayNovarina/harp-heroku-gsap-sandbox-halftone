@@ -57,6 +57,7 @@ function newPhoto( _this, options, /*Code to resume when done*/ callback ) {
   // Recover our last activeScene, if any, and make it visible.
   _this.activeScene = _this.activeStory.lastActiveScene;
   openSceneContainer( _this, _this.activeStory.lastActiveScene );
+  console.log( " ..*3a) newPhoto() DONE. *");
   if ( typeof callback == 'function' ) { callback( _this.activeStory.imgage ); return; }
   return _this.activeStory.imgage;
   /*4-*/});/*3-*/});/*2-*/});/*1-*/}; // end img.onload()
@@ -412,7 +413,7 @@ function addTimelineToStory( _this, story, results ) {
   }
   if ( results.expandTimeline ) {
     story.timelines.expandTimeline = results.expandTimeline;
-    story.timelines.expandTimelineIsReversed = false;
+    story.timelines.expandTimelineIsReversed = true;
   }
   if ( results.storyTimeline ) {
     story.timelines.storyTimeline = results.storyTimeline;

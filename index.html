@@ -37,7 +37,12 @@ One way to explode items at: https://greensock.com/forums/topic/7622-one-way-to-
 <body>
 
   <div class="peopleLeftRow1">
-    <a id="newPhotoMike" style="margin-left: 0px;" photoTag="mike"
+    <a id="newPhotoGary" style="margin-left: 0px;" photoTag="gary"
+       data-src="./images/gary_crossland_422x436.jpg"
+       class="trr-photo-effect"
+       title=""
+    >Gary</a>
+    <a id="newPhotoMike" style="margin-left: 50px;" photoTag="mike"
        photoType="color" data-src="./images/mike_CC_422x436.jpg"
        class="trr-photo-effect"
        title=""
@@ -47,16 +52,11 @@ One way to explode items at: https://greensock.com/forums/topic/7622-one-way-to-
        class="trr-photo-effect"
        title=""
     >Meg</a>
-    <a id="newPhotoLaura" style="margin-left: 50px;" photoTag="laura"
+    <a id="newPhotoLaura" style="margin-left: 36px;" photoTag="laura"
        data-src="./images/laura_oliphant_600x573.jpg"
        class="trr-photo-effect"
        title=""
     >Laura</a>
-    <a id="newPhotoGary" style="margin-left: 36px;" photoTag="gary"
-       data-src="./images/gary_crossland_422x436.jpg"
-       class="trr-photo-effect"
-       title=""
-    >Gary</a>
   </div>
 
   <div class="peopleLeftRow2">
@@ -71,16 +71,16 @@ One way to explode items at: https://greensock.com/forums/topic/7622-one-way-to-
   </div>
 
   <div class="peopleLeftRow3">
-    <a class="trr-scroll-to" style="margin-left: 0px;" photoTag="mike"
+    <a class="trr-scroll-to" style="margin-left: 0px;" photoTag="gary"
        title=""
     >Scroll To</a>
-    <a class="trr-scroll-to" style="margin-left: 24px;" photoTag="meg"
+    <a class="trr-scroll-to" style="margin-left: 24px;" photoTag="mike"
        title=""
     >Scroll To</a>
-    <a class="trr-scroll-to" style="margin-left: 20px;" photoTag="laura"
+    <a class="trr-scroll-to" style="margin-left: 20px;" photoTag="meg"
        title=""
     >Scroll To</a>
-    <a class="trr-scroll-to" style="margin-left: 16px;" photoTag="gary"
+    <a class="trr-scroll-to" style="margin-left: 16px;" photoTag="laura"
        title=""
     >Scroll To</a>
   </div>
@@ -89,17 +89,19 @@ One way to explode items at: https://greensock.com/forums/topic/7622-one-way-to-
   </div>
 
   <div class="actionsMiddleRow1">
-    <input id="cbox_particles_mode" type="checkbox" style="margin-left: 8px;"
+    <input id="cbox_particles_mode" type="checkbox"
+           style="margin-left: 8px; margin-right: 0; padding: 0;"
            title="Particles Mode. Canvas/SVG/Div checkboxes apply to Particles link." >
-    <a id="particles" style="margin-left: 0px;"
+    <a id="particles" style="margin-left: 0px; padding: 0;"
        title="Display converted particle map once it is done as a halftone
            image. Create particle map and then create a canvas in the center
            Panel and write the particle halftone dots on it in one pass,
            i.e. without animation."
        >Particles</a>
     <input id="cbox_elements_mode" type="checkbox"
+           style="margin-left: 8px; margin-right: 0; padding: 0;"
            title="Elements Mode. Canvas/SVG/Div checkboxes apply to Elements link." >
-    <a id="elements" style="margin-left: 0px;"
+    <a id="elements" style="margin-left: 0px; padding: 0;"
        title="Create AnimationElements in the center Panel based on the particles.
            Pin them to their collapsed position."
        >Elements</a>
@@ -128,6 +130,13 @@ One way to explode items at: https://greensock.com/forums/topic/7622-one-way-to-
        title=""
        href="/"
        >RESET</a>
+    <input id="cbox_load4scroll" type="checkbox" disabled
+           style="margin-left: 4px; margin-right: 0; padding: 0;"
+           title="" >
+    <a id="makeReadyForScroll"
+       style="margin-left: 0px; padding: 0;"
+       title=""
+       >Make Ready For Scroll</a>
   </div>
 
   <div class="actionCheckboxesRightRow1">
@@ -195,7 +204,7 @@ One way to explode items at: https://greensock.com/forums/topic/7622-one-way-to-
 <script type="text/javascript" src="js/action_collapse.js"></script>
 <script type="text/javascript" src="js/action_expand.js"></script>
 <script type="text/javascript" src="js/action_story.js"></script>
-<script type="text/javascript" src="js/action_movie.js"></script>
+<script type="text/javascript" src="js/action_ready4scroll.js"></script>
 <script type="text/javascript" src="js/scroll-event.js"></script>
 
 
@@ -208,13 +217,10 @@ $( document ).ready( function() {
   trr_init(
   /*1-Resume here when done*/ function( trrPlugin ) {
   window.trrPlugin = trrPlugin;
-  // Select, display default photo.
-  newPhoto( trrPlugin, { photoType: trrPlugin.defaults.photoType,
-                         photoTag: trrPlugin.defaults.photoTag,
-                         imgSrc: trrPlugin.defaults.imgSrc },
-  /*2-Resume here when done*/ function() {
-  /*2-*/});/*1-*/});
-}); //end $( document ).ready()
+  // NOTE: default photo is now displayed. Optionally, we may have preloaded all
+  // photos, particleMaps, animationElements, GSAP timesLines.
+  /*1-*/});
+  }); //end $( document ).ready()
 
  </script>
 

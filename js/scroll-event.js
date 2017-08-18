@@ -2,10 +2,10 @@
 // // NOTE: Private methods MUST use _this to get 'this' for this instance of TrrPlugin
 
 //----------------------------------------------------------------------------
-function scrollTo( _this, options ) {
+function scrollTo( _this, options, callback ) {
   //----------------------------------------------------------------------------
-  var $scrolledToElem = $( options.event.currentTarget ),
-      toPhotoTag = $scrolledToElem.attr( 'photoTag' ),
+  var $scrolledToElem = ( options.toPhotoTag ? null : $( options.event.currentTarget ) ),
+      toPhotoTag = options.toPhotoTag || $scrolledToElem.attr( 'photoTag' ),
       $toPhotoImg = $( '#' + 'newPhoto' + toPhotoTag.charAt( 0 ).toUpperCase() + toPhotoTag.slice(1).toLowerCase() ),
       fromPhotoTag = _this.activeStory.tag;
   // alert( "Clicked on ScrollTo '" + $elem.attr( 'photoTag' ) + ".  Active halftone profile: '" + _this.activeStory.tag + "'. *" );
@@ -15,7 +15,8 @@ function scrollTo( _this, options ) {
   if ( !fromStory.timelines ||
        !fromStory.timelines.expandTimeline ) {
     alert( "Scroll From: '" + fromPhotoTag + "'. A story has not been created for this photo yet! You MUST create animationElements first via the 'Particles, Elements' links." );
-    return;
+    if ( typeof callback == 'function' ) { callback( toPhotoTag ); return; }
+    return toPhotoTag;
   }
 
   photoTagToStory( _this, toPhotoTag,
@@ -24,7 +25,8 @@ function scrollTo( _this, options ) {
        !results.item.timelines ||
        !results.item.timelines.expandTimeline ) {
     alert( "Scroll To: '" + toPhotoTag + "'. A story has not been created for this photo yet! You MUST create animationElements first via the 'Particles, Elements' links." );
-    return;
+    if ( typeof callback == 'function' ) { callback( toPhotoTag ); return; }
+    return toPhotoTag;
   }
   var toStory = results.item;
 
@@ -91,5 +93,7 @@ function scrollTo( _this, options ) {
   // From Story:
   /*1c-*/}); }, delayMsToWaitForCollapsedState); // end /*1b-timeout*/
   }, delayMsToWaitForExpandedState); // end /*1a-timeout*/
+  if ( typeof callback == 'function' ) { callback( toPhotoTag ); return; }
+  return toPhotoTag;
   /*1-*/});
 }; // end: scrollTo()
