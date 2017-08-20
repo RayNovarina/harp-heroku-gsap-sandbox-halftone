@@ -147,7 +147,7 @@ function createSvgElementsFromParticleMap( _this, options, callback ) {
                     cy: particle.y, // + animationElementOffsetY,
                   },
     	      //autoAlpha: 0,
-            //ease: Power0.easeInOut,
+            //ease: Power0.easeInOut, // will case fade-out
             ease: Power2.easeOut,
           }
         ) // end TweenMax.to()

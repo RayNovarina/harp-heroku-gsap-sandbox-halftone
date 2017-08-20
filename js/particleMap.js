@@ -182,7 +182,7 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
           // chars are stored in string so we can just multiply with the CONSTANT gridSize. BUT we
           // have the multiplication overhead. IF calc when mapped, about 20chars are stored for
           // particle.r versus 3 for particle.i
-          r: filterResults.pixelChannelIntensity * gridSize,
+          r: (filterResults.pixelChannelIntensity * gridSize) * .5,
         });
       }
     } // end for (col)
@@ -218,6 +218,92 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
   return results;
 }; // end: makeParticles()
 
+/* per: https://en.wikipedia.org/wiki/RGBA_color_space
+RGBA stands for red green blue alpha. While it is sometimes described as a color
+space, it is actually simply a use of the RGB color model, with extra alpha
+channel information. The color is RGB, and may belong to any RGB color space,
+but an integral alpha value as invented by Catmull and Smith between 1971 and
+1972 enables alpha compositing. The inventors named alpha after the Greek letter
+in the classic linear interpolation formula α A + (1 − α) B.
+
+The alpha channel is normally used as an opacity channel. If a pixel has a value
+of 0% in its alpha channel, it is fully transparent (and, thus, invisible),
+whereas a value of 100% in the alpha channel gives a fully opaque pixel
+(traditional digital images). Values between 0% and 100% make it possible for
+pixels to show through a background like a glass, an effect not possible with
+simple binary (transparent or opaque) transparency. It allows easy image
+compositing.
+
+The 80 hex value, which is 128 in decimal, represents a 50.2% alpha value
+because 128 is approximately 50.2% of the maximum value of 255 (FF hex)
+
+The traditional halftone process converts different tones into dots of varying
+size. The size of the dot behind each grid square is proportional to the
+intensity of the light falling on it. Therefore the tones of the original
+photograph are converted to dots of varying size on the high contrast film.
+
+// using glfx.js at https://github.com/evanw/glfx.js
+// demo tools at: https://github.com/evanw/webgl-filter/blob/master/www/script.js
+//        and at: http://evanw.github.io/webgl-filter/
+canvas.draw(texture).dotScreen(this.center.x, this.center.y, this.angle, this.size).update();
+*/
+
+/*
+window.$canvas = $('#portrait-canvas')
+
+window.canvas = document.getElementById('portrait-canvas')
+    <canvas id="portrait-canvas" width="2000" height="1000">
+window.canvas.width
+  2000
+
+window.ctx = window.canvas.getContext("2d")
+  CanvasRenderingContext2D { canvas: <canvas#portrait-canvas>, mozCurrentTransform: Array[6], mozCurrentTransformInverse: Array[6], mozTextStyle: "10px sans-serif", mozImageSmoothingEnabled: true, globalAlpha: 1, globalCompositeOperation: "source-over", strokeStyle: "#000000", fillStyle: "#0098ce", filter: "none" }
+
+window.imgData = window.ctx.getImageData(0,0,2000,1000)
+  ImageData { width: 2000, height: 1000, data: Uint8ClampedArray[8000000] }
+
+window.imgDataArray = window.imgData.data
+  Uint8ClampedArray [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7999990 more… ]
+
+window.imgDataArray = window.ctx.getImageData(0,0,2000,1000).data
+
+window.imagDataArray_json = JSON.stringify(window.imgDataArray)
+window.arr = window.imgDataArray
+
+window.arr0to100k =
+
+$(window.arr.slice(0,100000))
+  Object [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 99990 more… ]
+
+  JSON.stringify(window.test)
+  "[0,1,2,3]"
+  window.JSON.arr0to100k = JSON.stringify(window.arr0to100k)
+  "{"0":0,"1":0,"2":0,"3":0,"4":0,"5":0,"6":0,"7":0,"8":0,"9":0,"10":0,"11":0,"12":0,"13":0,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0,"31":0,"32":0,"33":0,"34":0,"35":0,"36":0,"37":0,"38":0,"39":0,"40":0,"41":0,"42":0,"43":0,"44":0,"45":0,"46":0,"47":0,"48":0,"49":0,"50":0,"51":0,"52":0,"53":0,"54":0,"55":0,"56":0,"57":0,"58":0,"59":0,"60":0,"61":0,"62":0,"63":0,"64":0,"65":0,"66":0,"67":0,"68":0,"69":0,"70":0,"71":0,"72":0,"73":0,"74":0,"75":0,"76":0,"77":0,"78":0,"79":0,"80":0,"81":0,"82":0,"83":0,"84":0,"85":0,"86":0,"87":0,"88":0,"89":0,"90":0,"91":0,"92":0,"93":0,"94":0,"95":0,"96":0,"97":0,"98":0,"99":0,"100":0,"101":0,"102":0,"103":0,"104":0,"105":0,"106":0,"107":0,"108":0,"109":0,"110":0,"111":0,"112":0,"113":0,"114":0,"115":0,"116":0,"117":0,"118":0,"119":0,"120":0,"121":0,"122":0,"123":0,"124":0,"125":0,"126":0,"127":0,"128":0,"129":0,"130":0,"131":0,"132":0,"133":0,"134":0,"135":0,"136":0,"137":0,"138""[…]
+
+  window.$canvas = $('#portrait-canvas')
+
+  window.canvas = document.getElementById('portrait-canvas')
+      <canvas id="portrait-canvas" width="2000" height="1000">
+  window.canvas.width
+    2000
+
+  window.ctx = document.getElementById('portrait-canvas').getContext("2d")
+
+  Chrome/Firefox snippet to add console.save to file feature:
+  http://bgrins.github.io/devtools-snippets/#console-save
+
+  window.imgDataArray = window.ctx.getImageData(0,0,2000,1000).data
+  console.save(data, [filename])
+
+  //---------------
+  www/script.js
+  line: 381
+  $('#save').click(function() {
+      window.open(canvas.toDataURL('image/png'));
+      // change to: (per: https://github.com/evanw/webgl-filter/issues/4)
+      window.open(canvas.update().toDataURL('image/png'));
+  });
+ */
 //----------------------------------------------------------------------------
 function particleFilter( _this, rgbChannel, x, y, carryOverResults ) {
   //----------------------------------------------------------------------------
@@ -279,6 +365,7 @@ function particleFilter( _this, rgbChannel, x, y, carryOverResults ) {
 
   if ( _this.settings.isRejectParticlesBelowIntensityThreshold &&
        ( pixelInfo.channelIntensity < _this.settings.pixelChannelIntensityThreshold ) ) {
+    // pixelChannelIntensityThreshold: 0.05
     _this.particlesRejectedBecausePixelIntensityLessThanThreshold += 1;
     return { isAccepted: false };
   }

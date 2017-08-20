@@ -130,7 +130,7 @@ function renderParticleMapAsSingleCanvas( _this, options, callback ) {
   canvas.width = imageElem.width;
   canvas.height = imageElem.height;
   context.clearRect( 0, 0, canvas.width, canvas.height );
-  context.fillStyle = 'white';
+  context.fillStyle = '#E7F1F7'; // 'white'; #E7F1F7; /* Climate Corp "halftone background blue" */
   context.fillRect( 0, 0, canvas.width, canvas.height );
 
   // Recreate photo via particles[].

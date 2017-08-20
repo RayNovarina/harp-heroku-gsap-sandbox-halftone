@@ -64,19 +64,19 @@ function trr_init(/*Code to resume when done*/ callback ) {
   trrPlugin.defaults = {
     img: document.getElementById( 'selectedPhoto'),
     $img: $el,
-    photoTag: 'gary',
+    photoTag: 'laura',
     photoType: 'color',
-    imgSrc: './images/gary_crossland_422x436.jpg',
+    imgSrc: './images/laura_600x600_webgl_filter_greyscale_more_contrast.png',
     isParticlesMode: true,
     isElementsMode: false,
-    isLoadReadyForScroll: true,
+    isLoadReadyForScroll: false,
     isTransformPixels: true,
     isAutoPlay: false,
     isExcludePixels: false,
     isProcessBySkipCount: true,
-    isEvery1: false,
-    nthPixelToProcess: 2,
-    isEvery2: true,
+    isEvery1: true,
+    nthPixelToProcess: 1,
+    isEvery2: false,
     isEvery3: false,
     isEvery4: false,
     is1x1_cluster: false,
@@ -90,7 +90,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
     isUseCanvasElements: false,
     isUseSVGelements: true,
     isUseDivElements: false,
-    animationElementColor: '#70C0EF',
+    animationElementColor: '#0099cc', // '#70C0EF', // Climate Corp halftone dot blue.
     maxHalftoneDotSize: 1/150,
     pixelChannelIntensityThreshold: 0.05,
     imageScale: 1.0, // canvas.width / imgWidth;
@@ -138,14 +138,18 @@ function trr_init(/*Code to resume when done*/ callback ) {
 
   //----------------------------------------------------------------------------
   // People
-  $( "#newPhotoMike" ).click( function( event ) {
+  $( "#newPhotoChris" ).click( function( event ) {
     newPhoto( trrPlugin, { photoType: "color", photoTag: $(this).attr('photoTag'),
                            imgSrc: $(this).attr('data-src') } );
   });
-  $( "#newPhotoMeg" ).click( function( event ) {
+  $( "#newPhotoCurt" ).click( function( event ) {
     newPhoto( trrPlugin, { photoType: "color", photoTag: $(this).attr('photoTag'),
                            imgSrc: $(this).attr('data-src') } );
   });
+  //$( "#newPhotoMeg" ).click( function( event ) {
+  //  newPhoto( trrPlugin, { photoType: "color", photoTag: $(this).attr('photoTag'),
+  //                         imgSrc: $(this).attr('data-src') } );
+  //});
   $( "#newPhotoLaura" ).click( function( event ) {
     newPhoto( trrPlugin, { photoType: "color", photoTag: $(this).attr('photoTag'),
                            imgSrc: $(this).attr('data-src') } );
@@ -154,10 +158,14 @@ function trr_init(/*Code to resume when done*/ callback ) {
     newPhoto( trrPlugin, { photoType: "color", photoTag: $(this).attr('photoTag'),
                            imgSrc: $(this).attr('data-src') } );
   });
-  $( "#newCcHalftoneMike" ).click( function( event ) {
-    newPhoto( trrPlugin, { photoType: "halftone", photoTag: $(this).attr('photoTag'),
-                           imgSrc: $(this).attr('data-src') } );
-  });
+  //$( "#newPhotoMike" ).click( function( event ) {
+  //  newPhoto( trrPlugin, { photoType: "color", photoTag: $(this).attr('photoTag'),
+  //                         imgSrc: $(this).attr('data-src') } );
+  //});
+  //$( "#newCcHalftoneMike" ).click( function( event ) {
+  //  newPhoto( trrPlugin, { photoType: "halftone", photoTag: $(this).attr('photoTag'),
+  //                         imgSrc: $(this).attr('data-src') } );
+  //});
   $( "#newCcHalftoneMeg" ).click( function( event ) {
     newPhoto( trrPlugin, { photoType: "halftone", photoTag: $(this).attr('photoTag'),
                            imgSrc: $(this).attr('data-src') } );
@@ -182,7 +190,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
     elements( trrPlugin, {
       autoPlay: false, // expand from collapsed view to full image.
       isCreateSceneInCenterPanel: true,
-      tweenDuration: 2,
+      tweenDuration: 1.5,
     } );
   });
   $( "#expand" ).click( function() {
