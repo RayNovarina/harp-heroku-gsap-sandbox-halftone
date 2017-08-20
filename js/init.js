@@ -69,7 +69,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
     imgSrc: './images/laura_600x600_webgl_filter_greyscale_more_contrast.png',
     isParticlesMode: true,
     isElementsMode: false,
-    isLoadReadyForScroll: false,
+    isLoadReadyForScroll: true,
     isTransformPixels: true,
     isAutoPlay: false,
     isExcludePixels: false,
