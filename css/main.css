@@ -26,25 +26,11 @@
 .peopleLeftRow2 a:hover {
     color: green;
 }
-.peopleLeftRow3 {
-  position: absolute;
-  top: 40px;
-  left: 8px;
-}
-.peopleLeftRow3 a {
-    padding: 0 6px;
-    text-decoration: underline;
-    color: blue;
-    cursor: pointer
-}
-.peopleLeftRow3 a:hover {
-    color: green;
-}
 
 .actionsMiddleRow1 {
   position: absolute;
   top: 2px;
-  left: 390px;
+  left: 396px;
 }
 .actionsMiddleRow1 a {
     padding: 0 6px;
@@ -73,7 +59,7 @@
 .actionCheckboxesRightRow1 {
   position: absolute;
   top: 2px;
-  left: 880px;
+  left: 740px;
 }
 .actionCheckboxesRightRow1 input {
     margin-left: 0px;
@@ -89,7 +75,7 @@
 .actionCheckboxesRightRow2 {
     position: absolute;
     top: 22px;
-    left: 880px;
+    left: 740px;
 }
 .actionCheckboxesRightRow2 input {
     margin-left: 0px;
@@ -104,7 +90,7 @@
 
 .leftPanel {
   position: absolute;
-  top: 64px;
+  top: 48px;
   left: 10px;
   width: 610px;
   height: 610px;
@@ -113,19 +99,10 @@
 }
 .centerPanel {
   position: absolute;
-  top: 64px;
+  top: 48px;
   left: 632px;
   width: 610px;
   height: 610px;
   background-color: #E7F1F7; /* Climate Corp "halftone background blue" */
   border: 4px solid black;
-}
-.rightPanel {
-  position: absolute;
-  top: 64px;
-  left: 888px;
-  width: 430px;
-  height: 438px;
-  background-color: brown;
-  border: 4px solid violet;
 }

@@ -50,7 +50,7 @@ function selectPhotoMakeParticlesAndElements(  _this, options, photo_imgs, photo
   //--------------------------------------------------------------------------
   var photo_img = photo_imgs[photo_index];
   var beforePlayFullStorylayDelayMs = 0,
-      afterPlayFullStoryDelayMs = 4000,
+      afterPlayFullStoryDelayMs = 2000,
       photoTag = $(photo_img).attr('photoTag');
   // Select, display specified photo.
   newPhoto( _this, { photoTag: photoTag, photoType: $(photo_img).attr('photoType'), imgSrc: $(photo_img).attr('data-src') },

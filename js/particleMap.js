@@ -14,25 +14,13 @@ function createParticleMap( _this, options, /*Code to resume when done*/ callbac
                "'. *");
   _this.containerBackgroundRGB = _this.imgDataBackgroundRGB;
   _this.containerBackgroundRGBA = _this.imgDataBackgroundRGBA;
-
-  if ( _this.settings.isUseTrrData ) {
-    results = makeParticlesFromTrrMap( _this, {
-      id: options.id,
-      effectsDataAsJSONstring: effectsDataForRender[0].effectsDataAsJSONstring,
-      additionalHomeOffsetLeft: 0,
-      additionalHomeOffsetTop: 0,
-      isMakeHomePositionMap: true,
-      isMakePooledAtBottomMap: true,
-    } );
-  } else {
-    results = makeCartesianGridParticles( _this, {
+  results = makeCartesianGridParticles( _this, {
       id: options.id,
       additionalHomeOffsetLeft: 2,
       additionalHomeOffsetTop: 0,
       isMakeHomePositionMap: true,
       isMakePooledAtBottomMap: true,
-    } );
-  }
+  } );
   _this.particles = results.particles;
   _this.activeStory.particleMap = {
     particles: results.particles,
@@ -46,42 +34,21 @@ function createParticleMap( _this, options, /*Code to resume when done*/ callbac
 }; // end: createParticleMap()
 
 //----------------------------------------------------------------------------
-function makeParticlesFromTrrMap( _this, options, /*Code to resume when done*/ callback ) {
-  //--------------------------------------------------------------------------
-  updateSettings( _this, options );
-  var effectsData = JSON.parse( _this.settings.effectsDataAsJSONstring );
-  var particles = [],
-      effectsDataParticles = effectsData.particles,
-      edpParticle = {},
-      homeOffsetLeft = _this.settings.particlesHomeOffsetLeft + _this.settings.additionalHomeOffsetLeft,
-      homeOffsetTop = _this.settings.particlesHomeOffsetTop + _this.settings.additionalHomeOffsetTop;
-  console.log( " ..*5.1) makeParticlesFromTrrMap() for id: " + _this.settings.id +
-               ". effectsData.particles.len = " + effectsData.particles.length +
-               ". effectsDataAsJSONstring.len = " + _this.settings.effectsDataAsJSONstring.length +
-               ". Canvas Particles Home position Offset left: " + _this.settings.particlesHomeOffsetLeft +
-               ". top: " + _this.settings.particlesHomeOffsetTop +
-               ". MakeHomePositionMap: " + _this.settings.isMakeHomePositionMap +
-               ".");
-
-  if ( _this.settings.isMakeHomePositionMap ) {
-    for( var i = 0; i < (effectsData.particles.length); i += 1 ) {
-      edpParticle = effectsDataParticles[ i ];
-      particles.push( {
-          x: edpParticle.x + homeOffsetLeft,
-          y: edpParticle.y + homeOffsetTop,
-          r: edpParticle.r,
-      });
-    } //end for( var n )
-  }
-  var results = {
-    particles: particles,
-    gridSize: null,
-    homeOffsetLeft: homeOffsetLeft,
-    homeOffsetTop: homeOffsetTop,
-  };
-  if ( typeof callback == 'function' ) { callback( results ); return; }
-  return results;
-}; // end: makeParticlesFromTrrMap()
+function createParticleMap_reset( _this, options ) {
+  //----------------------------------------------------------------------------
+  _this.particles = [];
+  _this.settings.rgbChannel = 'blue'; // _this.settings.halftoneColor
+  _this.particlesRejectedBecauseParticleIsOutOfBounds = 0;
+  _this.particlesRejectedBecausePixelIntensityLessThanThreshold = 0;
+  _this.particlesRejectedBecausePixelSameAsContainerBackgroundRGB = 0;
+  _this.particlesRejectedBecausePixelSameAsContainerBackgroundRGBA = 0;
+  _this.particlesRejectedBecauseIsExcludedNthPixell = 0;
+  _this.particlesRejectedBecauseIsExcludedNotNthPixell = 0;
+  _this.particlesRejectedBecauseIsNonCenterMemberOfCluster = 0;
+  _this.particlesRejectedBecausePixelIndexIsOutOfBounds = 0;
+  _this.settings.rgbChannelOffset = _this.RGB_CHANNEL_OFFSETS[ _this.settings.rgbChannel ];
+  _this.settings.rgbChannelAngle = _this.RGB_CHANNEL_ANGLES[ _this.settings.rgbChannel ];
+}; // end: createParticleMap_reset()
 
 //----------------------------------------------------------------------------
 function makeCartesianGridParticles( _this, options, /*Code to resume when done*/ callback ) {
@@ -430,11 +397,3 @@ function getPixelLum( _this, pixelIndex ) {
   var min = Math.min( r, g, b );
   return ( max + min ) / 2;
 }; // end getPixelLum()
-
-//----------------------------------------------------------------------------
-function createParticleMap_reset( _this ) {
-  //----------------------------------------------------------------------------
-  if ( _this.particles !== 'undefined' ) {
-    _this.particles = [];
-  }
-}; // end createParticleMap_reset()

@@ -26,21 +26,14 @@ function playFullStory( _this, photoTag, options, /*Code to resume when done*/ c
   //--------------------------------------------------------------------------
   console.log( " ..*4.2) playFullStory() create ParticleMap, animation elements, play story for '" + photoTag + "'. All scenes, i.e. expand and collapse. *");
 
-  particles( _this, { isOnlyIfNewParticleMap: true, isRenderParticleMap: true, isCreateSceneInCenterPanel: true },
+  convert( _this, { isCreateSceneInCenterPanel: true, tweenDuration: 2, },
   /*1-Resume here when done*/ function( activeScene ) {
-  setTimeout(function() {
-  /*1a-Resume here when Timeout done*/
-  elements( _this, { isOnlyIfNewElements: true, autoPlay: false, isCreateSceneInCenterPanel: true, tweenDuration: 2, },
-  /*1b-Resume here when done*/ function( activeScene ) {
-  setTimeout(function() {
-  /*1c-Resume here when Timeout done*/
   // Play story for active/selectedPhoto. All scenes, i.e. expand and collapse.
   playStory( _this, photoTag, options,
-  /*1d-Resume here when done*/ function( story ) {
+  /*2-Resume here when done*/ function( story ) {
   if ( typeof callback == 'function' ) { callback( story ); return; }
   return story;
-  /*1d-*/}); }, 2000); // end /*1c-timeout*/
-  /*1b-*/}); }, 500); // end /*1a-timeout*/
+  /*1-*/});
   /*1-*/});
 }; // end: playFullStory()
 

@@ -8,7 +8,6 @@ function trr_init(/*Code to resume when done*/ callback ) {
   var $el = trrPlugin.$el;
   trrPlugin.leftPanel = document.getElementById( 'leftPanel' );
   trrPlugin.centerPanel = document.getElementById( 'centerPanel' );
-  trrPlugin.rightPanel = document.getElementById( 'rightPanel' );
   /*
   trrPlugin.movie {
     lastActiveStory: story,
@@ -16,14 +15,8 @@ function trr_init(/*Code to resume when done*/ callback ) {
       lastActiveScene: scene,
       tag: _this.settings.photoTag,
       timelines: {
-        particles: particlesTimeline,
         expand: expandTimeline,
         expandTimelineIsReversed: false,
-        story: storyTimeline,
-      },
-      particleMap: {
-        particles: _this.particles,
-        gridSize: 5.568,
       },
       image: {
         html {
@@ -67,12 +60,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
     photoTag: 'laura',
     photoType: 'color',
     imgSrc: './images/laura_600x600_webgl_filter_greyscale_more_contrast.png',
-    isParticlesMode: true,
-    isElementsMode: false,
-    isLoadReadyForScroll: true,
-    isTransformPixels: true,
-    isAutoPlay: false,
-    isExcludePixels: false,
+    isLoadReadyForScroll: false,
     isProcessBySkipCount: true,
     isEvery1: true,
     nthPixelToProcess: 1,
@@ -87,9 +75,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
     pixelsPerClusterSide: 5,
     isUseTrrData: false,
     isRenderParticleMap: false,
-    isUseCanvasElements: false,
     isUseSVGelements: true,
-    isUseDivElements: false,
     animationElementColor: '#0099cc', // '#70C0EF', // Climate Corp halftone dot blue.
     maxHalftoneDotSize: 1/150,
     pixelChannelIntensityThreshold: 0.05,
@@ -107,22 +93,9 @@ function trr_init(/*Code to resume when done*/ callback ) {
   updateSettings( trrPlugin, { timeNow: trrPlugin.timeNow, id: 'mapTrrEffect_' + trrPlugin.timeNow } );
 
   // Set default state of checkboxes.
-  $( '#cbox_particles_mode' ).prop('checked', trrPlugin.defaults.isParticlesMode );
-  $( '#cbox_elements_mode' ).prop('checked', trrPlugin.defaults.isElementsMode );
   $( '#cbox_load4scroll' ).prop('checked', false );
-  $( '#cbox_transform' ).prop('checked', trrPlugin.defaults.isTransformPixels );
-  $( '#cbox_exclude' ).prop('checked', trrPlugin.defaults.isExcludePixels );
   $( '#cbox_useTrr' ).prop('checked', trrPlugin.defaults.isUseTrrData );
-
-  if ( trrPlugin.defaults.isParticlesMode ) {
-    trrPlugin.settings.isUseCanvasElements = false;
-    trrPlugin.settings.isUseSVGelements = false;
-    trrPlugin.settings.isUseDivElements = false;
-  }
-  $( '#cbox_useCanvas' ).prop('checked', trrPlugin.settings.isUseCanvasElements );
   $( '#cbox_useSVG' ).prop('checked', trrPlugin.settings.isUseSVGelements );
-  $( '#cbox_useDiv' ).prop('checked', trrPlugin.settings.isUseDivElements );
-
   $( '#cbox_every1' ).prop('checked', trrPlugin.defaults.isEvery1 );
   $( '#cbox_every2' ).prop('checked', trrPlugin.defaults.isEvery2 );
   $( '#cbox_every3' ).prop('checked', trrPlugin.defaults.isEvery3 );
@@ -172,26 +145,15 @@ function trr_init(/*Code to resume when done*/ callback ) {
   });
   //----------------------------------------------------------------------------
   // Actions
-  $( "#cbox_particles_mode" ).click( function( event ) {
-    cbox_particles_mode( trrPlugin, { event: event } );
-  });
-  $( "#cbox_elements_mode" ).click( function( event ) {
-    cbox_elements_mode( trrPlugin, { event: event } );
-  });
 
-  $( "#particles" ).click( function() {
-    particles( trrPlugin, {
-      // Display full image as halftone made from particleMap particles.
-      isRenderParticleMap: true,
-      isCreateSceneInCenterPanel: true,
-    } );
-  });
-  $( "#elements" ).click( function() {
-    elements( trrPlugin, {
-      autoPlay: false, // expand from collapsed view to full image.
+  $( "#convert" ).click( function() {
+    convert( trrPlugin, {
+      isShowHalftone: true,
       isCreateSceneInCenterPanel: true,
       tweenDuration: 1.5,
-    } );
+    },
+    /*1-Resume here when done*/ function( scene ) {
+    /*1-*/});
   });
   $( "#expand" ).click( function() {
     expand( trrPlugin, { autoPlay: true, tweenDuration: 2.5 } );
@@ -199,15 +161,6 @@ function trr_init(/*Code to resume when done*/ callback ) {
   $( "#collapse" ).click( function() {
     collapse( trrPlugin, { autoPlay: true, tweenDuration: 3 } );
   });
-  //$( "#play" ).click( function() {
-  //  playSegment( trrPlugin, {} );
-  //});
-  $( "#playStory" ).click( function() {
-    playSelectedStory( trrPlugin, {} );
-  });
-  //$( "#playMovie" ).click( function() {
-  //  playMovie( trrPlugin, {} );
-  //});
   $( "#makeReadyForScroll" ).click( function( event ) {
     loadReadyForScroll( trrPlugin, { event: event } );
   });
@@ -220,23 +173,11 @@ function trr_init(/*Code to resume when done*/ callback ) {
   //----------------------------------------------------------------------------
   // Action checkboxesRow1
 
-  $( "#cbox_transform" ).click( function( event ) {
-    cbox_transform( trrPlugin, { event: event } );
-  });
-  $( "#cbox_exclude" ).click( function( event ) {
-    cbox_exclude( trrPlugin, { event: event } );
-  });
   $( "#cbox_useTrr" ).click( function( event ) {
     cbox_useTrr( trrPlugin, { event: event } );
   });
-  $( "#cbox_useCanvas" ).click( function( event ) {
-    cbox_useCanvas( trrPlugin, { event: event } );
-  });
   $( "#cbox_useSVG" ).click( function( event ) {
     cbox_useSVG( trrPlugin, { event: event } );
-  });
-  $( "#cbox_useDiv" ).click( function( event ) {
-    cbox_useDiv( trrPlugin, { event: event } );
   });
 
   //----------------------------------------------------------------------------
@@ -273,7 +214,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
 
   // Preload all photos, particles, elements, timelines.
   if ( trrPlugin.settings.isLoadReadyForScroll ) {
-      loadReadyForScroll( trrPlugin, {} );
+    loadReadyForScroll( trrPlugin, {} );
   }
   /*1-*/});
 

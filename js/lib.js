@@ -151,8 +151,7 @@ function createSceneContainer( _this, options, /*Code to resume when done*/ call
 
   _this.activeScene.container = {
     panelElem: ( _this.settings.isCreateSceneInLeftPanel ? _this.leftPanel
-                : _this.settings.isCreateSceneInCenterPanel ? _this.centerPanel
-                : _this.rightPanel ),
+                : _this.centerPanel ),
     html: {
       elem: sceneContainerElem,
     }
@@ -305,41 +304,6 @@ function setAnimationBoundaries( _this, options ) {
 }; // end setAnimationBoundaries()
 
 //----------------------------------------------------------------------------
-function copyConversionContainerToAnimationContainer( _this, options, /*Code to resume when done*/ callback ) {
-  //--------------------------------------------------------------------------
-  // local option overrides defaults.
-  var isUseConversionScene = options.isActionsUseMovedConversionContainer
-    ? options.isActionsUseMovedConversionContainer
-    : _this.settings.isActionsUseMovedConversionContainer;
-  console.log( " ..*3.6) copyConversionContainerToAnimationContainer() " +
-               "isUseConversionScene: '" + isUseConversionScene +
-               ( isUseConversionScene ? "'. Copy nothing. animationContainer uses conversionContainer scene"
-                                      : "'. Copy' scene in conversionContainer to the animationContainer" ) +
-               "'. *");
-
-  if ( isUseConversionScene ) {
-    _this.animationContainer.appendChild( _this.scene );
-    if ( typeof callback == 'function' ) { callback(); return; }
-    return;
-  }
-
-  // NOTE: Most scene options are used from scene created for the conversionContainer.
-  // Create animationContainer
-  createSceneContainer( _this, {
-    sceneId: 'scene_Ani_' + _this.settings.id,
-  },
-  /*1-Resume here when done*/ function( scene ) {
-  _this.scene = scene;
-  // NOTE: Use same options used for the conversionContainer elements.
-  createAnimationElements( _this, {},
-  /*2-Resume here when done*/ function() {
-  // AnimationElements will display after append()
-  _this.animationContainer.appendChild( _this.scene );
-  if ( typeof callback == 'function' ) { callback(); return; }
-  /*2-*/});/*1-*/});
-}; // end: copyConversionContainerToAnimationContainer()
-
-//----------------------------------------------------------------------------
 function isSceneDisabled( _this, options ) {
   //----------------------------------------------------------------------------
   if ( ( options.sceneTag == 'particles' && !_this.settings.isRenderParticleMap ) ) {
@@ -354,8 +318,7 @@ function isSceneDisabled( _this, options ) {
 //------------------------------------------------------------------------------
 function settingsToPanel( _this ) {
   //----------------------------------------------------------------------------
-  return  _this.settings.isCreateSceneInLeftPanel
-      ? 'left' : _this.settings.isCreateSceneInCenterPanel ? 'center' : 'right';
+  return  _this.settings.isCreateSceneInLeftPanel ? 'left' : 'center';
 }; // end settingsToPanel()
 
 //------------------------------------------------------------------------------
@@ -408,9 +371,6 @@ function newAnimationElements( _this, scene ) {
 //----------------------------------------------------------------------------
 function addTimelineToStory( _this, story, results ) {
   //----------------------------------------------------------------------------
-  if ( results.particlesTimeline ) {
-    story.timelines.particlesTimeline = results.particlesTimeline;
-  }
   if ( results.expandTimeline ) {
     story.timelines.expandTimeline = results.expandTimeline;
     story.timelines.expandTimelineIsReversed = true;
@@ -538,114 +498,8 @@ function openLastActiveSceneContainer( _this, callback ) {
   return activeScene;
 };// end: openLastActiveSceneContainer()
 
-//------------------------------------------------------------------------------
-function playSceneIfAutoPlay( _this, options, callback ) {
-  //----------------------------------------------------------------------------
-  if ( _this.settings.autoPlay ) {
-    playScene( _this, options, callback );
-  }
-}; // end: playSceneIfAutoPlay()
-
-//------------------------------------------------------------------------------
-function playScene( _this, options, callback ) {
-  //----------------------------------------------------------------------------
-  var numElements = parseInt( $(options.scene.container.html.elem).attr('numElements') ),
-      sceneTag = options.scene.tag,
-      timeline = null;
-  console.log( " ..*3.7) playScene() SceneTag: '" + sceneTag +
-               "'. Story: '" + options.scene.story.tag +
-               "'. For numElements: '" + numElements + "'. *");
-  /*
-  if ( sceneTag == 'particles' ) {
-    if ( _this.settings.is?? &&
-         numElements !== '0' ) {
-      // Start animation at seek(starting seconds into animation)
-      options.scene.story.particlesTimeline.play();
-    }
-    // Else "scene" does not have a timeLine, will just be displayed via DOM.
-  } else if ( sceneTag == 'elements' ) {
-    options.scene.story.elementsTimeline.play();
-  } else if ( sceneTag == 'collapse' ) {
-    options.scene.story.collapseTimeline.play();
-  } else if ( sceneTag == 'expand' ) {
-    options.scene.story.collapseTimeline.reverse();
-  }
-  */
-  if ( typeof callback == 'function' ) { callback( timeline ); return; }
-  return timeline;
-}; // end: playScene()
-
-//------------------------------------------------------------------------------
-function playScene_reset( _this, options ) {
-  //----------------------------------------------------------------------------
-
-}; // end: playScene_reset()
-
 //======== ACTIONS Checkboxes =================
 //=============================================
-
-//----------------------------------------------------------------------------
-function cbox_particles_mode( _this, options, /*Code to resume when done*/ callback ) {
-  //--------------------------------------------------------------------------
-  console.log( " ..*4.5) cbox_particles_mode() Box checked = '" + $( '#cbox_particles_mode' ).prop('checked') + "'. *");
-  _this.settings.isParticlesMode = $( '#cbox_particles_mode' ).prop('checked');
-  _this.settings.isElementsMode = !_this.settings.isParticlesMode;
-  update_ep_mode_cboxes( _this );
-  if ( typeof callback == 'function' ) { callback(); return; }
-}; // end: function cbox_particles_mode()
-
-//----------------------------------------------------------------------------
-function update_ep_mode_cboxes( _this ){
-    //----------------------------------------------------------------------------
-  if ( _this.settings.isParticlesMode ) {
-    _this.settings.isUseSVGelements = false;
-    _this.settings.isUseDivElements = false;
-    _this.settings.isUseCanvasElements = false;
-  } else {
-    _this.settings.isUseSVGelements = _this.defaults.isUseSVGelements;
-    _this.settings.isUseDivElements = _this.defaults.isUseDivElements;
-    _this.settings.isUseCanvasElements = _this.defaults.isUseCanvasElements;
-  }
-  $( '#cbox_particles_mode' ).prop('checked', _this.settings.isParticlesMode );
-  $( '#cbox_elements_mode' ).prop('checked', _this.settings.isElementsMode );
-  $( '#cbox_useCanvas' ).prop('checked', _this.settings.isUseCanvasElements );
-  $( '#cbox_useSVG' ).prop('checked', _this.settings.isUseSVGelements );
-  $( '#cbox_useDiv' ).prop('checked', _this.settings.isUseDivElements );
-};// end: function update_elements_particle_mode_cboxes()
-
-//----------------------------------------------------------------------------
-function cbox_elements_mode( _this, options, /*Code to resume when done*/ callback ) {
-  //--------------------------------------------------------------------------
-  console.log( " ..*4.5) cbox_elements_mode() Box checked = '" + $( '#cbox_elements_mode' ).prop('checked') + "'. *");
-  _this.settings.isElementsMode = $( '#cbox_elements_mode' ).prop('checked');
-  _this.settings.isParticlesMode = !_this.settings.isElementsMode;
-  update_ep_mode_cboxes( _this );
-  if ( typeof callback == 'function' ) { callback(); return; }
-}; // end: function cbox_elements_mode()
-
-//----------------------------------------------------------------------------
-function cbox_transform( _this, options, /*Code to resume when done*/ callback ) {
-  //--------------------------------------------------------------------------
-  console.log( " ..*4.5) cbox_transform() Box checked = '" + $( '#cbox_transform' ).prop('checked') + "'. *");
-  _this.settings.isTransformPixels = $( '#cbox_transform' ).prop('checked');
-  if ( _this.settings.isTransformPixels ) {
-    _this.settings.isExcludePixels = false;
-    $( '#cbox_exclude' ).prop('checked', false );
-  }
-  if ( typeof callback == 'function' ) { callback(); return; }
-}; // end: function cbox_transform()
-
-//----------------------------------------------------------------------------
-function cbox_exclude( _this, options, /*Code to resume when done*/ callback ) {
-  //--------------------------------------------------------------------------
-  console.log( " ..*4.5) cbox_exclude() Box checked = '" + $( '#cbox_exclude' ).prop('checked') + "'. *");
-  _this.settings.isExcludePixels = $( '#cbox_exclude' ).prop('checked');
-  if ( _this.settings.isExcludePixels ) {
-    _this.settings.isTransformPixels = false;
-    $( '#cbox_transform' ).prop('checked', false );
-  }
-  if ( typeof callback == 'function' ) { callback(); return; }
-}; // end: function cbox_exclude()
 
 //----------------------------------------------------------------------------
 function cbox_useTrr( _this, options, /*Code to resume when done*/ callback ) {
@@ -656,47 +510,12 @@ function cbox_useTrr( _this, options, /*Code to resume when done*/ callback ) {
 }; // end: cbox_useTrr()
 
 //----------------------------------------------------------------------------
-function cbox_useCanvas( _this, options, /*Code to resume when done*/ callback ) {
-  //--------------------------------------------------------------------------
-  console.log( " ..*4.5) cbox_useCanvas() Box checked = '" + $( '#cbox_useCanvas' ).prop('checked') + "'. *");
-  _this.settings.isUseCanvasElements = $( '#cbox_useCanvas' ).prop('checked');
-  if ( _this.settings.isUseCanvasElements ) {
-    _this.settings.isUseSVGelements = false;
-    $( '#cbox_useSVG' ).prop('checked', false );
-    _this.settings.isUseDivElements = false;
-    $( '#cbox_useDiv' ).prop('checked', false );
-  }
-  if ( typeof callback == 'function' ) { callback(); return; }
-}; // end: function cbox_useCanvas()
-
-//----------------------------------------------------------------------------
 function cbox_useSVG( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
   console.log( " ..*4.5) cbox_useSVG() Box checked = '" + $( '#cbox_useSVG' ).prop('checked') + "'. *");
   _this.settings.isUseSVGelements = $( '#cbox_useSVG' ).prop('checked');
-  if ( _this.settings.isUseSVGelements ) {
-    _this.settings.isUseCanvasElements = false;
-    $( '#cbox_useCanvas' ).prop('checked', false );
-    _this.settings.isUseDivElements = false;
-    $( '#cbox_useDiv' ).prop('checked', false );
-  }
   if ( typeof callback == 'function' ) { callback(); return; }
 }; // end: function cbox_useSVG()
-
-//----------------------------------------------------------------------------
-function cbox_useDiv( _this, options, /*Code to resume when done*/ callback ) {
-  //--------------------------------------------------------------------------
-  console.log( " ..*4.5) cbox_useDiv() Box checked = '" + $( '#cbox_useDiv' ).prop('checked') + "'. *");
-  _this.settings.isUseDivElements = $( '#cbox_useDiv' ).prop('checked');
-  if ( _this.settings.isUseDivElements ) {
-    _this.settings.isUseCanvasElements = false;
-    $( '#cbox_useCanvas' ).prop('checked', false );
-    _this.settings.isUseSVGelements = false;
-    $( '#cbox_useSVG' ).prop('checked', false );
-  }
-  if ( typeof callback == 'function' ) { callback(); return; }
-}; // end: function cbox_useDiv()
-
 
 //================ Action sub options checkboxes.
 //----------------------------------------------------------------------------
