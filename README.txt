@@ -107,6 +107,45 @@ All effects link: Add option to animate as GASP TimeLine of effects.
 
 ==============================================
 
+  // isProcessBySkipCount
+  if ( _this.settings.nthPixelToProcess == 1 ) {
+    // Not every pixel is to be looked at.
+    // Reject (if isExcludePixels) or accept (if isTransformPixels) every nth pixel.
+    if ( _this.settings.isExcludePixels ) {
+      _this.particlesRejectedBecauseIsExcludedNthPixell += 1;
+      return { isAccepted: false };
+    }
+  } else { // _this.settings.nthPixelToProcess > 1
+    // Not every pixel is to be looked at.
+    // Reject (if isExcludePixels) or accept (if isTransformPixels) every nth pixel.
+    if ( y % _this.settings.nthPixelToProcess == 0 &&
+         x % _this.settings.nthPixelToProcess == 0 ) {
+      // _this is the nth pixel.
+      if ( _this.settings.isExcludePixels ) {
+        _this.particlesRejectedBecauseIsExcludedNthPixell += 1;
+        return { isAccepted: false };
+      }
+    // Else _this is not the nth pixel.
+    } else if ( _this.settings.isTransformPixels ) {
+      // And we are only accepting the nth pixel.
+      _this.particlesRejectedBecauseIsExcludedNotNthPixell += 1;
+      return { isAccepted: false };
+    }
+  }
+    if ( _this.settings.isExcludePixels ) {
+      // Reject every nth pixel.
+      if ( y % _this.settings.nthPixelToProcess == 0 &&
+           x % _this.settings.nthPixelToProcess == 0 ) {
+        _this.particlesRejectedBecauseIsExcludedNthPixell += 1;
+        return { isAccepted: false };
+      }
+    }  else { // isTransformPixels
+      // Keep processing every nth pixel.
+    }
+  }
+
+  ==============================
+  
 //----------------------------------------------------------------------------
 function loadReadyForScroll( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------

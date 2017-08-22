@@ -129,6 +129,12 @@
     <!-- <input id="cbox_useDiv" type="checkbox"
            title="When converting halftone particles to animation elements: use <div> objects. Default is Canvas objects."
            >Div -->
+    <input id="cbox_exclude" type="checkbox" style="margin-left: 6px;"
+           title="When converting photo to halftone: ignore every so many accepted pixels. Per units from next checkboxes."
+           >Reject or&nbsp;
+    <input id="cbox_transform" type="checkbox"
+           title="When converting photo to halftone: transform every so many accepted pixels into halftone balls. Per units from next checkboxes."
+           >Transform&nbsp;
   </div>
 
   <div class="actionCheckboxesRightRow2">
@@ -136,19 +142,19 @@
     <span>Every:&nbsp;</span>
 
     <input id="cbox_every1" type="checkbox"
-           title="When converting photo to halftone: reject or transform every pixel. Default is every 1 pixel."
+           title="When converting photo to halftone: reject or transform every accepted pixel."
            >1&nbsp;
     <input id="cbox_every2" type="checkbox"
-           title="When converting photo to halftone: reject or transform every 2 pixels. Default is every 1 pixel."
+           title="When converting photo to halftone: reject or transform every 2 accepted pixels."
            >2&nbsp;
     <input id="cbox_every3" type="checkbox"
-           title="When converting photo to halftone: reject or transform every 3 pixels. Default is every 1 pixel."
+           title="When converting photo to halftone: reject or transform every 3 accepted pixels."
            >3&nbsp;
     <input id="cbox_every4" type="checkbox"
-           title="When converting photo to halftone: reject or transform every 4 pixels. Default is every 1 pixel."
-           >4&nbsp;
+           title="When converting photo to halftone: reject or transform every 4 accepted pixels."
+           >4&nbsp;Pixel
 
-    <span>&nbsp;Cluster:&nbsp;</span>
+    <span>&nbsp;or&nbsp;&nbsp;Cluster:&nbsp;</span>
     <input id="cbox_1x1_cluster" type="checkbox"
            title="When converting photo to halftone: reject or transform every 1x1 cluster of pixels. Default is every 1 pixel."
            >1x1&nbsp;
@@ -169,7 +175,7 @@
   <div id="centerPanel" class="trr-elements-stage centerPanel"></div>
 
 <script type="text/javascript" src="js/TrrEffect.js"></script>
-<script type="text/javascript" src="./images/effectsData.js"></script>
+<!-- <script type="text/javascript" src="./images/effectsData.js"></script> -->
 <script type="text/javascript" src="js/init.js"></script>
 <script type="text/javascript" src="js/lib.js"></script>
 <script type="text/javascript" src="js/particleMap.js"></script>

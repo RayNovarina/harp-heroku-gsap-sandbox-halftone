@@ -2,17 +2,21 @@
 // // NOTE: Private methods MUST use _this to get 'this' for this instance of TrrPlugin
 
 //----------------------------------------------------------------------------
-function createSvgElementsFromParticleMap( _this, options, callback ) {
+function createSvgElementsFromParticles( _this, options, callback ) {
   //----------------------------------------------------------------------------
   updateSettings( _this, options );
-  var particles = _this.activeStory.particleMap.particles,
-      sceneContainerElem = _this.activeScene.container.html.elem,
+  getParticlesInfo( _this, options, _this.activeStory,
+  /*1-Resume here when done*/ function( particlesInfo ) {
+  var sceneContainerElem = _this.activeScene.container.html.elem,
       $sceneContainerElem = $( sceneContainerElem ),
       elementsContainer = _this.activeScene.animationElements.container,
       domElementsObjsArray = [],
       animationElementOffsetX = _this.settings.createAnimationElementsParams.offsetX,
       animationElementOffsetY = _this.settings.createAnimationElementsParams.offsetY;
-  console.log( " ..*5a.1) createSvgElementsFromParticleMap() For Particles[].len = " + particles.length +
+  console.log( " ..*5a.1) createSvgElementsFromParticleMap() Particles source: '" + particlesInfo.source +
+               "'. numParticles = " + particlesInfo.numParticles +
+               "'. ShowHalftone: '" + _this.settings.isShowHalftone +
+               "'. RandomizeCollapsedCore: '" + _this.settings.createAnimationElementsParams.isRandomizeCollapsedCore +
                "'. animationElementOffsetX: '" + animationElementOffsetX +
                "'. animationElementOffsetY: '" + animationElementOffsetY +
                ". *");
@@ -22,7 +26,7 @@ function createSvgElementsFromParticleMap( _this, options, callback ) {
   elementsContainer.html = {
     elem: $( makeSvgElementNS('svg') )
       .attr( 'id', 'aniElems_Con_' )
-      .attr( 'width', '589' )
+      .attr( 'width', '600' )
       .attr( 'height', '600' )
       .attr( 'trr-ani-elem-type', 'circle' )
       .addClass( 'trr-ani-elems-container' ),
@@ -33,23 +37,148 @@ function createSvgElementsFromParticleMap( _this, options, callback ) {
 
   // attach to specified Panel.
   $( _this.centerPanel ).children().last().append( elementsContainerElem );
-  // Assume activeScene container was made invisible in our _reset() and
-  // make our container visible before we start filling it up.
-  openSceneContainer( _this, _this.activeScene );
-  setAnimationBoundaries( _this, options );
+  // Assume activeScene container was made invisible in our _reset().
+  if ( _this.settings.isShowHalftone ) {
+    // make our container visible before we start filling it up.
+    openSceneContainer( _this, _this.activeScene );
+  }
+  if ( _this.settings.createAnimationElementsParams.isRandomizeCollapsedCore ) {
+    setAnimationBoundaries( _this, options );
+  }
 
   var numElements = 0;
-  var collapsedTimeline = new TimelineMax(
+  var collapseTimeline = new TimelineMax(
           { repeat: 0, yoyo: false, repeatDelay: 0, delay: 0, paused: true,
-            //onComplete: collapsedTimelineCompleteCallback
+            //onComplete: collapseTimelineCompleteCallback
             //onComplete: function( timeline ) {
             //  _this = window.trrPlugin;
-            //  alert( "collapsedTimeline animation is complete for '" + _this.activeStory.tag +
+            //  alert( "collapseTimeline animation is complete for '" + _this.activeStory.tag +
             //  "'. collapseTimelineIsReversed = '" + _this.activeStory.timelines.collapseTimelineIsReversed + "'. " );
             //}
           } );
 
-  $.each( particles, function( idx, particle ) {
+  // Create element (svg <circle> in the particle's "expanded/home position".
+  // results = { element: circle, coreX: coreXY.coreX, coreY: coreXY.coreY };
+  while ( (results = createCollapsedPositionSVGelement( _this, options, particlesInfo )) ) {
+    $elementsContainerElem.append( results.element );
+    domElementsObjsArray.push( results.element );
+
+    // Create timeline of tweens that "collapse" the halftone image to a shrunken
+    // core.
+    collapseTimeline.insert(
+      TweenMax.to(
+        results.element, _this.settings.tweenDuration,
+        // NOTE: we don't want to do math calculations when creating DOM elements.
+        //       So require that all adjustments were made when the particle
+        //       map was created.
+        // At this point the <circle> has a cx/cy of the particle's image 'home' position.
+        { attr: { cx: results.coreX, // + animationElementOffsetX,
+                  cy: results.coreY, // + animationElementOffsetY,
+                },
+          autoAlpha: 0,
+          ease: Power0.easeInOut, // will cause fade-out
+        }
+      ) // end TweenMax.to()
+    ); // end collapseTimeline.insert()
+    numElements += 1;
+  }; // end while ( results )
+  // Resume here when all elements created.
+  $sceneContainerElem.attr( 'numElements', numElements + '' );
+  var results = {
+    animationElementsContainerElem: elementsContainerElem,
+    domElementsObjsArray: domElementsObjsArray,
+    timelineProps: {
+      sceneTag: _this.settings.sceneTag,
+      gsapTimeline: collapseTimeline,
+      isReversed: false,
+    },
+  };
+  console.log( " ..*5a.2)createSvgElementsFromParticleMap(): Made " + $sceneContainerElem.attr( 'numElements' ) +
+               " canvas AnimationElements. *");
+
+  if ( typeof callback == 'function' ) { callback( results ); return; }
+  return results;
+  /*1-*/});
+}; // end createSvgElementsFromParticles()
+
+//----------------------------------------------------------------------------
+function getParticlesInfo( _this, options, story, callback ) {
+  //----------------------------------------------------------------------------
+
+  // Create particle array by selecting pixels we want for a halftone image.
+  createParticleMap( _this, {
+    id: _this.activeStory.tag + '_particleMap',
+    isRejectParticlesOutOfBounds: true,
+    isRejectParticlesBelowIntensityThreshold: true,
+    isRejectParticlesSameAsContainerBackground: true,
+    sceneTag: _this.settings.sceneTag,
+    particlesHomeOffsetLeft: 0,
+    particlesHomeOffsetTop: 0,
+  },
+  /*1-Resume here when done*/ function( particles ) {
+  var results = {
+    source: 'image',
+    particlesArrayType: 'trrParticles',
+    particles: particles,
+    numParticles: particles.length,
+    eof: particles.length - 1,
+    nextIndex: 0,
+  };
+  if ( typeof callback == 'function' ) { callback( results ); return; }
+  return results;
+  /*1-*/});
+}; // end getParticlesInfo()
+
+//----------------------------------------------------------------------------
+function getNextParticle(_this, options, particlesInfo ) {
+  //----------------------------------------------------------------------------
+  var particle = null;
+  if ( !(particlesInfo.eof == -1) &&
+       !(particlesInfo.nextIndex == particlesInfo.eof) ) {
+    var particleProps = particlesInfo.particles[ particlesInfo.nextIndex ];
+    particlesInfo.nextIndex += 1;
+    var particle = {
+      props: particleProps,
+    };
+  }
+  return particle;
+}; // end getNextParticle()
+
+//----------------------------------------------------------------------------
+function createCollapsedPositionSVGelement( _this, options, particlesInfo ) {
+  //----------------------------------------------------------------------------
+  var results = null;
+  if ( (particle = getNextParticle( _this, options, particlesInfo )) ) {
+    // Create elements to start at their 'home position' which will recreate the
+    // photo image.
+    var circle = $( makeSvgElementNS( 'circle' ) )
+        .attr( 'cx', particle.props.x )
+        .attr( 'cy', particle.props.y )
+        .attr( 'r', particle.props.r )
+        .attr( 'fill', _this.settings.animationElementColor );
+    var coreXY = calcCoreXY( _this, options, particle );
+    results = { element: circle, coreX: coreXY.coreX, coreY: coreXY.coreY };
+  }
+  return results;
+}; // end createCollapsedPositionSVGelement()
+
+//----------------------------------------------------------------------------
+function calcCoreXY( _this, options, particle ) {
+  //----------------------------------------------------------------------------
+  var coreX = _this.settings.createAnimationElementsParams.collapsedCoreX,
+      coreY = _this.settings.createAnimationElementsParams.collapsedCoreY;
+  if ( _this.settings.createAnimationElementsParams.isRandomizeCollapsedCore ) {
+    coreX = getRandom( _this.settings.animationPanelLeftBoundaryX, _this.settings.animationPanelRightBoundaryX );
+    coreY = getRandom( _this.settings.animationPanelTopBoundary, _this.settings.animationPanelBottom );
+  }
+  return {
+    coreX: coreX,
+    coreY: coreY
+  };
+}; // end calcCoreXY()
+
+/*
+$.each( particles, function( idx, particle ) {
     // NOTE: particleAnimationMethod should return a Tween for the element. And it
     // should call its own "make an element" method.
     // Create element in the "collapsed position column".
@@ -60,36 +189,26 @@ function createSvgElementsFromParticleMap( _this, options, callback ) {
 
       // We can optionally "animate" the collapsed elements to an expaded view.
       // Move elements from collapsed position to image home position.
-      collapseTimeline.insert(
-        TweenMax.to(
-          element, _this.settings.tweenDuration,
-          // NOTE: we don't want to do math calculations when creating DOM elements.
-          //       So require that all adjustments were made when the particle
-          //       map was created.
-          { attr: { cx: particle.x, // + animationElementOffsetX,
-                    cy: particle.y, // + animationElementOffsetY,
-                  },
-    	      //autoAlpha: 0,
-            //ease: Power0.easeInOut, // will case fade-out
-            ease: Power2.easeOut,
-          }
-        ) // end TweenMax.to()
-      ); // end collapseTimeline.insert()
+      //if ( _this.settings.isRenderParticleMapAsTweens ) {
+        _this.activeStory.expandTimeline.insert(
+          TweenMax.to(
+            element, _this.settings.tweenDuration,
+            // NOTE: we don't want to do math calculations when creating DOM elements.
+            //       So require that all adjustments were made when the particle
+            //       map was created.
+            { attr: { cx: particle.x, // + animationElementOffsetX,
+                      cy: particle.y, // + animationElementOffsetY,
+                    },
+    	        //autoAlpha: 0,
+              //ease: Power0.easeInOut,
+              ease: Power2.easeOut,
+            }
+          ) // end TweenMax.to()
+        ); // end Timeline.insert()
+      //} // end if ( RenderParticleMapAsTweens )
       numElements += 1;
     } // end if ( element )
   }); // end $.each()
-
-  $sceneContainerElem.attr( 'numElements', numElements + '' );
-  var results = {
-    animationElementsContainerElem: elementsContainerElem,
-    domElementsObjsArray: domElementsObjsArray,
-    collapseTimeline: collapseTimeline,
-  };
-  console.log( " ..*5a.2)createSvgElementsFromParticleMap(): Made " + $sceneContainerElem.attr( 'numElements' ) +
-               " canvas AnimationElements. *");
-
-  if ( typeof callback == 'function' ) { callback( results ); return; }
-  return results;
 }; // end createSvgElementsFromParticleMap()
 
 //----------------------------------------------------------------------------
@@ -112,15 +231,10 @@ function createCollapsedPositionSVGelement( _this, particle ) {
   .attr( 'cx', getRandom( _this.settings.animationPanelLeftBoundaryX, _this.settings.animationPanelRightBoundaryX ) )
   .attr( 'cy', _this.settings.animationPanelBottom - getRandom( 40, 50 ) )
   */
-}; // end createCollapsedPositionSVGelement()
-
-//function collapseTimelineCompleteCallback( timelineMax ) {
-//  _this = window.trrPlugin;
-//  alert( 'collapseTimeline animation is complete for ' + _this.activeStory.tag + '.' );
-//}; // end collapseTimelineCompleteCallback
+/*}; // end createCollapsedPositionSVGelement()
+*/
 
 /*
-
 //----------------------------------------------------------------------------
 function makeParticlesFromTrrMap( _this, options, /*Code to resume when done/ callback ) {
   //--------------------------------------------------------------------------

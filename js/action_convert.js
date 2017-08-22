@@ -6,24 +6,10 @@ function convert( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
   updateSettings( _this, options );
   console.log( " ..*4.1) particles() for active story '" + _this.activeStory.tag + "' *");
+  options.sceneTag = 'convert';
 
-  // Create particle array by selecting pixels we want for a halftone image.
-  createParticleMap( _this, {
-    id: _this.activeStory.tag + '_particleMap',
-    isRejectParticlesOutOfBounds: true,
-    isRejectParticlesBelowIntensityThreshold: true,
-    isRejectParticlesSameAsContainerBackground: true,
-    sceneTag: options.sceneTag,
-    particlesHomeOffsetLeft: 0,
-    particlesHomeOffsetTop: 0,
-  },
-  /*1-Resume here when done*/ function( particles ) {
-  options.sceneTag = 'elements';
-  console.log( " ..*4.2) elements() for active story '" + _this.activeStory.tag + "' *");
-
-  // Create animationElements from particles and build array of DOM elements
-  // that can be animated via GSAP timeLine.
-  // Optionally display default image in Panel specified by options (now in .settings).
+  // Create animationElements from particles by selecting pixels we want for a
+  // halftone image and build array of DOM elements that can be animated via GSAP timeLine.
   createScene( _this, {
     id: _this.activeStory.tag + '_particleMap',
     sceneTag: options.sceneTag,
@@ -31,20 +17,26 @@ function convert( _this, options, /*Code to resume when done*/ callback ) {
     createContainerParams: {
       width: _this.settings.img.width + 8,
       height: _this.settings.img.height,
-      left: 0,
-      top: 0,
+      offsetX: 0,
+      offsetY: 0,
       backgroundColor: _this.defaults.sceneBackgroundColor, //  '#E7F1F7', Climate Corp "halftone background blue"
-      //  background color of Climate Corp profile photo for Meg: rgb(234, 233, 238) #eae9ee
       border: '',
     },
     createAnimationElementsParams: {
-      method: 'createSvgElementsFromParticleMap',
+      sceneTag: options.sceneTag,
+      isRejectParticlesOutOfBounds: true,
+      isRejectParticlesBelowIntensityThreshold: false,
+      isRejectParticlesSameAsContainerBackground: true,
+      isRandomizeCollapsedCore: true,
+      collapsedCoreX: 100,
+      collapsedCoreY: 100,
+      method: 'createSvgElementsFromParticles',
       offsetX: 0, //-80,
       offsetY: 0, //-20,
     },
   },
-  /*2-Resume here when done*/ function( activeScene ) {
+  /*1-Resume here when done*/ function( activeScene ) {
   if ( typeof callback == 'function' ) { callback( activeScene ); return; }
   return activeScene;
-  /*2-*/});/*1-*/});
+  /*1-*/});
 };// end: convert()

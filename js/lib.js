@@ -98,10 +98,7 @@ function createScene( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
   updateSettings( _this, options );
   console.log( " ..*3.2) createScene() For sceneTag: '" + _this.settings.sceneTag + "'. *");
-  if ( isSceneDisabled( _this, options ) ) {
-    if ( typeof callback == 'function' ) { callback( null ); return; }
-    return null;
-  }
+
   // Create container per panel and options specified in settings.
   createSceneContainer( _this, {
     sceneId: 'scene_Con_' + _this.settings.id,
@@ -214,7 +211,7 @@ function createAnimationElements( _this, options, /*Code to resume when done*/ c
     container: { html: { elem: results.animationElementsContainerElem, string: '', }, },
     domElements: { html: { elems: results.domElementsObjsArray, string: '', }, },
   };
-  addTimelineToStory( _this, _this.activeStory, results );
+  addTimelineToStory( _this, _this.activeStory, results.timelineProps );
   if ( typeof callback == 'function' ) { callback( results.animationElementsContainerElem ); return; }
   return results.animationElementsContainerElem;
   /*2-*/});/*1-*/});
@@ -299,21 +296,9 @@ function setAnimationBoundaries( _this, options ) {
   _this.settings.animationPanelTopBoundary = Math.round( panel_bottom * .45 );
   _this.settings.animationPanelBottom = panel_bottom;
   _this.settings.animationPanelWidth = panel_width;
-  _this.settings.animationPanelLeftBoundaryX = Math.round( panel_width * .42 );
+  _this.settings.animationPanelLeftBoundaryX = Math.round( panel_width * .45 );
   _this.settings.animationPanelRightBoundaryX = Math.round( panel_width - _this.settings.animationPanelLeftBoundaryX );
 }; // end setAnimationBoundaries()
-
-//----------------------------------------------------------------------------
-function isSceneDisabled( _this, options ) {
-  //----------------------------------------------------------------------------
-  if ( ( options.sceneTag == 'particles' && !_this.settings.isRenderParticleMap ) ) {
-    console.log( " ..*3.3) createScene() Rendering is disabled for sceneTag: '" + options.sceneTag + "'. *");
-    if ( typeof callback == 'function' ) { callback( true ); return; }
-    return true;
-  }
-  if ( typeof callback == 'function' ) { callback( false ); return; }
-  return false;
-}; // end isSceneDisabled()
 
 //------------------------------------------------------------------------------
 function settingsToPanel( _this ) {
@@ -369,14 +354,14 @@ function newAnimationElements( _this, scene ) {
 }// end: newAnimationElements()
 
 //----------------------------------------------------------------------------
-function addTimelineToStory( _this, story, results ) {
+function addTimelineToStory( _this, story, props ) {
   //----------------------------------------------------------------------------
-  if ( results.expandTimeline ) {
-    story.timelines.expandTimeline = results.expandTimeline;
-    story.timelines.expandTimelineIsReversed = true;
-  }
-  if ( results.storyTimeline ) {
-    story.timelines.storyTimeline = results.storyTimeline;
+  if ( props.sceneTag == 'convert' ) {
+    story.timelines.collapse = {
+      sceneTag: props.sceneTag,
+      gsapTimeline: props.gsapTimeline,
+      isReversed: props.isReversed,
+    };
   }
 }// end: addTimelineToStory()
 
@@ -516,6 +501,30 @@ function cbox_useSVG( _this, options, /*Code to resume when done*/ callback ) {
   _this.settings.isUseSVGelements = $( '#cbox_useSVG' ).prop('checked');
   if ( typeof callback == 'function' ) { callback(); return; }
 }; // end: function cbox_useSVG()
+
+//----------------------------------------------------------------------------
+function cbox_transform( _this, options, /*Code to resume when done*/ callback ) {
+  //--------------------------------------------------------------------------
+  console.log( " ..*4.5) cbox_transform() Box checked = '" + $( '#cbox_transform' ).prop('checked') + "'. *");
+  _this.settings.isTransformPixels = $( '#cbox_transform' ).prop('checked');
+  if ( _this.settings.isTransformPixels ) {
+    _this.settings.isExcludePixels = false;
+    $( '#cbox_exclude' ).prop('checked', false );
+  }
+  if ( typeof callback == 'function' ) { callback(); return; }
+}; // end: function cbox_transform()
+
+//----------------------------------------------------------------------------
+function cbox_exclude( _this, options, /*Code to resume when done*/ callback ) {
+//--------------------------------------------------------------------------
+  console.log( " ..*4.5) cbox_exclude() Box checked = '" + $( '#cbox_exclude' ).prop('checked') + "'. *");
+  _this.settings.isExcludePixels = $( '#cbox_exclude' ).prop('checked');
+  if ( _this.settings.isExcludePixels ) {
+    _this.settings.isTransformPixels = false;
+    $( '#cbox_transform' ).prop('checked', false );
+  }
+  if ( typeof callback == 'function' ) { callback(); return; }
+}; // end: function cbox_exclude()
 
 //================ Action sub options checkboxes.
 //----------------------------------------------------------------------------

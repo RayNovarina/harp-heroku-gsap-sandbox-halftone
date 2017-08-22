@@ -15,8 +15,12 @@ function trr_init(/*Code to resume when done*/ callback ) {
       lastActiveScene: scene,
       tag: _this.settings.photoTag,
       timelines: {
-        expand: expandTimeline,
-        expandTimelineIsReversed: false,
+        collapse: {
+          sceneTag: 'convert',
+          gsapTimeline: collapseTimeline,
+          isReversed: false,
+          isRandomizedCollapsedCore: false,
+        },
       },
       image: {
         html {
@@ -61,10 +65,12 @@ function trr_init(/*Code to resume when done*/ callback ) {
     photoType: 'color',
     imgSrc: './images/laura_600x600_webgl_filter_greyscale_more_contrast.png',
     isLoadReadyForScroll: false,
+    isTransformPixels: true,
+    isExcludePixels: false,
     isProcessBySkipCount: true,
-    isEvery1: true,
-    nthPixelToProcess: 1,
-    isEvery2: false,
+    isEvery1: false,
+    nthPixelToProcess: 2,
+    isEvery2: true,
     isEvery3: false,
     isEvery4: false,
     is1x1_cluster: false,
@@ -96,6 +102,8 @@ function trr_init(/*Code to resume when done*/ callback ) {
   $( '#cbox_load4scroll' ).prop('checked', false );
   $( '#cbox_useTrr' ).prop('checked', trrPlugin.defaults.isUseTrrData );
   $( '#cbox_useSVG' ).prop('checked', trrPlugin.settings.isUseSVGelements );
+  $( '#cbox_exclude' ).prop('checked', trrPlugin.defaults.isExcludePixels );
+  $( '#cbox_transform' ).prop('checked', trrPlugin.defaults.isTransformPixels );
   $( '#cbox_every1' ).prop('checked', trrPlugin.defaults.isEvery1 );
   $( '#cbox_every2' ).prop('checked', trrPlugin.defaults.isEvery2 );
   $( '#cbox_every3' ).prop('checked', trrPlugin.defaults.isEvery3 );
@@ -150,16 +158,16 @@ function trr_init(/*Code to resume when done*/ callback ) {
     convert( trrPlugin, {
       isShowHalftone: true,
       isCreateSceneInCenterPanel: true,
-      tweenDuration: 1.5,
+      tweenDuration: 8,
     },
     /*1-Resume here when done*/ function( scene ) {
     /*1-*/});
   });
-  $( "#expand" ).click( function() {
-    expand( trrPlugin, { autoPlay: true, tweenDuration: 2.5 } );
-  });
   $( "#collapse" ).click( function() {
-    collapse( trrPlugin, { autoPlay: true, tweenDuration: 3 } );
+    collapse( trrPlugin, {} );
+  });
+  $( "#expand" ).click( function() {
+    expand( trrPlugin, {} );
   });
   $( "#makeReadyForScroll" ).click( function( event ) {
     loadReadyForScroll( trrPlugin, { event: event } );
@@ -178,6 +186,12 @@ function trr_init(/*Code to resume when done*/ callback ) {
   });
   $( "#cbox_useSVG" ).click( function( event ) {
     cbox_useSVG( trrPlugin, { event: event } );
+  });
+  $( "#cbox_exclude" ).click( function( event ) {
+    cbox_exclude( trrPlugin, { event: event } );
+  });
+  $( "#cbox_transform" ).click( function( event ) {
+    cbox_transform( trrPlugin, { event: event } );
   });
 
   //----------------------------------------------------------------------------

@@ -5,11 +5,10 @@
 function expand( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
   console.log( " ..*4.2) expand() for activeStory: '" + _this.activeStory.tag + "' *");
-
   // animationElements MUST have already been created.
   if ( !_this.activeStory.timelines ||
-       !_this.activeStory.timelines.expandTimeline ) {
-    alert( "photoTag: '" + _this.activeStory.tag + "'. You MUST create animationElements first via the 'Particles, Elements' links." );
+       !_this.activeStory.timelines.collapse ) {
+    alert( "photoTag: '" + _this.activeStory.tag + "'. You MUST create animationElements first via the 'Convert' link." );
     if ( typeof callback == 'function' ) { callback(); return; }
     return;
   }
@@ -17,11 +16,11 @@ function expand( _this, options, /*Code to resume when done*/ callback ) {
   // Hide the active/visible sceneContainer, we will replace it with ours.
   closeActiveSceneContainer( _this,
   /*1-Resume here when done*/ function( activeScene ) {
-  tagToScene( _this, 'elements', _this.activeStory,
+  tagToScene( _this, _this.activeStory.timelines.collapse.sceneTag, _this.activeStory,
   /*2-Resume here when done*/ function( result ) {
   openSceneContainer( _this, result.item );
-  _this.activeStory.timelines.expandTimeline.play();
-  _this.activeStory.timelines.expandTimelineIsReversed = false;
+  _this.activeStory.timelines.collapse.gsapTimeline.reverse();
+  _this.activeStory.timelines.collapse.isReversed = true;
   if ( typeof callback == 'function' ) { callback(); return; }
   return;
   /*2-*/});/*1-*/});
@@ -41,7 +40,7 @@ function expand( _this, options, /*Code to resume when done/ callback ) {
   /*2-Resume here when done/ function( result ) {
   var elementsSceneForSelectedStory = result.item
   elementsSceneForSelectedStory.container.html.elem.style.display = 'block';
-  selectedStory.expandTimeline.play();
+  selectedStory.collapseTimeline.play();
   if ( typeof callback == 'function' ) { callback(); return; }
   return;
   /*2-/});/*1-/});

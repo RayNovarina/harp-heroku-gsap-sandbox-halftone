@@ -18,8 +18,6 @@ function createParticleMap( _this, options, /*Code to resume when done*/ callbac
       id: options.id,
       additionalHomeOffsetLeft: 2,
       additionalHomeOffsetTop: 0,
-      isMakeHomePositionMap: true,
-      isMakePooledAtBottomMap: true,
   } );
   _this.particles = results.particles;
   _this.activeStory.particleMap = {
@@ -59,7 +57,6 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
                ". top: " + _this.settings.particlesHomeOffsetTop +
                ". Particles additional Offset left: " + _this.settings.additionalHomeOffsetLeft +
                ". top: " + _this.settings.additionalHomeOffsetTop +
-               ". MakeHomePositionMap: " + _this.settings.isMakeHomePositionMap +
                ". maxHalftoneDotSize: " + _this.settings.maxHalftoneDotSize +
                ". pixelChannelIntensityThreshold: " + _this.settings.pixelChannelIntensityThreshold +
                ". imageScale: " + _this.settings.imageScale +
@@ -72,9 +69,9 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
                ". isProcessByCluster: " + _this.settings.isProcessByCluster +
                ". pixelsPerClusterSide: " + _this.settings.pixelsPerClusterSide +
 
-               ". isRejectParticlesOutOfBounds: " + _this.settings.isRejectParticlesOutOfBounds +
-               ". isRejectParticlesBelowIntensityThreshold: " + _this.settings.isRejectParticlesBelowIntensityThreshold +
-               ". isRejectParticlesSameAsContainerBackground: " + _this.settings.isRejectParticlesSameAsContainerBackground +                 ".");
+               ". isRejectParticlesOutOfBounds: " + _this.settings.createAnimationElementsParams.isRejectParticlesOutOfBounds +
+               ". isRejectParticlesBelowIntensityThreshold: " + _this.settings.createAnimationElementsParams.isRejectParticlesBelowIntensityThreshold +
+               ". isRejectParticlesSameAsContainerBackground: " + _this.settings.createAnimationElementsParams.isRejectParticlesSameAsContainerBackground +                 ".");
 
   // Create local variables to reduce loop overhead.
   var homeOffsetLeft = _this.settings.particlesHomeOffsetLeft + _this.settings.additionalHomeOffsetLeft,
@@ -282,7 +279,7 @@ function particleFilter( _this, rgbChannel, x, y, carryOverResults ) {
     y = Math.round( y );
   }
 
-  if ( _this.settings.isRejectParticlesOutOfBounds &&
+  if ( _this.settings.createAnimationElementsParams.isRejectParticlesOutOfBounds &&
        ( x < 0 || x > _this.settings.img.width ||
          y < 0 || y > _this.settings.img.height ) ) {
     _this.particlesRejectedBecauseParticleIsOutOfBounds += 1;
@@ -293,7 +290,39 @@ function particleFilter( _this, rgbChannel, x, y, carryOverResults ) {
     return particleFilterByCluster( _this, rgbChannel, x, y, carryOverResults );
   }
 
-  // isProcessBySkipCount
+  // We are processing every pixel that gets here.
+  if ( _this.settings.nthPixelToProcess == 1 &&
+       _this.settings.isExcludePixels ) {
+    // special case for ??
+    _this.particlesRejectedBecauseIsExcludedNthPixell += 1;
+    return { isAccepted: false };
+  }
+
+  // We are processing every pixel that gets here.
+  var pixelInfo = getPixelInfo( _this, x, y, rgbChannel );
+  if ( pixelInfo == null ) {
+    _this.particlesRejectedBecausePixelIndexIsOutOfBounds += 1;
+    return { isAccepted: false };
+  }
+
+  if ( _this.settings.createAnimationElementsParams.isRejectParticlesBelowIntensityThreshold &&
+       ( pixelInfo.channelIntensity < _this.settings.pixelChannelIntensityThreshold ) ) {
+    // pixelChannelIntensityThreshold: 0.05
+    _this.particlesRejectedBecausePixelIntensityLessThanThreshold += 1;
+    return { isAccepted: false };
+  }
+
+  if ( _this.settings.createAnimationElementsParams.isRejectParticlesSameAsContainerBackground &&
+       ( pixelInfo.rgbString == _this.containerBackgroundRGB ) ) {
+    _this.particlesRejectedBecausePixelSameAsContainerBackgroundRGB += 1;
+    if ( pixelInfo.rgbaString == _this.containerBackgroundRGBA ) {
+      _this.particlesRejectedBecausePixelSameAsContainerBackgroundRGBA += 1;
+    }
+    return { isAccepted: false };
+  }
+
+  // We are processing every pixel that gets here.
+  // isProcessBySkipCount: reject or transform every nth accepted pixels
   if ( _this.settings.nthPixelToProcess > 1 ) {
     // Not every pixel is to be looked at.
     // Reject (if isExcludePixels) or accept (if isTransformPixels) every nth pixel.
@@ -310,42 +339,9 @@ function particleFilter( _this, rgbChannel, x, y, carryOverResults ) {
       _this.particlesRejectedBecauseIsExcludedNotNthPixell += 1;
       return { isAccepted: false };
     }
-
-    if ( _this.settings.isExcludePixels ) {
-      // Reject every nth pixel.
-      if ( y % _this.settings.nthPixelToProcess == 0 &&
-           x % _this.settings.nthPixelToProcess == 0 ) {
-        _this.particlesRejectedBecauseIsExcludedNthPixell += 1;
-        return { isAccepted: false };
-      }
-    }  else { // isTransformPixels
-      // Keep processing every nth pixel.
-
-    }
   }
+
   // We are processing every pixel that gets here.
-  var pixelInfo = getPixelInfo( _this, x, y, rgbChannel );
-  if ( pixelInfo == null ) {
-    _this.particlesRejectedBecausePixelIndexIsOutOfBounds += 1;
-    return { isAccepted: false };
-  }
-
-  if ( _this.settings.isRejectParticlesBelowIntensityThreshold &&
-       ( pixelInfo.channelIntensity < _this.settings.pixelChannelIntensityThreshold ) ) {
-    // pixelChannelIntensityThreshold: 0.05
-    _this.particlesRejectedBecausePixelIntensityLessThanThreshold += 1;
-    return { isAccepted: false };
-  }
-
-  if ( _this.settings.isRejectParticlesSameAsContainerBackground &&
-       ( pixelInfo.rgbString == _this.containerBackgroundRGB ) ) {
-    _this.particlesRejectedBecausePixelSameAsContainerBackgroundRGB += 1;
-    if ( pixelInfo.rgbaString == _this.containerBackgroundRGBA ) {
-      _this.particlesRejectedBecausePixelSameAsContainerBackgroundRGBA += 1;
-    }
-    return { isAccepted: false };
-  }
-
   return {
     isAccepted: true,
     x: x,
