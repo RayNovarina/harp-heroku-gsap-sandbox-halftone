@@ -5,16 +5,15 @@
 function createSvgElementsFromParticles( _this, options, callback ) {
   //----------------------------------------------------------------------------
   updateSettings( _this, options );
-  getParticlesInfo( _this, options, _this.activeStory,
-  /*1-Resume here when done*/ function( particlesInfo ) {
   var sceneContainerElem = _this.activeScene.container.html.elem,
       $sceneContainerElem = $( sceneContainerElem ),
       elementsContainer = _this.activeScene.animationElements.container,
       domElementsObjsArray = [],
       animationElementOffsetX = _this.settings.createAnimationElementsParams.offsetX,
       animationElementOffsetY = _this.settings.createAnimationElementsParams.offsetY;
-  console.log( " ..*5a.1) createSvgElementsFromParticleMap() Particles source: '" + particlesInfo.source +
-               "'. numParticles = " + particlesInfo.numParticles +
+  console.log( " ..*5a.1) createSvgElementsFromParticleMap() Particles source: '" + _this.settings.particlesInfo.source +
+               "'. numParticles = '" + _this.settings.particlesInfo.numParticles +
+               "'. nextParticleMethod: '" + _this.settings.createAnimationElementsParams.nextParticleMethod +
                "'. ShowHalftone: '" + _this.settings.isShowHalftone +
                "'. RandomizeCollapsedCore: '" + _this.settings.createAnimationElementsParams.isRandomizeCollapsedCore +
                "'. animationElementOffsetX: '" + animationElementOffsetX +
@@ -59,7 +58,7 @@ function createSvgElementsFromParticles( _this, options, callback ) {
 
   // Create element (svg <circle> in the particle's "expanded/home position".
   // results = { element: circle, coreX: coreXY.coreX, coreY: coreXY.coreY };
-  while ( (results = createCollapsedPositionSVGelement( _this, options, particlesInfo )) ) {
+  while ( (results = createCollapsedPositionSVGelement( _this, options )) ) {
     $elementsContainerElem.append( results.element );
     domElementsObjsArray.push( results.element );
 
@@ -94,61 +93,17 @@ function createSvgElementsFromParticles( _this, options, callback ) {
     },
   };
   console.log( " ..*5a.2)createSvgElementsFromParticleMap(): Made " + $sceneContainerElem.attr( 'numElements' ) +
-               " canvas AnimationElements. *");
+               " " + _this.settings.createAnimationElementsParams.type + " AnimationElements. *");
 
   if ( typeof callback == 'function' ) { callback( results ); return; }
   return results;
-  /*1-*/});
 }; // end createSvgElementsFromParticles()
 
 //----------------------------------------------------------------------------
-function getParticlesInfo( _this, options, story, callback ) {
-  //----------------------------------------------------------------------------
-
-  // Create particle array by selecting pixels we want for a halftone image.
-  createParticleMap( _this, {
-    id: _this.activeStory.tag + '_particleMap',
-    isRejectParticlesOutOfBounds: true,
-    isRejectParticlesBelowIntensityThreshold: true,
-    isRejectParticlesSameAsContainerBackground: true,
-    sceneTag: _this.settings.sceneTag,
-    particlesHomeOffsetLeft: 0,
-    particlesHomeOffsetTop: 0,
-  },
-  /*1-Resume here when done*/ function( particles ) {
-  var results = {
-    source: 'image',
-    particlesArrayType: 'trrParticles',
-    particles: particles,
-    numParticles: particles.length,
-    eof: particles.length - 1,
-    nextIndex: 0,
-  };
-  if ( typeof callback == 'function' ) { callback( results ); return; }
-  return results;
-  /*1-*/});
-}; // end getParticlesInfo()
-
-//----------------------------------------------------------------------------
-function getNextParticle(_this, options, particlesInfo ) {
-  //----------------------------------------------------------------------------
-  var particle = null;
-  if ( !(particlesInfo.eof == -1) &&
-       !(particlesInfo.nextIndex == particlesInfo.eof) ) {
-    var particleProps = particlesInfo.particles[ particlesInfo.nextIndex ];
-    particlesInfo.nextIndex += 1;
-    var particle = {
-      props: particleProps,
-    };
-  }
-  return particle;
-}; // end getNextParticle()
-
-//----------------------------------------------------------------------------
-function createCollapsedPositionSVGelement( _this, options, particlesInfo ) {
+function createCollapsedPositionSVGelement( _this, options ) {
   //----------------------------------------------------------------------------
   var results = null;
-  if ( (particle = getNextParticle( _this, options, particlesInfo )) ) {
+  if ( (particle = getNextParticle( _this, options )) ) {
     // Create elements to start at their 'home position' which will recreate the
     // photo image.
     var circle = $( makeSvgElementNS( 'circle' ) )

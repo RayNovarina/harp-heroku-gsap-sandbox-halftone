@@ -69,9 +69,9 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
                ". isProcessByCluster: " + _this.settings.isProcessByCluster +
                ". pixelsPerClusterSide: " + _this.settings.pixelsPerClusterSide +
 
-               ". isRejectParticlesOutOfBounds: " + _this.settings.createAnimationElementsParams.isRejectParticlesOutOfBounds +
-               ". isRejectParticlesBelowIntensityThreshold: " + _this.settings.createAnimationElementsParams.isRejectParticlesBelowIntensityThreshold +
-               ". isRejectParticlesSameAsContainerBackground: " + _this.settings.createAnimationElementsParams.isRejectParticlesSameAsContainerBackground +                 ".");
+               ". isRejectParticlesOutOfBounds: " + _this.settings.isRejectParticlesOutOfBounds +
+               ". isRejectParticlesBelowIntensityThreshold: " + _this.settings.isRejectParticlesBelowIntensityThreshold +
+               ". isRejectParticlesSameAsContainerBackground: " + _this.settings.isRejectParticlesSameAsContainerBackground +                 ".");
 
   // Create local variables to reduce loop overhead.
   var homeOffsetLeft = _this.settings.particlesHomeOffsetLeft + _this.settings.additionalHomeOffsetLeft,
@@ -98,7 +98,13 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
                ". columns = " + cols + ". Max number of particles = " +
                maxNumOfParticles + ". *");
 
-  var particles = [];
+  var particles = null;
+  if ( _this.settings.isParticlesObjAsHashArray ||
+      _this.settings.isParticlesObjAsArray ) {
+    particles = [];
+  } else if ( _this.settings.isParticlesObjAsString ) {
+    particles = '';
+  }
   var carryOverResults = {};
 
   // Calculate the "home position", i.e. the image xy of each filtered pixel.
@@ -139,7 +145,7 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
       // background/fill color is.
       var filterResults = particleFilter( _this, _this.settings.rgbChannel, home_position_x, home_position_y, carryOverResults );
       if ( filterResults.isAccepted ) {
-        particles.push( {
+        var particle = {
           x: filterResults.x + homeOffsetLeft,
           y: filterResults.y + homeOffsetTop,
           // NOTE: performance tradeoff? if particle.i is stored as pixelIntensity (0-255) then Less
@@ -147,7 +153,16 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
           // have the multiplication overhead. IF calc when mapped, about 20chars are stored for
           // particle.r versus 3 for particle.i
           r: (filterResults.pixelChannelIntensity * gridSize) * .5,
-        });
+        };
+        if ( _this.settings.isParticlesObjAsHashArray ) {
+          particles.push( particle );
+        } else if ( _this.settings.isParticlesObjAsString) {
+          particles += ( particle.x + ' ' + particle.y + ' ' + particle.r + ' ' );
+        } else if ( _this.settings.isParticlesObjAsArray ) {
+          particles.push( particle.x );
+          particles.push( particle.y );
+          particles.push( particle.r );
+        }
       }
     } // end for (col)
   } // end for (row)
@@ -279,7 +294,7 @@ function particleFilter( _this, rgbChannel, x, y, carryOverResults ) {
     y = Math.round( y );
   }
 
-  if ( _this.settings.createAnimationElementsParams.isRejectParticlesOutOfBounds &&
+  if ( _this.settings.isRejectParticlesOutOfBounds &&
        ( x < 0 || x > _this.settings.img.width ||
          y < 0 || y > _this.settings.img.height ) ) {
     _this.particlesRejectedBecauseParticleIsOutOfBounds += 1;
@@ -305,14 +320,14 @@ function particleFilter( _this, rgbChannel, x, y, carryOverResults ) {
     return { isAccepted: false };
   }
 
-  if ( _this.settings.createAnimationElementsParams.isRejectParticlesBelowIntensityThreshold &&
+  if ( _this.settings.isRejectParticlesBelowIntensityThreshold &&
        ( pixelInfo.channelIntensity < _this.settings.pixelChannelIntensityThreshold ) ) {
     // pixelChannelIntensityThreshold: 0.05
     _this.particlesRejectedBecausePixelIntensityLessThanThreshold += 1;
     return { isAccepted: false };
   }
 
-  if ( _this.settings.createAnimationElementsParams.isRejectParticlesSameAsContainerBackground &&
+  if ( _this.settings.isRejectParticlesSameAsContainerBackground &&
        ( pixelInfo.rgbString == _this.containerBackgroundRGB ) ) {
     _this.particlesRejectedBecausePixelSameAsContainerBackgroundRGB += 1;
     if ( pixelInfo.rgbaString == _this.containerBackgroundRGBA ) {

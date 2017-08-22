@@ -87,6 +87,9 @@ function trr_init(/*Code to resume when done*/ callback ) {
     pixelChannelIntensityThreshold: 0.05,
     imageScale: 1.0, // canvas.width / imgWidth;
     rgbChannel: 'blue',
+    isParticlesObjAsHashArray: true,
+    isParticlesObjAsString: false,
+    isParticlesObjAsArray: false,
     halftoneColor: 'blue',
     sceneBackgroundColor: '#E7F1F7', // Climate Corp "halftone background blue"
     animationElementOffsetX: -80,
@@ -158,6 +161,9 @@ function trr_init(/*Code to resume when done*/ callback ) {
     convert( trrPlugin, {
       isShowHalftone: true,
       isCreateSceneInCenterPanel: true,
+      isParticlesObjAsHashArray: true,
+      isParticlesObjAsString: false,
+      isParticlesObjAsArray: false,
       tweenDuration: 8,
     },
     /*1-Resume here when done*/ function( scene ) {
