@@ -9,7 +9,7 @@ function collapse( _this, options, /*Code to resume when done*/ callback ) {
   // animationElements MUST have already been created.
   if ( !_this.activeStory.timelines ||
        !_this.activeStory.timelines.collapse ) {
-    alert( "photoTag: '" + _this.activeStory.tag + "'. You MUST create animationElements first via the 'Convert' link." );
+    alert( "photoTag: '" + _this.activeStory.tag + "'. You MUST create animationElements first via the 'Elements' link." );
     if ( typeof callback == 'function' ) { callback(); return; }
     return;
   }

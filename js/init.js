@@ -64,7 +64,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
     photoTag: 'laura',
     photoType: 'color',
     imgSrc: './images/laura_600x600_webgl_filter_greyscale_more_contrast.png',
-    isLoadReadyForScroll: false,
+    isLoadReadyForScroll: true,
     isTransformPixels: true,
     isExcludePixels: false,
     isProcessBySkipCount: true,
