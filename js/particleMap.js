@@ -17,14 +17,13 @@ function createParticleMap( _this, options, /*Code to resume when done*/ callbac
       additionalHomeOffsetLeft: 2,
       additionalHomeOffsetTop: 0,
   } );
-  _this.particles = results.particles;
-  _this.activeStory.particleMap = {
-    particles: results.particles,
-    gridSize: results.gridSize,
-    homeOffsetLeft: results.homeOffsetLeft,
-    homeOffsetTop: results.homeOffsetTop,
-  };
-  console.log( " ..*5a) createParticleMap() Created HomePositionParticles[" + _this.activeStory.particleMap.particles.length + "] *");
+  //_this.activeStory.particlesInfo = {
+  //  particles: results.particles,
+  //  gridSize: results.gridSize,
+  //  homeOffsetLeft: results.homeOffsetLeft,
+  //  homeOffsetTop: results.homeOffsetTop,
+  //};
+  console.log( " ..*5a) createParticleMap() Created HomePositionParticles[" + _this.activeStory.particlesInfo.numParticles + "] *");
   if ( typeof callback == 'function' ) { callback( results.particles ); return; }
   return results.particles;
 }; // end: createParticleMap()
@@ -32,7 +31,7 @@ function createParticleMap( _this, options, /*Code to resume when done*/ callbac
 //----------------------------------------------------------------------------
 function createParticleMap_reset( _this, options ) {
   //----------------------------------------------------------------------------
-  _this.particles = [];
+
   _this.settings.rgbChannel = _this.settings.halftoneColor;
   _this.particlesRejectedBecauseParticleIsOutOfBounds = 0;
   _this.particlesRejectedBecausePixelIntensityLessThanThreshold = 0;
@@ -104,13 +103,13 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
   var carryOverResults = {};
 
   // Calculate the "home position", i.e. the image xy of each filtered pixel.
-  var isTerminateLoop = false,
-      previousStartingX1 = 0;
+  //var isTerminateLoop = false;
+  var previousStartingX1 = 0;
   var previousStartingY1 = -halfGridSize;
   for ( var row = 0; row < rows; row++ ) {
-    if ( isTerminateLoop) {
-      break;
-    }
+    //if ( isTerminateLoop ) {
+    //  break;
+    //}
     var y1 = previousStartingY1 + gridSize; // y1 = ( row + 0.5 ) * gridSize;
     previousStartingY1 = y1;
     previousStartingX1 = -halfGridSize; // 0.5 * gridSize
@@ -152,6 +151,7 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
         };
         // We have different formats for storing particle objects.
         particles = window[ _this.settings.addParticleMethod ]( _this, options, particles, particle );
+//if (particles.length > 0) {isTerminateLoop=true;}
       }
     } // end for (col)
   } // end for (row)

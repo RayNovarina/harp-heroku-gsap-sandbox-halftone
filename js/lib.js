@@ -168,7 +168,7 @@ function createSceneContainer_reset( _this, callback ) {
     // hide current scene before we create another one.
     _this.activeScene.container.html.elem.style.display = 'none';
   }
-  // Case: just loaded, just created meg_story, meg_ParticleMap. Going to render
+  // Case: just loaded, just created meg_story, meg_Particles Going to render
   //       particleMap for meg. need to create scene.
   tagToScene( _this, _this.settings.sceneTag, _this.settings.story,
   /*1-Resume here when done*/ function( result ) {
@@ -319,7 +319,7 @@ function newStory( _this, photoTag ) {
     movie: _this.movie,
     lastActiveScene: null,
     tag: photoTag,
-    particleMap: {},
+    particlesInfo: {},
     image: {},
     scenes: [],
     timelines: {},

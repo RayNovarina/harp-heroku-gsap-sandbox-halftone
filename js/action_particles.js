@@ -57,19 +57,19 @@ function getParticles( _this, options, story, callback ) {
                "'. getParticlesMethod: '" + _this.settings.getParticlesMethod + "'. *");
 
   if ( _this.settings.isOnlyIfNewParticleMap &&
-       _this.activeStory.particleMap.particles &&
-       _this.activeStory.particleMap.particles.length > 0 ) {
+       _this.activeStory.particlesInfo.particles &&
+       _this.activeStory.particlesInfo.particles.numParticles > 0 ) {
     console.log( " ..*4.1a) getParticles() OnlyIfNewParticleMap: True. Ignored, " +
-                 "we already have a particleMap with '" + _this.activeStory.particleMap.particles.length + "' particles. *");
+                 "we already have a particleMap with '" + _this.activeStory.particlesInfo.particles.numParticles + "' particles. *");
     // We are going to reuse these particles, reset pointers.
-    _this.settings.particlesInfo.nextIndex = 0;
-    if ( typeof callback == 'function' ) { callback( _this.settings.particlesInfo ); return; }
-    return _this.settings.particlesInfo;
+    _this.activeStory.particlesInfo.nextIndex = 0;
+    if ( typeof callback == 'function' ) { callback( _this.activeStory.particlesInfo ); return; }
+    return _this.activeStory.particlesInfo;
   }
 
   window[ _this.settings.getParticlesMethod ]( _this, options, _this.activeStory,
   /*1-Resume here when done*/ function( particlesInfo ) {
-  _this.settings.particlesInfo = particlesInfo;
+  _this.activeStory.particlesInfo = particlesInfo;
 
   if ( typeof callback == 'function' ) { callback( particlesInfo ); return; }
   return particlesInfo;
@@ -111,6 +111,10 @@ function createParticlesInfoFromImageDataObj( _this, options, imgDataObj, callba
   var particlesInfo = {
     source: 'image',
     particles: particles,
+    particles: {
+      type: 'HashArray',
+      obj: particles,
+    },
     numParticles: particles.length,
     eof: particles.length - 1,
     nextIndex: 0,
@@ -124,47 +128,57 @@ function createParticlesInfoFromImageDataObj( _this, options, imgDataObj, callba
 //----------------------------------------------------------------------------
 function getParticlesFromDataFile( _this, options, story, callback ) {
   //----------------------------------------------------------------------------
-  var particles_data_file_contents =
+  // NOTE: .js file contains a string that was evaluated by javascript when the
+  // file loaded. Example:
+  //    var laura_particles_data='{"tag":"laura","type":"HashArray","data":[{"x":22,"y":580,"r":2.8062433825913184}]}';
+
+  var particles_data_file_var =
       ( _this.activeStory.tag == 'laura' ) ? laura_particles_data
     : ( _this.activeStory.tag == 'chris' ) ? chris_particles_data
     : ( _this.activeStory.tag == 'gary')   ? gary_particles_data
     :                                        curt_particles_data;
+
+  // NOTE: particles_data_file_var NOW = JSON String as follows:
+  // {"tag":"laura","type": "HashArray","data":[{"x":22,"y":580,"r":2.8062433825913184}]}
+  particles_data_file_var = JSON.parse( particles_data_file_var );
+  // NOTE: particles_data_file_contents NOW = hash object as follows:
+  // { tag:  "laura",
+  //   type: "HashArray",
+  //   data: "[ {x:22,y:580,r:2.8062433825913184} ]"
+  // }
+  // NOTE: particles_data_file_contents.data = javascript object of type array of hashes.
+
    _this.settings.createParticlesInfoMethod =
-            particles_data_file_contents.type == 'hashArray' ? 'createParticlesInfoFromDataTypeHashArray'
-          : particles_data_file_contents.type == 'array'     ? 'createParticlesInfoFromDataTypeArray'
+            particles_data_file_var.type == 'HashArray' ? 'createParticlesInfoFromDataTypeHashArray'
+          : particles_data_file_var.type == 'Array'     ? 'createParticlesInfoFromDataTypeArray'
           :                                                    'createParticlesInfoFromDataTypeString';
 
   console.log( " ..*4.1) getParticlesFromDataFile() for active story '" + _this.activeStory.tag +
                "'. From data file: '" + _this.activeStory.tag + "_particles_data" +
                "'. Using createParticlesInfoMethod: '" + _this.settings.createParticlesInfoMethod + "'. *");
 
-  window[ _this.settings.createParticlesInfoMethod ]( _this, options, particles_data_file_contents,
+  window[ _this.settings.createParticlesInfoMethod ]( _this, options, particles_data_file_var,
   /*1-Resume here when done*/ function( particlesInfo ) {
   if ( typeof callback == 'function' ) { callback( particlesInfo ); return; }
   return particlesInfo;
   /*1-*/});
 }; // end getParticlesFromDataFile()
 
-  /*
-
-  var laura_particles_data = {
-    tag: 'laura',
-    type: 'hashArray',
-    data: '"[{"x":22,"y" ..... 120866908}]"',
-  };
-   */
 //----------------------------------------------------------------------------
 function createParticlesInfoFromDataTypeHashArray( _this, options, data_file_var, callback ) {
   //----------------------------------------------------------------------------
   console.log( " ..*4.1) createParticlesInfoFromDataTypeHashArray() *");
   // TypeHashArray: convert from JSON string of hash objects. Each hash object
   // already is of our format pixel(x,y,r), so nothing more to reformat.
-  var particles = JSON.parse( data_file_var.data );
+  var particlesHashArray = data_file_var.data;
   var particlesInfo = {
     source: 'file',
-    particles: particles,
-    numParticles: particles.length,
-    eof: particles.length - 1,
+    particles: {
+      type: 'HashArray',
+      obj: particlesHashArray,
+    },
+    numParticles: particlesHashArray.length,
+    eof: particlesHashArray.length - 1,
     nextIndex: 0,
     nextParticleMethod: 'nextParticleFromHashArray',
   };
@@ -182,7 +196,10 @@ function createParticlesInfoFromDataTypeArray( _this, options, data_file_var, ca
   var numParticles = particlesArray.length / 3;
   var particlesInfo = {
     source: 'image',
-    particlesArray: particlesArray,
+    particles: {
+      type: 'Array',
+      obj: particlesArray,
+    },
     numParticles: numParticles,
     eof: numParticles - 1,
     nextIndex: 0,
@@ -202,7 +219,10 @@ function createParticlesInfoFromDataTypeString( _this, options, data_file_var, c
   var numParticles = particlesArray.length / 3;
   var particlesInfo = {
     source: 'image',
-    particlesArray: particlesArray,
+    particles: {
+      type: 'String',
+      obj: particlesArray,
+    },
     numParticles: numParticles,
     eof: numParticles - 1,
     nextIndex: 0,
@@ -218,7 +238,7 @@ function getNextParticle(_this, options ) {
   //----------------------------------------------------------------------------
   var particle = null,
       particleProps = null,
-      pcb = _this.settings.particlesInfo;
+      pcb = _this.activeStory.particlesInfo;
   if ( !(pcb.eof == -1) &&
        !(pcb.nextIndex == pcb.eof) ) {
     particleProps = window[ pcb.nextParticleMethod ]( _this, options, pcb );
@@ -233,7 +253,7 @@ function getNextParticle(_this, options ) {
 //----------------------------------------------------------------------------
 function nextParticleFromHashArray( _this, options, pcb ) {
   //----------------------------------------------------------------------------
-  return pcb.particles[ pcb.nextIndex ];
+  return pcb.particles.obj[ pcb.nextIndex ];
 }; // end nextParticleFromHashArray()
 
 //----------------------------------------------------------------------------
@@ -256,7 +276,7 @@ function renderParticleMapAsSingleCanvas( _this, options, callback ) {
       $sceneContainerElem = $( sceneContainerElem ),
       elementsContainer = _this.activeScene.animationElements.container,
       imageElem = _this.activeStory.image.html.elem;
-  console.log( " ..*5b.1) renderParticleMapAsSingleCanvas(): For Particles[].len = " + _this.settings.particlesInfo.numParticles + ". *");
+  console.log( " ..*5b.1) renderParticleMapAsSingleCanvas(): For Particles[].len = " + _this.activeStory.particlesInfo.numParticles + ". *");
 
   elementsContainer.html = {
     elem: $( document.createElement( "div" ) )

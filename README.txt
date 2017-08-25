@@ -107,6 +107,14 @@ All effects link: Add option to animate as GASP TimeLine of effects.
 Boneyard: code snippets
 ==============================================
 
+_this.particles = results.particles;
+_this.activeStory.particleMap = {
+  particles: results.particles,
+  gridSize: results.gridSize,
+  homeOffsetLeft: results.homeOffsetLeft,
+  homeOffsetTop: results.homeOffsetTop,
+};
+
 ===================================
 /*
 var main_tl = new TimelineMax({repeat:-1});

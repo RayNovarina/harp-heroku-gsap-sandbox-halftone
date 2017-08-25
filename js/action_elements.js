@@ -60,8 +60,8 @@ function createSvgElementsFromParticles( _this, options, callback ) {
       $sceneContainerElem = $( sceneContainerElem ),
       elementsContainer = _this.activeScene.animationElements.container,
       domElementsObjsArray = [];
-  console.log( " ..*5a.1) createSvgElementsFromParticleMap() Particles source: '" + _this.settings.particlesInfo.source +
-               "'. numParticles = '" + _this.settings.particlesInfo.numParticles +
+  console.log( " ..*5a.1) createSvgElementsFromParticleMap() Particles source: '" + _this.activeStory.particlesInfo.source +
+               "'. numParticles = '" + _this.activeStory.particlesInfo.numParticles +
                "'. nextParticleMethod: '" + _this.settings.createAnimationElementsParams.nextParticleMethod +
                "'. RenderElementsImage: '" + _this.settings.isRenderElementsImage +
                "'. RandomizeCollapsedCore: '" + _this.settings.createAnimationElementsParams.isRandomizeCollapsedCore +
