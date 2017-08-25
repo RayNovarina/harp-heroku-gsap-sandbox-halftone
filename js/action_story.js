@@ -26,7 +26,7 @@ function playFullStory( _this, photoTag, options, /*Code to resume when done*/ c
   //--------------------------------------------------------------------------
   console.log( " ..*4.2) playFullStory() create ParticleMap, animation elements, play story for '" + photoTag + "'. All scenes, i.e. expand and collapse. *");
 
-  convert( _this, { isCreateSceneInCenterPanel: true, tweenDuration: 2, },
+  elements( _this, { isCreateSceneInCenterPanel: true, tweenDuration: 2, },
   /*1-Resume here when done*/ function( activeScene ) {
   // Play story for active/selectedPhoto. All scenes, i.e. expand and collapse.
   playStory( _this, photoTag, options,
@@ -46,29 +46,41 @@ function playStory( _this, photoTag, options, /*Code to resume when done*/ callb
   /*1-Resume here when done*/ function( result ) {
   if ( !result.isFound ||
        (!result.item.timelines ||
-        !result.item.timelines.expandTimeline ) ) {
-    alert( "photoTag: '" + photoTag + "'. A story has not been created for this photo yet! You MUST create animationElements first via the 'Particles, Elements' links." );
+        !result.item.timelines.collapse ) ) {
+    alert( "photoTag: '" + photoTag + "'. A story has not been created for this photo yet! You MUST create animationElements first via the 'Elements' link." );
     if ( typeof callback == 'function' ) { callback( null ); return; }
     return null;
   }
+  // NOTE: after elements are built they form an expanded image.
   var story = result.item;
-  var delayMsToWaitForCollapsedState = 0;
-  if ( !story.timelines.expandTimelineIsReversed ) {
-    delayMsToWaitForCollapsedState = 2000;
-    story.timelines.expandTimeline.reverse();
-    story.timelines.expandTimelineIsReversed = true;
+  var delayMsToWaitForStartState = 0;
+  // Note: collapse.isReversed means "image is expanded"
+  if ( !story.timelines.collapse.isReversed ) {
+    delayMsToWaitForStartState = 2000;
+    story.timelines.collapse.gsapTimeline.reverse();
+    story.timelines.collapse.isReversed = true;
   }
+  // Wait for image to get into start position.
   setTimeout(function() {
   /*1a-Resume here when Timeout done*/
-  story.timelines.expandTimeline.play();
-  story.timelines.expandTimelineIsReversed = false;
+  // Collapse the image.
+  story.timelines.collapse.gsapTimeline.play();
+  story.timelines.collapse.isReversed = false;
+  // Wait for collapse to complete.
+  var delayMsToWaitForCollapsedState = 2500;
   setTimeout(function() {
   /*1b-Resume here when Timeout done*/
-  story.timelines.expandTimeline.reverse();
-  story.timelines.expandTimelineIsReversed = true;
+  // Expand the collapse image back to a full image.
+  story.timelines.collapse.gsapTimeline.reverse();
+  story.timelines.collapse.isReversed = true;
+  // Wait for expand to complete.
+  var delayMsToWaitForExpandedState = 1000;
+  setTimeout(function() {
+  /*1c-Resume here when Timeout done*/
   if ( typeof callback == 'function' ) { callback( story ); return; }
   return story;
-  }, 2500); // end /*1b-timeout*/
-  }, delayMsToWaitForCollapsedState); // end /*1a-timeout*/
+  }, delayMsToWaitForExpandedState); // end /*1c-timeout*/
+  }, delayMsToWaitForCollapsedState); // end /*1b-timeout*/
+  }, delayMsToWaitForStartState); // end /*1a-timeout*/
   /*1-*/});
 }; // end: playStory()

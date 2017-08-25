@@ -20,7 +20,7 @@ function collapse( _this, options, /*Code to resume when done*/ callback ) {
   tagToScene( _this, _this.activeStory.timelines.collapse.sceneTag, _this.activeStory,
   /*2-Resume here when done*/ function( result ) {
   openSceneContainer( _this, result.item );
-  _this.activeStory.timelines.collapse.gsapTimeline.pause(5);
+  _this.activeStory.timelines.collapse.gsapTimeline.play(); //pause(5);
   _this.activeStory.timelines.collapse.isReversed = false;
   if ( typeof callback == 'function' ) { callback(); return; }
   return;

@@ -13,34 +13,29 @@ function updateSettings( _this, options ) {
 //----------------------------------------------------------------------------
 function newPhoto( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*3) newPhoto() photoType: '" + options.photoType +
-               "'. photoTag: '" + options.photoTag +
-               "'. Current img.src: '" + _this.settings.img.src +
-               "'. New imgSrc: '" + options.imgSrc + "'. *");
   updateSettings( _this, options );
-  var src = _this.settings.imgSrc,
-      img = _this.settings.img,
-      $img = _this.settings.$img;
-  _this.isVisiblePhoto = false;
+  console.log( " ..*3) newPhoto() photoType: '" + _this.settings.photoType +
+               "'. photoTag: '" + _this.settings.photoTag +
+               "'. Current img.src: '" + _this.settings.img.src +
+               "'. New imgSrc: '" + _this.settings.imgSrc + "'. *");
   _this.selectedPhotoTag = '';
 
-  img.onload =
+  _this.settings.img.onload =
   /*1-Resume here when done*/ function() {
-  console.log( " ..*3a) newPhoto() img.onload() Loaded src: '" + $img.attr('src') +
-               "'. img.width: '" + img.width + "'. img.height: '" + img.height +
+  console.log( " ..*3a) newPhoto() img.onload() Loaded src: '" + _this.settings.$img.attr('src') +
+               "'. img.width: '" + _this.settings.img.width + "'. img.height: '" + _this.settings.img.height +
                "'. *");
-  getImgData( _this,
-  /*2-Resume here when done*/ function( imgDataObj ) {
-  _this.isVisiblePhoto = true;
+
   // Hide the active/visible sceneContainer.
   closeActiveSceneContainer( _this,
-  /*3-Resume here when done*/ function( activeScene ) {
+  /*2-Resume here when done*/ function( activeScene ) {
   if ( _this.activeStory ) {
     _this.activeStory.lastActiveScene = _this.activeScene || null;
   }
   _this.selectedPhotoTag = _this.settings.photoTag;
+
   selectedPhotoToStory( _this,
-  /*4-Resume here when done*/ function( result ) {
+  /*3-Resume here when done*/ function( result ) {
   if ( !result.isFound ) {
     // This photo has not been selected before.
     result.item = newStory( _this, _this.selectedPhotoTag );
@@ -49,20 +44,22 @@ function newPhoto( _this, options, /*Code to resume when done*/ callback ) {
   _this.activeStory = result.item;
   _this.activeStory.image = {
     html: {
-      elem: img,
-      src: $img.attr('src'),
+      elem: _this.settings.img,
+      src: _this.settings.$img.attr('src'),
     },
-    ctxImgData: imgDataObj.data,
+    ctxImgData: null,
   };
+
   // Recover our last activeScene, if any, and make it visible.
   _this.activeScene = _this.activeStory.lastActiveScene;
   openSceneContainer( _this, _this.activeStory.lastActiveScene );
+
   console.log( " ..*3a) newPhoto() DONE. *");
   if ( typeof callback == 'function' ) { callback( _this.activeStory.imgage ); return; }
   return _this.activeStory.imgage;
-  /*4-*/});/*3-*/});/*2-*/});/*1-*/}; // end img.onload()
+  /*3-*/});/*2-*/});/*1-*/}; // end img.onload()
 
-  $img.attr('src', src); // causes photo to be loaded and rendered.
+  _this.settings.$img.attr('src', _this.settings.imgSrc); // causes photo to be loaded and rendered.
 }; // end: newPhoto()
 
 //----------------------------------------------------------------------------
@@ -356,7 +353,11 @@ function newAnimationElements( _this, scene ) {
 //----------------------------------------------------------------------------
 function addTimelineToStory( _this, story, props ) {
   //----------------------------------------------------------------------------
-  if ( props.sceneTag == 'convert' ) {
+  if ( !props ) {
+    return;
+  }
+
+  if ( props.sceneTag == 'elements' ) {
     story.timelines.collapse = {
       sceneTag: props.sceneTag,
       gsapTimeline: props.gsapTimeline,
@@ -487,30 +488,40 @@ function openLastActiveSceneContainer( _this, callback ) {
 //=============================================
 
 //----------------------------------------------------------------------------
-function cbox_useTrr( _this, options, /*Code to resume when done*/ callback ) {
+function cbox_useSVGelements( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.5) cbox_useTrr() Box checked = '" + $( '#cbox_useTrr' ).prop('checked') + "'. *");
-  _this.settings.isUseTrrData = $( '#cbox_useTrr' ).prop('checked');
-  if ( typeof callback == 'function' ) { callback(); return; }
-}; // end: cbox_useTrr()
-
-//----------------------------------------------------------------------------
-function cbox_useSVG( _this, options, /*Code to resume when done*/ callback ) {
-  //--------------------------------------------------------------------------
-  console.log( " ..*4.5) cbox_useSVG() Box checked = '" + $( '#cbox_useSVG' ).prop('checked') + "'. *");
+  console.log( " ..*4.5) cbox_useSVGelements() Box checked = '" + $( '#cbox_useSVG' ).prop('checked') + "'. *");
   _this.settings.isUseSVGelements = $( '#cbox_useSVG' ).prop('checked');
   if ( typeof callback == 'function' ) { callback(); return; }
-}; // end: function cbox_useSVG()
+}; // end: function cbox_useSVGelements()
+
+//----------------------------------------------------------------------------
+function cbox_particlesFromPhoto( _this, options, /*Code to resume when done*/ callback ) {
+  //--------------------------------------------------------------------------
+  console.log( " ..*4.5) cbox_particlesFromPhoto() Box checked = '" + $( '#cbox_fromPhoto' ).prop('checked') + "'. *");
+  _this.settings.isParticlesFromPhoto = $( '#cbox_fromPhoto' ).prop('checked');
+  _this.settings.isParticlesFromFile = !_this.settings.isParticlesFromPhoto
+  $( '#cbox_fromFile' ).prop('checked', _this.settings.isParticlesFromFile );
+  if ( typeof callback == 'function' ) { callback(); return; }
+}; // end: cbox_particlesFromPhoto()
+
+//----------------------------------------------------------------------------
+function cbox_particlesFromFile( _this, options, /*Code to resume when done*/ callback ) {
+  //--------------------------------------------------------------------------
+  console.log( " ..*4.5) cbox_particlesFromFile() Box checked = '" + $( '#cbox_fromFile' ).prop('checked') + "'. *");
+  _this.settings.isParticlesFromFile = $( '#cbox_fromFile' ).prop('checked');
+  _this.settings.isParticlesFromPhoto = !_this.settings.isParticlesFromFile
+  $( '#cbox_fromPhoto' ).prop('checked', _this.settings.isParticlesFromPhoto );
+  if ( typeof callback == 'function' ) { callback(); return; }
+}; // end: cbox_particlesFromFile()
 
 //----------------------------------------------------------------------------
 function cbox_transform( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
   console.log( " ..*4.5) cbox_transform() Box checked = '" + $( '#cbox_transform' ).prop('checked') + "'. *");
   _this.settings.isTransformPixels = $( '#cbox_transform' ).prop('checked');
-  if ( _this.settings.isTransformPixels ) {
-    _this.settings.isExcludePixels = false;
-    $( '#cbox_exclude' ).prop('checked', false );
-  }
+  _this.settings.isExcludePixels = !_this.settings.isTransformPixels
+  $( '#cbox_exclude' ).prop('checked', _this.settings.isExcludePixels );
   if ( typeof callback == 'function' ) { callback(); return; }
 }; // end: function cbox_transform()
 
@@ -519,10 +530,8 @@ function cbox_exclude( _this, options, /*Code to resume when done*/ callback ) {
 //--------------------------------------------------------------------------
   console.log( " ..*4.5) cbox_exclude() Box checked = '" + $( '#cbox_exclude' ).prop('checked') + "'. *");
   _this.settings.isExcludePixels = $( '#cbox_exclude' ).prop('checked');
-  if ( _this.settings.isExcludePixels ) {
-    _this.settings.isTransformPixels = false;
-    $( '#cbox_transform' ).prop('checked', false );
-  }
+  _this.settings.isTransformPixels = !_this.settings.isExcludePixels
+  $( '#cbox_transform' ).prop('checked', _this.settings.isTransformPixels );
   if ( typeof callback == 'function' ) { callback(); return; }
 }; // end: function cbox_exclude()
 

@@ -4,13 +4,14 @@
   left: 8px;
 }
 .peopleLeftRow1 a {
-    padding: 0 6px;
-    text-decoration: underline;
-    color: blue;
-    cursor: pointer
+  padding: 0 6px;
+  text-decoration: underline;
+  color: blue;
+  cursor: pointer
 }
 .peopleLeftRow1 a:hover {
-    color: green;
+  background: beige;
+  color: green;
 }
 .peopleLeftRow2 {
   position: absolute;
@@ -18,74 +19,106 @@
   left: 8px;
 }
 .peopleLeftRow2 a {
-    padding: 0 6px;
-    text-decoration: underline;
-    color: blue;
-    cursor: pointer
+  padding: 0 6px;
+  text-decoration: underline;
+  color: blue;
+  cursor: pointer
 }
 .peopleLeftRow2 a:hover {
-    color: green;
+  background: beige;
+  color: green;
 }
 
 .actionsMiddleRow1 {
   position: absolute;
   top: 2px;
-  left: 390px;
+  left: 346px;
 }
 .actionsMiddleRow1 a {
-    padding: 0 6px;
-    text-decoration: underline;
-    color: blue;
-    cursor: pointer
+  padding: 0 6px;
+  text-decoration: underline;
+  color: blue;
+  cursor: pointer
 }
 .actionsMiddleRow1 a:hover {
-    color: green;
+  background: beige;
+  color: green;
+}
+.actionsMiddleRow1 input:hover {
+  background: beige;
+  color: green;
 }
 .actionsMiddleRow2 {
   position: absolute;
   top: 22px;
-  left: 384px;
+  left: 340px;
 }
 .actionsMiddleRow2 a {
-    padding: 0 6px;
-    text-decoration: underline;
-    color: blue;
-    cursor: pointer
+  padding: 0 6px;
+  text-decoration: underline;
+  color: blue;
+  cursor: pointer
 }
 .actionsMiddleRow2 a:hover {
-    color: green;
+  background: beige;
+  color: green;
+}
+.actionsMiddleRow2 input:hover {
+  background: beige;
+  color: green;
 }
 
-.actionCheckboxesRightRow1 {
+.actionsRightRow1 {
   position: absolute;
   top: 2px;
-  left: 680px;
+  left: 636px;
 }
-.actionCheckboxesRightRow1 input {
-    margin-left: 0px;
-    padding: 0 6px;
-    text-decoration: underline;
-    color: blue;
-    cursor: pointer
+.actionsRightRow1 input {
+  margin-left: 0px;
+  padding: 0 6px;
+  text-decoration: underline;
+  color: blue;
+  cursor: pointer
 }
-.actionCheckboxesRightRow1 input:hover {
-    color: green;
+.actionsRightRow1 input:hover {
+  background: beige;
+  color: green;
+}
+.actionsRightRow1 a {
+  padding: 0 6px;
+  text-decoration: underline;
+  color: blue;
+  cursor: pointer
+}
+.actionsRightRow1 a:hover {
+  background: beige;
+  color: green;
 }
 
-.actionCheckboxesRightRow2 {
-    position: absolute;
-    top: 22px;
-    left: 680px;
+.actionsRightRow2 {
+  position: absolute;
+  top: 22px;
+  left: 636px;
 }
-.actionCheckboxesRightRow2 input {
-    margin-left: 0px;
-    padding: 0 6px;
-    text-decoration: underline;
-    color: blue;
-    cursor: pointer
+.actionsRightRow2 input {
+  margin-left: 0px;
+  padding: 0 6px;
+  text-decoration: underline;
+  color: blue;
+  cursor: pointer
 }
-.actionCheckboxesRightRow2 input:hover {
-    color: green;
+.actionsRightRow2 input:hover {
+  color: green;
+}
+.actionsRightRow2 a {
+  padding: 0 6px;
+  text-decoration: underline;
+  color: blue;
+  cursor: pointer
+}
+.actionsRightRow2 a:hover {
+  background: beige;
+  color: green;
 }
 
 .leftPanel {

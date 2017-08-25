@@ -4,34 +4,25 @@
 //----------------------------------------------------------------------------
 function particles( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  options.sceneTag = 'particles';
-  particles_reset( _this, { sceneTag: options.sceneTag } );
   updateSettings( _this, options );
-  console.log( " ..*4.1) particles() " + "'. RenderParticleMap: '" + _this.settings.isRenderParticleMap +
-               "' for active story '" + _this.activeStory.tag +
-               "'. isOnlyIfNewParticleMap: '" + _this.settings.isOnlyIfNewParticleMap + "' *");
+  console.log( " ..*4.1) particles() for active story '" + _this.activeStory.tag +
+               "'. ParticlesFromPhoto: '" +  _this.settings.isParticlesFromPhoto +
+               "'. ParticlesFromFile: '" +  _this.settings.isParticlesFromFile +
+               "'. RenderParticleMap: '" + _this.settings.isRenderParticleMap + "'. *");
 
-  if ( _this.settings.isOnlyIfNewParticleMap &&
-       _this.activeStory.particleMap.particles &&
-       _this.activeStory.particleMap.particles.length > 0 ) {
-    console.log( " ..*4.1a) particles() OnlyIfNewParticleMap: Ignored, " +
-                 "we already have a particleMap with '" + _this.activeStory.particleMap.particles.length + "' particles. *");
-    //if ( typeof callback == 'function' ) { callback( _this.activeScene ); return; }
-    //return _this.activeScene;
+  getParticles( _this, options, _this.activeStory,
+  /*1-Resume here when done*/ function( particlesInfo ) {
+
+  // Optionally display particles in Panel specified by options (now in .settings).
+  if ( !_this.settings.isRenderParticleMap ) {
+    if ( typeof callback == 'function' ) { callback( null ); return; }
+    return null;
   }
 
-  // Create particle array by selecting pixels we want for a halftone image.
-  createParticleMap( _this, {
-    id: _this.activeStory.tag + '_particleMap',
-    isRejectParticlesOutOfBounds: true,
-    isRejectParticlesBelowIntensityThreshold: true,
-    isRejectParticlesSameAsContainerBackground: true,
-    sceneTag: options.sceneTag,
-    particlesHomeOffsetLeft: 0,
-    particlesHomeOffsetTop: 0,
-  },
-  /*1-Resume here when done*/ function( particles ) {
-  // Optionally display particles in Panel specified by options (now in .settings).
+  // Hide the active/visible sceneContainer.
+  closeActiveSceneContainer( _this,
+  /*2-Resume here when done*/ function( activeScene ) {
+  options.sceneTag = 'particles';
   createScene( _this, {
     id: _this.activeStory.tag + '_particleMap',
     sceneTag: options.sceneTag,
@@ -39,8 +30,8 @@ function particles( _this, options, /*Code to resume when done*/ callback ) {
     createContainerParams: {
       width: _this.settings.img.width + 8,
       height: _this.settings.img.height,
-      left: 0,
-      top: 0,
+      offsetX: 0,
+      offsetY: 0,
       backgroundColor: _this.defaults.sceneBackgroundColor, //  '#E7F1F7', Climate Corp "halftone background blue"
       border: '',
     },
@@ -50,71 +41,244 @@ function particles( _this, options, /*Code to resume when done*/ callback ) {
       offsetY: 0,
     },
   },
-  /*2-Resume here when done*/ function( activeScene ) {
+  /*3-Resume here when done*/ function( activeScene ) {
   if ( typeof callback == 'function' ) { callback( activeScene ); return; }
   return activeScene;
-  /*2-*/});/*1-*/});
+  /*3-*/});/*2-*/});/*1-*/});
 };// end: particles()
 
 //----------------------------------------------------------------------------
-function particles_reset( _this, options ) {
+function getParticles( _this, options, story, callback ) {
   //----------------------------------------------------------------------------
-  if ( _this.settings == 'undefined' ) {
-    // onDomReady() init.
-  } else {
-    _this.particles = [];
-    _this.settings.rgbChannel = 'blue'; // _this.settings.halftoneColor
-    _this.particlesRejectedBecauseParticleIsOutOfBounds = 0;
-    _this.particlesRejectedBecausePixelIntensityLessThanThreshold = 0;
-    _this.particlesRejectedBecausePixelSameAsContainerBackgroundRGB = 0;
-    _this.particlesRejectedBecausePixelSameAsContainerBackgroundRGBA = 0;
-    _this.particlesRejectedBecauseIsExcludedNthPixell = 0;
-    _this.particlesRejectedBecauseIsExcludedNotNthPixell = 0;
-    _this.particlesRejectedBecauseIsNonCenterMemberOfCluster = 0;
-    _this.particlesRejectedBecausePixelIndexIsOutOfBounds = 0;
-    _this.settings.rgbChannelOffset = _this.RGB_CHANNEL_OFFSETS[ _this.settings.rgbChannel ];
-    _this.settings.rgbChannelAngle = _this.RGB_CHANNEL_ANGLES[ _this.settings.rgbChannel ];
+  _this.settings.getParticlesMethod = _this.settings.isParticlesFromFile
+        ? 'getParticlesFromDataFile' : 'getParticlesFromImage';
+
+  console.log( " ..*4.1) getParticles() for story '" + story.tag +
+               "'. getParticlesMethod: '" + _this.settings.getParticlesMethod + "'. *");
+
+  if ( _this.settings.isOnlyIfNewParticleMap &&
+       _this.activeStory.particleMap.particles &&
+       _this.activeStory.particleMap.particles.length > 0 ) {
+    console.log( " ..*4.1a) getParticles() OnlyIfNewParticleMap: True. Ignored, " +
+                 "we already have a particleMap with '" + _this.activeStory.particleMap.particles.length + "' particles. *");
+    // We are going to reuse these particles, reset pointers.
+    _this.settings.particlesInfo.nextIndex = 0;
+    if ( typeof callback == 'function' ) { callback( _this.settings.particlesInfo ); return; }
+    return _this.settings.particlesInfo;
   }
-}; // end: particles_reset()
+
+  window[ _this.settings.getParticlesMethod ]( _this, options, _this.activeStory,
+  /*1-Resume here when done*/ function( particlesInfo ) {
+  _this.settings.particlesInfo = particlesInfo;
+
+  if ( typeof callback == 'function' ) { callback( particlesInfo ); return; }
+  return particlesInfo;
+  /*1-*/});
+};// end: getParticles()
+
+//----------------------------------------------------------------------------
+function getParticlesFromImage( _this, options, story, callback ) {
+  //----------------------------------------------------------------------------
+  _this.settings.createParticlesInfoMethod = 'createParticlesInfoFromImageDataObj';
+  console.log( " ..*4.1) getParticlesFromImage() for active story '" + _this.activeStory.tag +
+               "'. By converting photo file: '" + _this.settings.img.src +
+               "'. Using createParticlesInfoMethod: '" + _this.settings.createParticlesInfoMethod + "'. *");
+
+  getImgData( _this,
+  /*1-Resume here when done*/ function( imgDataObj ) {
+  _this.activeStory.image.ctxImgData = imgDataObj.data;
+  window[ _this.settings.createParticlesInfoMethod ]( _this, options, imgDataObj,
+  /*2-Resume here when done*/ function( particlesInfo ) {
+  if ( typeof callback == 'function' ) { callback( particlesInfo ); return; }
+  return particlesInfo;
+  /*2-*/});/*1-*/});
+}; // end getParticlesFromImage()
+
+//----------------------------------------------------------------------------
+function createParticlesInfoFromImageDataObj( _this, options, imgDataObj, callback ) {
+  console.log( " ..*4.1) createParticlesInfoFromImageDataObj() *");
+  // Create particle array by selecting pixels we want for a halftone image.
+  createParticleMap( _this, {
+    id: _this.activeStory.tag + '_particleMap',
+    isRejectParticlesOutOfBounds: true,
+    isRejectParticlesBelowIntensityThreshold: true,
+    isRejectParticlesSameAsContainerBackground: true,
+    sceneTag: _this.settings.sceneTag,
+    particlesHomeOffsetLeft: 0,
+    particlesHomeOffsetTop: 0,
+  },
+  /*1-Resume here when done*/ function( particles ) {
+  var particlesInfo = {
+    source: 'image',
+    particles: particles,
+    numParticles: particles.length,
+    eof: particles.length - 1,
+    nextIndex: 0,
+    nextParticleMethod: 'nextParticleFromHashArray',
+  };
+  if ( typeof callback == 'function' ) { callback( particlesInfo ); return; }
+  return particlesInfo;
+  /*1-*/});
+}; // end createParticlesInfoFromImageDataObj()
+
+//----------------------------------------------------------------------------
+function getParticlesFromDataFile( _this, options, story, callback ) {
+  //----------------------------------------------------------------------------
+  var particles_data_file_contents =
+      ( _this.activeStory.tag == 'laura' ) ? laura_particles_data
+    : ( _this.activeStory.tag == 'chris' ) ? chris_particles_data
+    : ( _this.activeStory.tag == 'gary')   ? gary_particles_data
+    :                                        curt_particles_data;
+   _this.settings.createParticlesInfoMethod =
+            particles_data_file_contents.type == 'hashArray' ? 'createParticlesInfoFromDataTypeHashArray'
+          : particles_data_file_contents.type == 'array'     ? 'createParticlesInfoFromDataTypeArray'
+          :                                                    'createParticlesInfoFromDataTypeString';
+
+  console.log( " ..*4.1) getParticlesFromDataFile() for active story '" + _this.activeStory.tag +
+               "'. From data file: '" + _this.activeStory.tag + "_particles_data" +
+               "'. Using createParticlesInfoMethod: '" + _this.settings.createParticlesInfoMethod + "'. *");
+
+  window[ _this.settings.createParticlesInfoMethod ]( _this, options, particles_data_file_contents,
+  /*1-Resume here when done*/ function( particlesInfo ) {
+  if ( typeof callback == 'function' ) { callback( particlesInfo ); return; }
+  return particlesInfo;
+  /*1-*/});
+}; // end getParticlesFromDataFile()
+
+  /*
+
+  var laura_particles_data = {
+    tag: 'laura',
+    type: 'hashArray',
+    data: '"[{"x":22,"y" ..... 120866908}]"',
+  };
+   */
+//----------------------------------------------------------------------------
+function createParticlesInfoFromDataTypeHashArray( _this, options, data_file_var, callback ) {
+  //----------------------------------------------------------------------------
+  console.log( " ..*4.1) createParticlesInfoFromDataTypeHashArray() *");
+  // TypeHashArray: convert from JSON string of hash objects. Each hash object
+  // already is of our format pixel(x,y,r), so nothing more to reformat.
+  var particles = JSON.parse( data_file_var.data );
+  var particlesInfo = {
+    source: 'file',
+    particles: particles,
+    numParticles: particles.length,
+    eof: particles.length - 1,
+    nextIndex: 0,
+    nextParticleMethod: 'nextParticleFromHashArray',
+  };
+  if ( typeof callback == 'function' ) { callback( particlesInfo ); return; }
+  return particlesInfo;
+}; // createParticlesInfoFromDataTypeHashArray()
+
+//----------------------------------------------------------------------------
+function createParticlesInfoFromDataTypeArray( _this, options, data_file_var, callback ) {
+  //----------------------------------------------------------------------------
+  console.log( " ..*4.1) createParticlesInfoFromDataTypeArray() *");
+  // TypeArray: convert from JSON string of array items. Each pixel has three
+  // array items for r,g,b values.
+  var particlesArray = JSON.parse( data_file_var.data );
+  var numParticles = particlesArray.length / 3;
+  var particlesInfo = {
+    source: 'image',
+    particlesArray: particlesArray,
+    numParticles: numParticles,
+    eof: numParticles - 1,
+    nextIndex: 0,
+    nextParticleMethod: 'nextParticleFromArray',
+  };
+  if ( typeof callback == 'function' ) { callback( particlesInfo ); return; }
+  return particlesInfo;
+}; // createParticlesInfoFromDataTypeArray()
+
+//----------------------------------------------------------------------------
+function createParticlesInfoFromDataTypeString( _this, options, data_file_var, callback ) {
+  //----------------------------------------------------------------------------
+  console.log( " ..*4.1) createParticlesInfoFromDataTypeString() *");
+  // TypeArray: convert from JSON string of pixel r,g,b values. Each value is
+  // separated by a space.
+  var particlesArray = JSON.parse( data_file_var.data ).split(' ');
+  var numParticles = particlesArray.length / 3;
+  var particlesInfo = {
+    source: 'image',
+    particlesArray: particlesArray,
+    numParticles: numParticles,
+    eof: numParticles - 1,
+    nextIndex: 0,
+    nextParticleMethod: 'nextParticleFromArray',
+  };
+  //  nextParticleMethod: 'nextParticleFromString',
+  if ( typeof callback == 'function' ) { callback( particlesInfo ); return; }
+  return particlesInfo;
+}; // createParticlesInfoFromDataTypeString()
+
+//----------------------------------------------------------------------------
+function getNextParticle(_this, options ) {
+  //----------------------------------------------------------------------------
+  var particle = null,
+      particleProps = null,
+      pcb = _this.settings.particlesInfo;
+  if ( !(pcb.eof == -1) &&
+       !(pcb.nextIndex == pcb.eof) ) {
+    particleProps = window[ pcb.nextParticleMethod ]( _this, options, pcb );
+    pcb.nextIndex += 1;
+    particle = {
+      props: particleProps,
+    };
+  }
+  return particle;
+}; // end getNextParticle()
+
+//----------------------------------------------------------------------------
+function nextParticleFromHashArray( _this, options, pcb ) {
+  //----------------------------------------------------------------------------
+  return pcb.particles[ pcb.nextIndex ];
+}; // end nextParticleFromHashArray()
+
+//----------------------------------------------------------------------------
+function nextParticleFromArray( _this, options, pcb ) {
+  //----------------------------------------------------------------------------
+
+}; // end nextParticleFromArray()
+
+//----------------------------------------------------------------------------
+function nextParticleFromString( _this, options, pcb ) {
+  //----------------------------------------------------------------------------
+
+}; // end nextParticleFromString()
 
 //----------------------------------------------------------------------------
 function renderParticleMapAsSingleCanvas( _this, options, callback ) {
   //----------------------------------------------------------------------------
-  var particleAnimationElementMethod = '',
-      particles = _this.activeStory.particleMap.particles,
-      gridSize = _this.activeStory.particleMap.gridSize,
-      sceneContainerElem = _this.activeScene.container.html.elem,
+  updateSettings( _this, options );
+  var sceneContainerElem = _this.activeScene.container.html.elem,
       $sceneContainerElem = $( sceneContainerElem ),
       elementsContainer = _this.activeScene.animationElements.container,
-      imageElem = _this.activeStory.image.html.elem,
-      animationElementOffsetX = _this.settings.createAnimationElementsParams.offsetX,
-      animationElementOffsetY = _this.settings.createAnimationElementsParams.offsetY,
-      domElementsObjsArray = [];
-  console.log( " ..*5b.1) renderParticleMapAsSingleCanvas(): For Particles[].len = " + particles.length + ". *");
+      imageElem = _this.activeStory.image.html.elem;
+  console.log( " ..*5b.1) renderParticleMapAsSingleCanvas(): For Particles[].len = " + _this.settings.particlesInfo.numParticles + ". *");
 
   elementsContainer.html = {
     elem: $( document.createElement( "div" ) )
       .attr( 'id', 'aniElems_Con_' )
-      .attr( 'width', '589px' )
+      .attr( 'width', '600px' )
       .attr( 'height', '600px' )
       .attr( 'trr-ani-elem-type', 'canvas' )
       .addClass( 'trr-ani-elems-container' ),
     string: '',
   };
+
   var elementsContainerElem = elementsContainer.html.elem,
       $elementsContainerElem = $( elementsContainerElem );
 
   // attach to specified Panel.
   $( _this.centerPanel ).children().last().append( elementsContainerElem );
-  // Assume activeScene container was made invisible in our _reset() and
   // make our container visible before we start filling it up.
   openSceneContainer( _this, _this.activeScene );
 
-  var numElements = 1,
-      canvasAndCtx = makeCanvasAndCtx(),
+  var canvasAndCtx = makeCanvasAndCtx(),
       canvas = canvasAndCtx.canvas,
-      context = canvasAndCtx.ctx,
-      element = canvas;
+      context = canvasAndCtx.ctx;
   canvas.width = imageElem.width;
   canvas.height = imageElem.height;
   context.clearRect( 0, 0, canvas.width, canvas.height );
@@ -122,36 +286,70 @@ function renderParticleMapAsSingleCanvas( _this, options, callback ) {
   context.fillRect( 0, 0, canvas.width, canvas.height );
 
   // Recreate photo via particles[].
-
+  //
   // Place every particle in its home position on a white background.
   // Write a halftone ball with the specified radius (which was calculated
   // as bigger for lower intensity particles).
-  context.fillStyle = _this.settings.animationElementColor;
-  $.each( particles, function( idx, particle ) {
-    context.beginPath();
-    context.arc(
-        particle.x + animationElementOffsetX, // NOTE: already adjusted when mapped.
-        particle.y + animationElementOffsetY, // NOTE: already adjusted when mapped.
-        // NOTE: performance tradeoff? if particle.i is stored as pixelIntensity (0-255) then Less
-        // chars are stored in string so we can just multiply with the CONSTANT gridSize. BUT we
-        // have the multiplication overhead. IF calc when mapped, about 20chars are stored for
-        // particle.r versus 3 for particle.i
-        particle.r, // * gridSize, // not needed, already adjusted when mapped.
-        0, _this.TAU );
-    context.fill();
-    context.closePath();
-  });
-  $elementsContainerElem.append( element );
-  domElementsObjsArray.push( document.createElement( 'canvas' ) );
-
-  $sceneContainerElem.attr( 'numElements', numElements + '' );
+  context.fillStyle = _this.settings.particleMapAnimationElementColor;
+  //var results = null; // context or null if end of file;
+  while ( createExpandedPositionCanvasCircle( _this, options, context ) ) {
+    // Just keep drawing circles on single canvas.context
+  }; // end while ( results )
+  // Resume here when all circles drawn.
+  $elementsContainerElem.append( canvas );
+  $sceneContainerElem.attr( 'numElements', '1' );
 
   var results = {
     animationElementsContainerElem: elementsContainerElem,
-    domElementsObjsArray: domElementsObjsArray,
+    domElementsObjsArray: [ document.createElement( 'canvas' ) ], // just a required placeholder.
+    timelineProps: null,
   };
   console.log( " ..*5b.2) renderParticleMapAsSingleCanvas(): Made " + $sceneContainerElem.attr( 'numElements' ) +
                " canvas AnimationElements. *");
   if ( typeof callback == 'function' ) { callback( results ); return; }
   return results;
 }; // end renderParticleMapAsSingleCanvas()
+
+/*
+//----------------------------------------------------------------------------
+function createCollapsedPositionSVGelement( _this, options ) {
+  //----------------------------------------------------------------------------
+  var results = null;
+  if ( (particle = getNextParticle( _this, options )) ) {
+    // Create elements to start at their 'home position' which will recreate the
+    // photo image.
+    var circle = $( makeSvgElementNS( 'circle' ) )
+        .attr( 'cx', particle.props.x )
+        .attr( 'cy', particle.props.y )
+        .attr( 'r', particle.props.r )
+        .attr( 'fill', _this.settings.animationElementColor );
+    var coreXY = calcCoreXY( _this, options, particle );
+    results = { element: circle, coreX: coreXY.coreX, coreY: coreXY.coreY };
+  }
+  return results;
+}; // end createCollapsedPositionSVGelement()
+*/
+
+//----------------------------------------------------------------------------
+function createExpandedPositionCanvasCircle( _this, options, context ) {
+  //----------------------------------------------------------------------------
+  var results = null,
+      particle = null;
+  if ( (particle = getNextParticle( _this, options )) ) {
+    // Create canvas circle at 'home position' which will recreate the photo image.
+    context.beginPath();
+    context.arc(
+          particle.props.x, // + animationElementOffsetX, // NOTE: already adjusted when mapped.
+          particle.props.y, // + animationElementOffsetY, // NOTE: already adjusted when mapped.
+          // NOTE: performance tradeoff? if particle.i is stored as pixelIntensity (0-255) then Less
+          // chars are stored in string so we can just multiply with the CONSTANT gridSize. BUT we
+          // have the multiplication overhead. IF calc when mapped, about 20chars are stored for
+          // particle.r versus 3 for particle.i
+          particle.props.r, // * gridSize, // not needed, already adjusted when mapped.
+          0, _this.TAU );
+      context.fill();
+      context.closePath();
+    results = {};
+  }
+  return results;
+}; // end createExpandedPositionCanvasCircle()

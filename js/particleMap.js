@@ -7,8 +7,6 @@ function createParticleMap( _this, options, /*Code to resume when done*/ callbac
   createParticleMap_reset( _this );
   updateSettings( _this, options );
   console.log( " ..*5) createParticleMap() for id: '" + options.id +
-               "'. useTrrData: '" + _this.settings.isUseTrrData +
-               "'. RenderParticleMap: '" + _this.settings.isRenderParticleMap +
                "'. particlesHomeOffsetLeft: '" + _this.settings.particlesHomeOffsetLeft +
                "'. particlesHomeOffsetTop: '" + _this.settings.particlesHomeOffsetTop +
                "'. *");
@@ -35,7 +33,7 @@ function createParticleMap( _this, options, /*Code to resume when done*/ callbac
 function createParticleMap_reset( _this, options ) {
   //----------------------------------------------------------------------------
   _this.particles = [];
-  _this.settings.rgbChannel = 'blue'; // _this.settings.halftoneColor
+  _this.settings.rgbChannel = _this.settings.halftoneColor;
   _this.particlesRejectedBecauseParticleIsOutOfBounds = 0;
   _this.particlesRejectedBecausePixelIntensityLessThanThreshold = 0;
   _this.particlesRejectedBecausePixelSameAsContainerBackgroundRGB = 0;
@@ -92,19 +90,17 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
       halfImageWidth = image_width / 2,
       halfImageHeigth = image_heigth / 2,
       halfGridSize = 0.5 * gridSize;
+  _this.settings.addParticleMethod =
+        _this.settings.isParticlesObjAsHashArray ? 'addParticleToHashArray'
+      : _this.settings.isParticlesObjAsArray     ? 'addParticleToArray'
+      :                                            'addParticleToString';
 
   console.log( " ..*5.2a) makeCartesianGridParticles(): BEGIN LOOP: " +
-               ". gridSize = " + gridSize + ". rows = " + rows +
-               ". columns = " + cols + ". Max number of particles = " +
-               maxNumOfParticles + ". *");
+               " gridSize: '" + gridSize + "'. rows: '" + rows + "'. columns: '" + cols +
+               "'. Max number of particles: '" + maxNumOfParticles +
+               "'. addParticleMethod: '" + _this.settings.addParticleMethod + "'. *");
 
   var particles = null;
-  if ( _this.settings.isParticlesObjAsHashArray ||
-      _this.settings.isParticlesObjAsArray ) {
-    particles = [];
-  } else if ( _this.settings.isParticlesObjAsString ) {
-    particles = '';
-  }
   var carryOverResults = {};
 
   // Calculate the "home position", i.e. the image xy of each filtered pixel.
@@ -154,15 +150,8 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
           // particle.r versus 3 for particle.i
           r: (filterResults.pixelChannelIntensity * gridSize) * .5,
         };
-        if ( _this.settings.isParticlesObjAsHashArray ) {
-          particles.push( particle );
-        } else if ( _this.settings.isParticlesObjAsString) {
-          particles += ( particle.x + ' ' + particle.y + ' ' + particle.r + ' ' );
-        } else if ( _this.settings.isParticlesObjAsArray ) {
-          particles.push( particle.x );
-          particles.push( particle.y );
-          particles.push( particle.r );
-        }
+        // We have different formats for storing particle objects.
+        particles = window[ _this.settings.addParticleMethod ]( _this, options, particles, particle );
       }
     } // end for (col)
   } // end for (row)
@@ -196,6 +185,34 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
   if ( typeof callback == 'function' ) { callback( results ); return; }
   return results;
 }; // end: makeParticles()
+
+//--------------------------------------------------------------------------
+function addParticleToHashArray( _this, options, particles, particle ) {
+  //--------------------------------------------------------------------------
+  // Init particles if needed.
+  particles = particles || [];
+  particles.push( particle );
+  return particles;
+}; // end addParticleToHashArray()
+
+//--------------------------------------------------------------------------
+function addParticleToString( _this, options, particles, particle ) {
+  //--------------------------------------------------------------------------
+  particles = particles || '';
+  particles += ( particle.x + ' ' + particle.y + ' ' + particle.r + ' ' );
+  return particles;
+}; // end addParticleToString()
+
+//--------------------------------------------------------------------------
+function addParticleToArray( _this, options, particles, particle ) {
+  //--------------------------------------------------------------------------
+  particles = particles || [];
+  particles.push( particle.x );
+  particles.push( particle.y );
+  particles.push( particle.r );
+  return particles;
+}; // end addParticleToArray()
+
 
 /* per: https://en.wikipedia.org/wiki/RGBA_color_space
 RGBA stands for red green blue alpha. While it is sometimes described as a color

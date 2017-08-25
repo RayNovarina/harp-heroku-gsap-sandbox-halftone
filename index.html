@@ -37,17 +37,17 @@
        class="trr-photo-effect"
        title=""
     >Laura</a>
-    <a id="newPhotoChris" style="margin-left: 32px;" photoTag="chris"
+    <a id="newPhotoChris" style="margin-left: 24px;" photoTag="chris"
        photoType="color" data-src="./images/chris_600x600x_webgl_filter_greyscale_more_contrast.png"
        class="trr-photo-effect"
        title=""
     >Chris</a>
-    <a id="newPhotoGary" style="margin-left: 40px;" photoTag="gary"
+    <a id="newPhotoGary" style="margin-left: 24px;" photoTag="gary"
        data-src="./images/gary_600x600_webgl_filter_greyscale_less_contrast.png"
        class="trr-photo-effect"
        title=""
     >Gary</a>
-    <a id="newPhotoCurt" style="margin-left: 40px;" photoTag="curt"
+    <a id="newPhotoCurt" style="margin-left: 26px;" photoTag="curt"
        photoType="color" data-src="./images/curt_600x600_webgl_filter_greyscale_more_brightness.png"
        class="trr-photo-effect"
        title=""
@@ -67,16 +67,16 @@
     <!-- <a class="trr-scroll-to" style="margin-left: 6px;" photoTag="mike"
        title=""
     >Scroll To</a> -->
-    <a class="trr-scroll-to" style="margin-left: 6px;" photoTag="chris"
+    <a class="trr-scroll-to" style="margin-left: 0px;" photoTag="chris"
        title=""
     >Scroll To</a>
     <!-- <a class="trr-scroll-to" style="margin-left: 20px;" photoTag="meg"
        title=""
     >Scroll To</a> -->
-    <a class="trr-scroll-to" style="margin-left: 16px;" photoTag="gary"
+    <a class="trr-scroll-to" style="margin-left: 0px;" photoTag="gary"
        title=""
     >Scroll To</a>
-    <a class="trr-scroll-to" style="margin-left: 16px;" photoTag="curt"
+    <a class="trr-scroll-to" style="margin-left: 0px;" photoTag="curt"
        title=""
     >Scroll To</a>
   </div>
@@ -85,11 +85,17 @@
   </div>
 
   <div class="actionsMiddleRow1">
-    <a id="convert" style="margin-left: 0px; padding: 0;"
-       title="Convert photo to a halftone image made up of AnimationElements in
-           the center. Pin them to their expanded, i.e. home, position."
-       >Convert</a>
-    <a id="collapse" style="margin-left: 4px;"
+    <a id="elements" style="margin-left: 0px; padding: 0;"
+       title="Create AnimationElements in the center Panel based on the particles.
+          Pin them to their expanded, i.e. home, position."
+       >Elements:</a>
+    <input id="cbox_useSVG" style="margin-left: 6px;" type="checkbox"
+       title="When converting halftone particles to animation elements: use <svg> objects. Default is Canvas objects."
+       >SVG&nbsp;
+    <!-- <input id="cbox_useDiv" type="checkbox"
+           title="When converting halftone particles to animation elements: use <div> objects. Default is Canvas objects."
+           >Div -->
+    <a id="collapse" style="margin-left: 0px;"
        title="AnimationElements in the center Panel, i.e. play GSAP
          timeline at label 'start'. Re-create them in the right panel. Delay
          and then apply the collapse animation effect. Elements move down and
@@ -106,10 +112,9 @@
   </div>
 
   <div class="actionsMiddleRow2">
-    <a id="" style="margin-left: 0px; color: red;"
-       title=""
-       href="/"
-       >RESET</a>
+    <a id="save" style="margin-left: 0px;"
+       title="Save Elements to a file."
+       >Save</a>
     <input id="cbox_load4scroll" type="checkbox" disabled
            style="margin-left: 4px; margin-right: 0; padding: 0;"
            title="" >
@@ -119,27 +124,31 @@
        >Make Ready For Scroll</a>
   </div>
 
-  <div class="actionCheckboxesRightRow1">
-    <input id="cbox_useTrr" type="checkbox"
-           title="When converting photo to halftone: use stored TRR effectsData array."
-           >TrrData&nbsp;
-    <input id="cbox_useSVG" type="checkbox"
-           title="When converting halftone particles to animation elements: use <svg> objects. Default is Canvas objects."
-           >SVG&nbsp;
-    <!-- <input id="cbox_useDiv" type="checkbox"
-           title="When converting halftone particles to animation elements: use <div> objects. Default is Canvas objects."
-           >Div -->
-    <input id="cbox_exclude" type="checkbox" style="margin-left: 6px;"
+  <div class="actionsRightRow1">
+    <a id="particles" style="margin-left: 0px; padding: 0;"
+       title="Convert the selected photo into particles. Store particles in memory or upload to a
+        file. Optionally display the converted particle map as a halftone
+        image via a <canvas> in the center
+        Panel and write the particle halftone dots on it in one pass,
+        i.e. without animation."
+       >Particles:</a>
+    <span style="margin-left: 8px;">From</span>
+    <input id="cbox_fromPhoto" style="margin-left: 2px;" type="checkbox"
+           title="When converting photo to halftone or fetching animation elements, get particles from memory or files."
+       >Photo
+    <input id="cbox_fromFile" style="margin-left: 2px;" type="checkbox"
+           title="When converting photo to halftone or fetching animation elements, get particles from memory or files."
+       >File
+  </div>
+
+  <div class="actionsRightRow2">
+    <input id="cbox_exclude" type="checkbox" style="margin-left: 0px;"
            title="When converting photo to halftone: ignore every so many accepted pixels. Per units from next checkboxes."
            >Reject or&nbsp;
     <input id="cbox_transform" type="checkbox"
            title="When converting photo to halftone: transform every so many accepted pixels into halftone balls. Per units from next checkboxes."
            >Transform&nbsp;
-  </div>
-
-  <div class="actionCheckboxesRightRow2">
-
-    <span>Every:&nbsp;</span>
+    <span>Every:</span>
 
     <input id="cbox_every1" type="checkbox"
            title="When converting photo to halftone: reject or transform every accepted pixel."
@@ -152,9 +161,9 @@
            >3&nbsp;
     <input id="cbox_every4" type="checkbox"
            title="When converting photo to halftone: reject or transform every 4 accepted pixels."
-           >4&nbsp;Pixel
+           >4&nbsp;Pixels
 
-    <span>&nbsp;or&nbsp;&nbsp;Cluster:&nbsp;</span>
+    <span>&nbsp;or&nbsp;&nbsp;Cluster:</span>
     <input id="cbox_1x1_cluster" type="checkbox"
            title="When converting photo to halftone: reject or transform every 1x1 cluster of pixels. Default is every 1 pixel."
            >1x1&nbsp;
@@ -175,15 +184,15 @@
   <div id="centerPanel" class="trr-elements-stage centerPanel"></div>
 
 <script type="text/javascript" src="js/TrrEffect.js"></script>
-<!-- <script type="text/javascript" src="./images/effectsData.js"></script> -->
+<script type="text/javascript" src="./images/laura_particles.js"></script>
 <script type="text/javascript" src="js/init.js"></script>
 <script type="text/javascript" src="js/lib.js"></script>
 <script type="text/javascript" src="js/particleMap.js"></script>
-<script type="text/javascript" src="js/action_convert.js"></script>
-<!-- <script type="text/javascript" src="js/action_particles.js"></script> -->
+<script type="text/javascript" src="js/action_particles.js"></script>
 <script type="text/javascript" src="js/action_elements.js"></script>
 <script type="text/javascript" src="js/action_collapse.js"></script>
 <script type="text/javascript" src="js/action_expand.js"></script>
+<script type="text/javascript" src="js/action_timelines.js"></script>
 <script type="text/javascript" src="js/action_story.js"></script>
 <script type="text/javascript" src="js/action_ready4scroll.js"></script>
 <script type="text/javascript" src="js/scroll-event.js"></script>

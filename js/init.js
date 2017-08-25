@@ -79,10 +79,14 @@ function trr_init(/*Code to resume when done*/ callback ) {
     is7x7_cluster: false,
     isProcessByCluster: false,
     pixelsPerClusterSide: 5,
-    isUseTrrData: false,
-    isRenderParticleMap: false,
+    isParticlesFromFile: false,
+    isParticlesFromPhoto: true,
+    isRenderParticleMap: true,
+    isRenderElementsImage: true,
+    isCreateElementsObjArray: false,
     isUseSVGelements: true,
-    animationElementColor: '#0099cc', // '#70C0EF', // Climate Corp halftone dot blue.
+    elementsAnimationElementColor: '#0099cc', // '#70C0EF', // Climate Corp halftone dot blue.
+    particleMapAnimationElementColor: 'black',
     maxHalftoneDotSize: 1/150,
     pixelChannelIntensityThreshold: 0.05,
     imageScale: 1.0, // canvas.width / imgWidth;
@@ -91,6 +95,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
     isParticlesObjAsString: false,
     isParticlesObjAsArray: false,
     halftoneColor: 'blue',
+    isCreateSceneInCenterPanel: true,
     sceneBackgroundColor: '#E7F1F7', // Climate Corp "halftone background blue"
     animationElementOffsetX: -80,
     animationElementOffsetY: -20,
@@ -103,7 +108,8 @@ function trr_init(/*Code to resume when done*/ callback ) {
 
   // Set default state of checkboxes.
   $( '#cbox_load4scroll' ).prop('checked', false );
-  $( '#cbox_useTrr' ).prop('checked', trrPlugin.defaults.isUseTrrData );
+  $( '#cbox_fromFile' ).prop('checked', trrPlugin.defaults.isParticlesFromFile );
+  $( '#cbox_fromPhoto' ).prop('checked', trrPlugin.defaults.isParticlesFromPhoto );
   $( '#cbox_useSVG' ).prop('checked', trrPlugin.settings.isUseSVGelements );
   $( '#cbox_exclude' ).prop('checked', trrPlugin.defaults.isExcludePixels );
   $( '#cbox_transform' ).prop('checked', trrPlugin.defaults.isTransformPixels );
@@ -157,17 +163,19 @@ function trr_init(/*Code to resume when done*/ callback ) {
   //----------------------------------------------------------------------------
   // Actions
 
-  $( "#convert" ).click( function() {
-    convert( trrPlugin, {
-      isShowHalftone: true,
-      isCreateSceneInCenterPanel: true,
-      isParticlesObjAsHashArray: true,
-      isParticlesObjAsString: false,
-      isParticlesObjAsArray: false,
-      tweenDuration: 8,
-    },
-    /*1-Resume here when done*/ function( scene ) {
-    /*1-*/});
+  $( "#particles" ).click( function() {
+    particles( trrPlugin, {
+      isOnlyIfNewParticleMap: false,
+      isRenderParticleMap: true,
+    } );
+  });
+  $( "#elements" ).click( function() {
+    elements( trrPlugin, {
+      isOnlyIfNewParticleMap: true,
+      isRenderElementsImage: true,
+      isCreateElementsObjArray: false,
+      tweenDuration: 2,
+    } );
   });
   $( "#collapse" ).click( function() {
     collapse( trrPlugin, {} );
@@ -175,8 +183,16 @@ function trr_init(/*Code to resume when done*/ callback ) {
   $( "#expand" ).click( function() {
     expand( trrPlugin, {} );
   });
+  $( "#save" ).click( function() {
+    save( trrPlugin, {} );
+  });
   $( "#makeReadyForScroll" ).click( function( event ) {
-    loadReadyForScroll( trrPlugin, { event: event } );
+    loadReadyForScroll( trrPlugin, { event: event,
+      isOnlyIfNewParticleMap: false,
+      isRenderParticleMap: false,
+      isRenderElementsImage: true,
+      isCreateElementsObjArray: false,
+      tweenDuration: 2, } );
   });
 
   // "Scroll To" links.
@@ -185,23 +201,25 @@ function trr_init(/*Code to resume when done*/ callback ) {
   });
 
   //----------------------------------------------------------------------------
-  // Action checkboxesRow1
+  // Action checkboxes
 
-  $( "#cbox_useTrr" ).click( function( event ) {
-    cbox_useTrr( trrPlugin, { event: event } );
-  });
   $( "#cbox_useSVG" ).click( function( event ) {
-    cbox_useSVG( trrPlugin, { event: event } );
+    cbox_useSVGelements( trrPlugin, { event: event } );
   });
+
+  $( "#cbox_fromPhoto" ).click( function( event ) {
+    cbox_particlesFromPhoto( trrPlugin, { event: event } );
+  });
+  $( "#cbox_fromFile" ).click( function( event ) {
+    cbox_particlesFromFile( trrPlugin, { event: event } );
+  });
+
   $( "#cbox_exclude" ).click( function( event ) {
     cbox_exclude( trrPlugin, { event: event } );
   });
   $( "#cbox_transform" ).click( function( event ) {
     cbox_transform( trrPlugin, { event: event } );
   });
-
-  //----------------------------------------------------------------------------
-  // checkboxesRow1
   $( "#cbox_every1" ).click( function( event ) {
     cbox_every1( trrPlugin, { event: event } );
   });
