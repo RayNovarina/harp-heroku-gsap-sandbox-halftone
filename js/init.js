@@ -75,7 +75,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
     photoTag: 'laura',
     photoType: 'color',
     imgSrc: './images/laura_600x600_webgl_filter_greyscale_more_contrast.png',
-    isLoadReadyForScroll: true,
+    isLoadReadyForScroll: false,
     isTransformPixels: true,
     isExcludePixels: false,
     isProcessBySkipCount: true,
@@ -90,8 +90,8 @@ function trr_init(/*Code to resume when done*/ callback ) {
     is7x7_cluster: false,
     isProcessByCluster: false,
     pixelsPerClusterSide: 5,
-    isParticlesFromFile: true,
-    isParticlesFromPhoto: false,
+    isParticlesFromFile: false,
+    isParticlesFromPhoto: true,
     isRenderParticleMap: true,
     isRenderElementsImage: true,
     isCreateElementsObjArray: false,
@@ -182,7 +182,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
   });
   $( "#elements" ).click( function() {
     elements( trrPlugin, {
-      isOnlyIfNewParticleMap: true,
+      isOnlyIfNewParticleMap: false,
       isRenderElementsImage: true,
       isCreateElementsObjArray: false,
       tweenDuration: 2,
