@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------------
 function loadReadyForScroll( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.2) loadReadyForScroll() *");
+  if (_this.logging){console.log( " ..*4.2) loadReadyForScroll() *");}
   var $clickedElem = $( (options.event ? options.event.currentTarget : '#makeReadyForScroll') );
 
   // To be able to use the scrollTo links smoothly, for each photo:
@@ -50,21 +50,21 @@ function selectPhotoMakeParticlesAndElements(  _this, options, photo_imgs, photo
   //--------------------------------------------------------------------------
   var photo_img = photo_imgs[photo_index];
   var beforePlayFullStorylayDelayMs = 0,
-      afterPlayFullStoryDelayMs = 1000,
+      afterPlayFullStoryDelayMs = 500,
       photoTag = $(photo_img).attr('photoTag');
   // Select, display specified photo.
   newPhoto( _this, { photoTag: photoTag, photoType: $(photo_img).attr('photoType'), imgSrc: $(photo_img).attr('data-src') },
   /*1-Resume here when done*/ function( image ) {
-  console.log( " ..*4.2.1) selectPhotoMakeParticlesAndElements() NOW Waiting '" + beforePlayFullStorylayDelayMs +
-               "ms' BEFORE creating particles and animation elements and playing story for '" + photoTag + "'. *");
+  if (_this.logging){console.log( " ..*4.2.1) selectPhotoMakeParticlesAndElements() NOW Waiting '" + beforePlayFullStorylayDelayMs +
+               "ms' BEFORE creating particles and animation elements and playing story for '" + photoTag + "'. *");}
   setTimeout(function() {
   /*1a-Resume here when Timeout done*/
   // make ParticleMap, Animation Elements at rest position, Expand to Full Image,
   // Collapse to rest position.
   playFullStory( _this, photoTag, options,
   /*1b-Resume here when done*/ function( story ) {
-  console.log( " ..*4.2.2) selectPhotoMakeParticlesAndElements() NOW Waiting '" + afterPlayFullStoryDelayMs +
-               "ms' AFTER playing story for '" + photoTag + "'. *");
+  if (_this.logging){console.log( " ..*4.2.2) selectPhotoMakeParticlesAndElements() NOW Waiting '" + afterPlayFullStoryDelayMs +
+               "ms' AFTER playing story for '" + photoTag + "'. *");}
 
   setTimeout(function() {
   /*1c-Resume here when Timeout done*/

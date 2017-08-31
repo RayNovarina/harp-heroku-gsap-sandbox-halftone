@@ -5,9 +5,9 @@
 function elements( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
   updateSettings( _this, options );
-  console.log( " ..*4) elements() for active story '" + _this.activeStory.tag +
+  if (_this.logging){console.log( " ..*4) elements() for active story '" + _this.activeStory.tag +
                "'. ParticlesFromPhoto: '" +  _this.settings.isParticlesFromPhoto +
-               "'. ParticlesFromFile: '" +  _this.settings.isParticlesFromFile + "' *");
+               "'. ParticlesFromFile: '" +  _this.settings.isParticlesFromFile + "' *");}
 
   getParticles( _this, options, _this.activeStory,
   /*1-Resume here when done*/ function( particlesInfo ) {
@@ -60,7 +60,7 @@ function createSvgElementsFromParticles( _this, options, callback ) {
       $sceneContainerElem = $( sceneContainerElem ),
       elementsContainer = _this.activeScene.animationElements.container,
       domElementsObjsArray = [];
-  console.log( " ..*4.1) createSvgElementsFromParticleMap() Particles source: '" + _this.activeStory.particlesInfo.source +
+  if (_this.logging){console.log( " ..*4.1) createSvgElementsFromParticleMap() Particles source: '" + _this.activeStory.particlesInfo.source +
                "'. numParticles = '" + _this.activeStory.particlesInfo.numParticles +
                "'. nextParticleMethod: '" + _this.settings.createAnimationElementsParams.nextParticleMethod +
                "'. RenderElementsImage: '" + _this.settings.isRenderElementsImage +
@@ -69,7 +69,7 @@ function createSvgElementsFromParticles( _this, options, callback ) {
                "'. mainTimeline.tweenDuration: '" + _this.settings.tweenDuration +
                "'. StartImageCollapsed: '" + _this.settings.isStartImageCollapsed +
                "'. ElementVisible: '" + _this.settings.isElementVisible +
-               "'. *");
+               "'. *");}
 
   // Insert the REQUIRED <svg> tag within the sceneContainer to contain the svg <circle> elements.
   // NOTE: browser can not directly add <svg> or <circle> tags, need to use "w3.org namespace".
@@ -186,11 +186,11 @@ function createSvgElementsFromParticles( _this, options, callback ) {
       isReversed: true,
     },
   };
-  console.log( " ..*4.1a)createSvgElementsFromParticleMap(): Made " + numElements +
+  if (_this.logging){console.log( " ..*4.1a)createSvgElementsFromParticleMap(): Made " + numElements +
                " " + _this.settings.createAnimationElementsParams.type +
                " AnimationElements that start in a '" +
                     (_this.settings.isStartImageCollapsed ? 'COLLAPSED' : 'EXPANDED') +
-               "' position. *");
+               "' position. *");}
 
   if ( typeof callback == 'function' ) { callback( results ); return; }
   return results;
@@ -265,17 +265,17 @@ function createExpandedPositionSVGelement( _this, options, particle, coreX, core
 }; // end calcCoreY()
 
 //----------------------------------------------------------------------------
-function playTimelineForwards( tcb ) {
+function playTimelineForwards( _this, tcb ) {
   //----------------------------------------------------------------------------
-  console.log( " ..*4.2) playTimelineForwards(): will set isReversed to 'false' *");
+  if (_this.logging){console.log( " ..*4.2) playTimelineForwards(): will set isReversed to 'false' *");}
   tcb.gsapTimeline.play(); //pause(5);
   tcb.isReversed = false;
 }; // end: playTimelineForwards()
 
 //----------------------------------------------------------------------------
-function playTimelineBackwards( tcb ) {
+function playTimelineBackwards( _this, tcb ) {
   //----------------------------------------------------------------------------
-  console.log( " ..*4.3) playTimelineBackwards(): will set isReversed to 'true' *");
+  if (_this.logging){console.log( " ..*4.3) playTimelineBackwards(): will set isReversed to 'true' *");}
   tcb.gsapTimeline.reverse();
   tcb.isReversed = true;
 }; // end: playTimelineBackwards()
@@ -283,10 +283,10 @@ function playTimelineBackwards( tcb ) {
 //----------------------------------------------------------------------------
 function isInStartPosition( _this, story ) {
   //----------------------------------------------------------------------------
-  console.log( " ..*4.4) isInStartPosition(): " +
+  if (_this.logging){console.log( " ..*4.4) isInStartPosition(): " +
                "StartImageExpanded: '" + _this.settings.isStartImageExpanded +
                "'. Will return: '" + ( _this.settings.isStartImageExpanded
-                    ? isInExpandedPosition( _this, story ) : isInCollapsedPosition( _this, story ) ) + "'*");
+                    ? isInExpandedPosition( _this, story ) : isInCollapsedPosition( _this, story ) ) + "'*");}
   return _this.settings.isStartImageExpanded
     ? isInExpandedPosition( _this, story )
     : isInCollapsedPosition( _this, story );
@@ -305,10 +305,10 @@ function startPosition( _this, story, tcb ) {
 //----------------------------------------------------------------------------
 function isInExpandedPosition( _this, story ) {
   //----------------------------------------------------------------------------
-  console.log( " ..*4.5) isInExpandedPosition(): " +
+  if (_this.logging){console.log( " ..*4.5) isInExpandedPosition(): " +
                "StartImageExpanded: '" + _this.settings.isStartImageExpanded +
                "'. Will return: '" + ( _this.settings.isStartImageExpanded
-                    ? story.timelines.main.isReversed : !story.timelines.main.isReversed ) + "'*");
+                    ? story.timelines.main.isReversed : !story.timelines.main.isReversed ) + "'*");}
   if ( _this.settings.isStartImageExpanded ) {
     // Note: main.isReversed means "image is expanded"
     return story.timelines.main.isReversed;
@@ -321,8 +321,8 @@ function isInExpandedPosition( _this, story ) {
 //----------------------------------------------------------------------------
 function isInCollapsedPosition( _this, story ) {
   //----------------------------------------------------------------------------
-  console.log( " ..*4.6) isInCollapsedPosition(): " +
+  if (_this.logging){console.log( " ..*4.6) isInCollapsedPosition(): " +
                "StartImageExpanded: '" + _this.settings.isStartImageExpanded +
-               "'. Will return: '" + !isInExpandedPosition( _this, story ) + "'*");
+               "'. Will return: '" + !isInExpandedPosition( _this, story ) + "'*");}
   return !isInExpandedPosition( _this, story );
 }; // end: isInCollapsedPosition()

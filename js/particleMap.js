@@ -6,10 +6,10 @@ function createParticleMap( _this, options, /*Code to resume when done*/ callbac
   //----------------------------------------------------------------------------
   createParticleMap_reset( _this );
   updateSettings( _this, options );
-  console.log( " ..*5) createParticleMap() for id: '" + options.id +
+  if (_this.logging){console.log( " ..*5) createParticleMap() for id: '" + options.id +
                "'. particlesHomeOffsetLeft: '" + _this.settings.particlesHomeOffsetLeft +
                "'. particlesHomeOffsetTop: '" + _this.settings.particlesHomeOffsetTop +
-               "'. *");
+               "'. *");}
   _this.containerBackgroundRGB = _this.imgDataBackgroundRGB;
   _this.containerBackgroundRGBA = _this.imgDataBackgroundRGBA;
   results = makeCartesianGridParticles( _this, {
@@ -17,7 +17,7 @@ function createParticleMap( _this, options, /*Code to resume when done*/ callbac
       additionalHomeOffsetLeft: 2,
       additionalHomeOffsetTop: 0,
   } );
-  console.log( " ..*5a) createParticleMap() Created HomePositionParticles[" + results.particles.length + "] *");
+  if (_this.logging){console.log( " ..*5a) createParticleMap() Created HomePositionParticles[" + results.particles.length + "] *");}
   if ( typeof callback == 'function' ) { callback( results.particles ); return; }
   return results.particles;
 }; // end: createParticleMap()
@@ -43,7 +43,7 @@ function createParticleMap_reset( _this, options ) {
 function makeCartesianGridParticles( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
   updateSettings( _this, options );
-  console.log( " ..*5.2) makeCartesianGridParticles() for id: " + _this.settings.id +
+  if (_this.logging){console.log( " ..*5.2) makeCartesianGridParticles() for id: " + _this.settings.id +
                ". Particles Home position Offset left: " + _this.settings.particlesHomeOffsetLeft +
                ". top: " + _this.settings.particlesHomeOffsetTop +
                ". Particles additional Offset left: " + _this.settings.additionalHomeOffsetLeft +
@@ -62,7 +62,7 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
 
                ". isRejectParticlesOutOfBounds: " + _this.settings.isRejectParticlesOutOfBounds +
                ". isRejectParticlesBelowIntensityThreshold: " + _this.settings.isRejectParticlesBelowIntensityThreshold +
-               ". isRejectParticlesSameAsContainerBackground: " + _this.settings.isRejectParticlesSameAsContainerBackground +                 ".");
+               ". isRejectParticlesSameAsContainerBackground: " + _this.settings.isRejectParticlesSameAsContainerBackground + ".");}
 
   // Create local variables to reduce loop overhead.
   var homeOffsetLeft = _this.settings.particlesHomeOffsetLeft + _this.settings.additionalHomeOffsetLeft,
@@ -88,10 +88,10 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
       : _this.settings.isParticlesObjAsArray     ? 'addParticleToArray'
       :                                            'addParticleToString';
 
-  console.log( " ..*5.2a) makeCartesianGridParticles(): BEGIN LOOP: " +
+  if (_this.logging){console.log( " ..*5.2a) makeCartesianGridParticles(): BEGIN LOOP: " +
                " gridSize: '" + gridSize + "'. rows: '" + rows + "'. columns: '" + cols +
                "'. Max number of particles: '" + maxNumOfParticles +
-               "'. addParticleMethod: '" + _this.settings.addParticleMethod + "'. *");
+               "'. addParticleMethod: '" + _this.settings.addParticleMethod + "'. *");}
 
   var particles = null;
   var carryOverResults = {};
@@ -156,7 +156,7 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
     homeOffsetTop: homeOffsetTop,
   };
 
-  console.log( " ..*5.2b) makeCartesianGridParticles(): END LOOP: HomePositionParticles[].len = " +
+  if (_this.logging){console.log( " ..*5.2b) makeCartesianGridParticles(): END LOOP: HomePositionParticles[].len = " +
                particles.length + ". Out of " + maxNumOfParticles + " possible. " +
                "Particles Rejected Because Particle Is Out Of Bounds = '" +
                _this.particlesRejectedBecauseParticleIsOutOfBounds +
@@ -174,7 +174,7 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
                _this.particlesRejectedBecauseIsNonCenterMemberOfCluster +
                "'. Particles Rejected Because PixelIndex Is Out Of Bounds = '" +
                _this.particlesRejectedBecausePixelIndexIsOutOfBounds +
-               "'. *");
+               "'. *");}
 
   if ( typeof callback == 'function' ) { callback( results ); return; }
   return results;

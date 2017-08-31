@@ -14,17 +14,17 @@ function updateSettings( _this, options ) {
 function newPhoto( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
   updateSettings( _this, options );
-  console.log( " ..*3) newPhoto() photoType: '" + _this.settings.photoType +
+  if (_this.logging){console.log( " ..*3) newPhoto() photoType: '" + _this.settings.photoType +
                "'. photoTag: '" + _this.settings.photoTag +
                "'. Current img.src: '" + _this.settings.img.src +
-               "'. New imgSrc: '" + _this.settings.imgSrc + "'. *");
+               "'. New imgSrc: '" + _this.settings.imgSrc + "'. *");}
   _this.selectedPhotoTag = '';
 
   _this.settings.img.onload =
   /*1-Resume here when done*/ function() {
-  console.log( " ..*3a) newPhoto() img.onload() Loaded src: '" + _this.settings.$img.attr('src') +
+  if (_this.logging){console.log( " ..*3a) newPhoto() img.onload() Loaded src: '" + _this.settings.$img.attr('src') +
                "'. img.width: '" + _this.settings.img.width + "'. img.height: '" + _this.settings.img.height +
-               "'. *");
+               "'. *");}
 
   // Hide the active/visible sceneContainer.
   closeActiveSceneContainer( _this,
@@ -54,7 +54,7 @@ function newPhoto( _this, options, /*Code to resume when done*/ callback ) {
   _this.activeScene = _this.activeStory.lastActiveScene;
   openSceneContainer( _this, _this.activeStory.lastActiveScene );
 
-  console.log( " ..*3a) newPhoto() DONE. *");
+  if (_this.logging){console.log( " ..*3a) newPhoto() DONE. *");}
   if ( typeof callback == 'function' ) { callback( _this.activeStory.image ); return; }
   return _this.activeStory.image;
   /*3-*/});/*2-*/});/*1-*/}; // end img.onload()
@@ -65,7 +65,7 @@ function newPhoto( _this, options, /*Code to resume when done*/ callback ) {
 //----------------------------------------------------------------------------
 function getImgData( _this, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*3.1 getImgData() *");
+  if (_this.logging){console.log( " ..*3.1 getImgData() *");}
 
   _this.effectsData = { canvasBackgroundColor: '', particles: [] };
   var canvasAndCtx = makeCanvasAndCtx();
@@ -81,11 +81,12 @@ function getImgData( _this, /*Code to resume when done*/ callback ) {
   _this.imgData = _this.imgDataObj.data;
   _this.imgDataBackgroundRGBA = pixelToRgbxString( _this.imgData, 0, true );
   _this.imgDataBackgroundRGB = pixelToRgbxString( _this.imgData, 0, false );
+  if (_this.logging){
   console.log( " ..*3.1 getImgData(): imgData.character.len = '" + _this.imgData.length +
   						 "'. imgData.RGBA_arrayCells = '" + _this.imgData.length / 4 +
   						 "'. imgWidth = '" + _this.imgWidth + "'. imgHeight = '" + _this.imgHeight +
   						 "'. Image Background RGB() = '" + _this.imgDataBackgroundRGB +
-               "'. Image Background RGBA() = '" + _this.imgDataBackgroundRGBA + "' *");
+               "'. Image Background RGBA() = '" + _this.imgDataBackgroundRGBA + "' *");}
   if ( typeof callback == 'function' ) { callback( _this.imgDataObj ); return; }
   return _this.imgDataObj;
 } // end: getImgData()
@@ -94,7 +95,7 @@ function getImgData( _this, /*Code to resume when done*/ callback ) {
 function createScene( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
   updateSettings( _this, options );
-  console.log( " ..*3.2) createScene() For sceneTag: '" + _this.settings.sceneTag + "'. *");
+  if (_this.logging){console.log( " ..*3.2) createScene() For sceneTag: '" + _this.settings.sceneTag + "'. *");}
 
   // Create container per panel and options specified in settings.
   createSceneContainer( _this, {
@@ -121,11 +122,11 @@ function createScene( _this, options, /*Code to resume when done*/ callback ) {
 function createSceneContainer( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
   updateSettings( _this, options );
-  console.log( " ..*3.4) createSceneContainer() For '" + _this.settings.panel + "' Panel. " +
+  if (_this.logging){console.log( " ..*3.4) createSceneContainer() For '" + _this.settings.panel + "' Panel. " +
                "sceneTag: '" + _this.settings.sceneTag +
                "'. CreateElementsSceneContainer: '" + _this.settings.isCreateElementsSceneContainer +
                "'. VisibleElementsSceneContainer: '" + _this.settings.isVisibleElementsSceneContainer +
-               "'. *");
+               "'. *");}
 
   // NOTE: will remove existing sceneContainer if it already exists.
   createSceneContainer_reset( _this,
@@ -159,7 +160,7 @@ function createSceneContainer( _this, options, /*Code to resume when done*/ call
       elem: sceneContainerElem,
     }
   };
-  console.log( " ..*3.4a) createSceneContainer() " +
+  if (_this.logging){console.log( " ..*3.4a) createSceneContainer() " +
                ( _this.activeScene.container.html.elem
                   ? ( "container.width: '" +  _this.activeScene.container.html.elem.style.width +
                       "'. container.height: '" + _this.activeScene.container.html.elem.style.height +
@@ -168,7 +169,7 @@ function createSceneContainer( _this, options, /*Code to resume when done*/ call
                     )
                   : '** container not created **'
                )
-               + " *");
+               + " *");}
 
   if ( typeof callback == 'function' ) { callback( _this.activeScene.container ); return; }
   return _this.activeScene.container;
@@ -213,11 +214,11 @@ function createSceneContainer_reset( _this, callback ) {
 function createAnimationElements( _this, options, /*Code to resume when done*/ callback ) {
   //----------------------------------------------------------------------------
   updateSettings( _this, options );
-  console.log( " ..*3.8) createAnimationElements() For " +
+  if (_this.logging){console.log( " ..*3.8) createAnimationElements() For " +
                "sceneTag: '" + _this.settings.scene.tag +
                "' in Panel: '" + _this.settings.panel +
                "' using method '" + _this.settings.createAnimationElementsParams.method +
-               "' *");
+               "' *");}
 
   createAnimationElements_reset( _this,
   /*1-Resume here when done*/ function() {
@@ -442,9 +443,9 @@ function tagToScene( _this, sceneTag, story, callback ) {
 //----------------------------------------------------------------------------
 function openSceneContainer( _this, scene ) {
   //----------------------------------------------------------------------------
-  console.log( " ..*3.7) openSceneContainer() sceneTag: '" +
+  if (_this.logging){console.log( " ..*3.7) openSceneContainer() sceneTag: '" +
                ( scene ? (scene.tag + "'. sceneContainer.id: '" + ( scene.container.html.elem ? scene.container.html.elem.id : '*none*') )
-                       : '*none' ) + "'. *");
+                       : '*none' ) + "'. *");}
   if ( !scene ||
        !scene.container.html.elem ) {
     return;
@@ -455,9 +456,9 @@ function openSceneContainer( _this, scene ) {
 //----------------------------------------------------------------------------
 function closeSceneContainer( _this, scene ) {
   //----------------------------------------------------------------------------
-  console.log( " ..*3.7) closeSceneContainer() sceneTag: '" +
+  if (_this.logging){console.log( " ..*3.7) closeSceneContainer() sceneTag: '" +
                ( scene ? (scene.tag + "'. sceneContainer.id: '" + scene.container.html.elem.id)
-                       : '*none' ) + "'. *");
+                       : '*none' ) + "'. *");}
   if ( !scene ||
        !scene.container.html.elem ||
        ( (_this.settings.sceneTag == 'elements') && _this.settings.isVisibleElementsSceneContainer ) ) {
@@ -478,9 +479,9 @@ function closeActiveSceneContainer( _this, callback ) {
     if ( typeof callback == 'function' ) { callback( null ); return; }
     return null;
   }
-  console.log( " ..*3.7) closeActiveSceneContainer() activeStory: '" + _this.activeStory.tag +
+  if (_this.logging){console.log( " ..*3.7) closeActiveSceneContainer() activeStory: '" + _this.activeStory.tag +
                "'. activeScene: '" + _this.activeScene.tag +
-               "'. activeSceneContainer: '" + _this.activeScene.container.html.elem.id + "'. *");
+               "'. activeSceneContainer: '" + _this.activeScene.container.html.elem.id + "'. *");}
 
   _this.activeScene.container.html.elem.style.display = 'none';
   if ( typeof callback == 'function' ) { callback( _this.activeScene ); return; }
@@ -504,11 +505,11 @@ function openLastActiveSceneContainer( _this, callback ) {
   if ( activeScene ) {
     activeScene.container.html.elem.style.display = 'block';
   }
-  console.log( " ..*3.7) openLastActiveSceneContainer() activeStory: '" + _this.activeStory.tag +
+  if (_this.logging){console.log( " ..*3.7) openLastActiveSceneContainer() activeStory: '" + _this.activeStory.tag +
                "'. activeScene: '" +
                       (activeScene ? (activeScene.tag + "'. activeSceneContainer: '" + activeScene.container.html.elem.id)
                                    : '*none*') +
-               "'. *");
+               "'. *");}
 
   if ( typeof callback == 'function' ) { callback( activeScene ); return; }
   return activeScene;
@@ -520,7 +521,7 @@ function openLastActiveSceneContainer( _this, callback ) {
 //----------------------------------------------------------------------------
 function cbox_useSVGelements( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.5) cbox_useSVGelements() Box checked = '" + $( '#cbox_useSVG' ).prop('checked') + "'. *");
+  if (_this.logging){console.log( " ..*4.5) cbox_useSVGelements() Box checked = '" + $( '#cbox_useSVG' ).prop('checked') + "'. *");}
   _this.settings.isUseSVGelements = $( '#cbox_useSVG' ).prop('checked');
   if ( typeof callback == 'function' ) { callback(); return; }
 }; // end: function cbox_useSVGelements()
@@ -528,7 +529,7 @@ function cbox_useSVGelements( _this, options, /*Code to resume when done*/ callb
 //----------------------------------------------------------------------------
 function cbox_atStartCollapsed( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.5) cbox_atStartCollapsed() Box checked = '" + $( '#cbox_atStartCollapsed' ).prop('checked') + "'. *");
+  if (_this.logging){console.log( " ..*4.5) cbox_atStartCollapsed() Box checked = '" + $( '#cbox_atStartCollapsed' ).prop('checked') + "'. *");}
   _this.settings.isStartImageCollapsed = $( '#cbox_atStartCollapsed' ).prop('checked');
   _this.settings.isStartImageExpanded = !_this.settings.isStartImageCollapsed
   $( '#cbox_atStartExpanded' ).prop('checked', _this.settings.isStartImageExpanded );
@@ -538,7 +539,7 @@ function cbox_atStartCollapsed( _this, options, /*Code to resume when done*/ cal
 //----------------------------------------------------------------------------
 function cbox_atStartExpanded( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.5) cbox_atStartExpanded() Box checked = '" + $( '#cbox_atStartExpanded' ).prop('checked') + "'. *");
+  if (_this.logging){console.log( " ..*4.5) cbox_atStartExpanded() Box checked = '" + $( '#cbox_atStartExpanded' ).prop('checked') + "'. *");}
   _this.settings.isStartImageExpanded = $( '#cbox_atStartExpanded' ).prop('checked');
   _this.settings.isStartImageCollapsed = !_this.settings.isStartImageExpanded
   $( '#cbox_atStartCollapsed' ).prop('checked', _this.settings.isStartImageCollapsed );
@@ -548,7 +549,7 @@ function cbox_atStartExpanded( _this, options, /*Code to resume when done*/ call
 //----------------------------------------------------------------------------
 function cbox_visible( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.5) cbox_atStartExpanded() Box checked = '" + $( '#cbox_visible' ).prop('checked') + "'. *");
+  if (_this.logging){console.log( " ..*4.5) cbox_atStartExpanded() Box checked = '" + $( '#cbox_visible' ).prop('checked') + "'. *");}
   _this.settings.isElementVisible = $( '#cbox_visible' ).prop('checked');
   if ( typeof callback == 'function' ) { callback(); return; }
 }; // end: cbox_visible()
@@ -556,7 +557,7 @@ function cbox_visible( _this, options, /*Code to resume when done*/ callback ) {
 //----------------------------------------------------------------------------
 function cbox_particlesFromPhoto( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.5) cbox_particlesFromPhoto() Box checked = '" + $( '#cbox_fromPhoto' ).prop('checked') + "'. *");
+  if (_this.logging){console.log( " ..*4.5) cbox_particlesFromPhoto() Box checked = '" + $( '#cbox_fromPhoto' ).prop('checked') + "'. *");}
   _this.settings.isParticlesFromPhoto = $( '#cbox_fromPhoto' ).prop('checked');
   _this.settings.isParticlesFromFile = !_this.settings.isParticlesFromPhoto
   $( '#cbox_fromFile' ).prop('checked', _this.settings.isParticlesFromFile );
@@ -566,7 +567,7 @@ function cbox_particlesFromPhoto( _this, options, /*Code to resume when done*/ c
 //----------------------------------------------------------------------------
 function cbox_particlesFromFile( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.5) cbox_particlesFromFile() Box checked = '" + $( '#cbox_fromFile' ).prop('checked') + "'. *");
+  if (_this.logging){console.log( " ..*4.5) cbox_particlesFromFile() Box checked = '" + $( '#cbox_fromFile' ).prop('checked') + "'. *");}
   _this.settings.isParticlesFromFile = $( '#cbox_fromFile' ).prop('checked');
   _this.settings.isParticlesFromPhoto = !_this.settings.isParticlesFromFile
   $( '#cbox_fromPhoto' ).prop('checked', _this.settings.isParticlesFromPhoto );
@@ -576,7 +577,7 @@ function cbox_particlesFromFile( _this, options, /*Code to resume when done*/ ca
 //----------------------------------------------------------------------------
 function cbox_transform( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.5) cbox_transform() Box checked = '" + $( '#cbox_transform' ).prop('checked') + "'. *");
+  if (_this.logging){console.log( " ..*4.5) cbox_transform() Box checked = '" + $( '#cbox_transform' ).prop('checked') + "'. *");}
   _this.settings.isTransformPixels = $( '#cbox_transform' ).prop('checked');
   _this.settings.isExcludePixels = !_this.settings.isTransformPixels
   $( '#cbox_exclude' ).prop('checked', _this.settings.isExcludePixels );
@@ -586,7 +587,7 @@ function cbox_transform( _this, options, /*Code to resume when done*/ callback )
 //----------------------------------------------------------------------------
 function cbox_exclude( _this, options, /*Code to resume when done*/ callback ) {
 //--------------------------------------------------------------------------
-  console.log( " ..*4.5) cbox_exclude() Box checked = '" + $( '#cbox_exclude' ).prop('checked') + "'. *");
+  if (_this.logging){console.log( " ..*4.5) cbox_exclude() Box checked = '" + $( '#cbox_exclude' ).prop('checked') + "'. *");}
   _this.settings.isExcludePixels = $( '#cbox_exclude' ).prop('checked');
   _this.settings.isTransformPixels = !_this.settings.isExcludePixels
   $( '#cbox_transform' ).prop('checked', _this.settings.isTransformPixels );
@@ -597,7 +598,7 @@ function cbox_exclude( _this, options, /*Code to resume when done*/ callback ) {
 //----------------------------------------------------------------------------
 function cbox_every1( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.5) cbox_every1() Box checked = '" + $( '#cbox_every1' ).prop('checked') + "'. *");
+  if (_this.logging){console.log( " ..*4.5) cbox_every1() Box checked = '" + $( '#cbox_every1' ).prop('checked') + "'. *");}
   if ( $( '#cbox_every1' ).prop('checked') ) {
     _this.settings.isProcessBySkipCount = true;
     _this.settings.isProcessByCluster = false;
@@ -616,7 +617,7 @@ function cbox_every1( _this, options, /*Code to resume when done*/ callback ) {
 //----------------------------------------------------------------------------
 function cbox_every2( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.5) cbox_every2() Box checked = '" + $( '#cbox_every2' ).prop('checked') + "'. *");
+  if (_this.logging){console.log( " ..*4.5) cbox_every2() Box checked = '" + $( '#cbox_every2' ).prop('checked') + "'. *");}
   if ( $( '#cbox_every2' ).prop('checked') ) {
     _this.settings.isProcessBySkipCount = true;
     _this.settings.isProcessByCluster = false;
@@ -635,7 +636,7 @@ function cbox_every2( _this, options, /*Code to resume when done*/ callback ) {
 //----------------------------------------------------------------------------
 function cbox_every3( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.5) cbox_every3() Box checked = '" + $( '#cbox_every3' ).prop('checked') + "'. *");
+  if (_this.logging){console.log( " ..*4.5) cbox_every3() Box checked = '" + $( '#cbox_every3' ).prop('checked') + "'. *");}
   if ( $( '#cbox_every3' ).prop('checked') ) {
     _this.settings.isProcessBySkipCount = true;
     _this.settings.isProcessByCluster = false;
@@ -654,7 +655,7 @@ function cbox_every3( _this, options, /*Code to resume when done*/ callback ) {
 //----------------------------------------------------------------------------
 function cbox_every4( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.5) cbox_every4() Box checked = '" + $( '#cbox_every4' ).prop('checked') + "'. *");
+  if (_this.logging){console.log( " ..*4.5) cbox_every4() Box checked = '" + $( '#cbox_every4' ).prop('checked') + "'. *");}
   if ( $( '#cbox_every4' ).prop('checked') ) {
     _this.settings.isProcessBySkipCount = true;
     _this.settings.isProcessByCluster = false;
@@ -673,7 +674,7 @@ function cbox_every4( _this, options, /*Code to resume when done*/ callback ) {
 //----------------------------------------------------------------------------
 function cbox_1x1_cluster( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.5) cbox_1x1_cluster() Box checked = '" + $( '#cbox_1x1_cluster' ).prop('checked') + "'. *");
+  if (_this.logging){console.log( " ..*4.5) cbox_1x1_cluster() Box checked = '" + $( '#cbox_1x1_cluster' ).prop('checked') + "'. *");}
   if ( $( '#cbox_1x1_cluster' ).prop('checked') ) {
     _this.settings.isProcessBySkipCount = false;
     _this.settings.isProcessByCluster = true;
@@ -692,7 +693,7 @@ function cbox_1x1_cluster( _this, options, /*Code to resume when done*/ callback
 //----------------------------------------------------------------------------
 function cbox_3x3_cluster( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.5) cbox_3x3_cluster() Box checked = '" + $( '#cbox_3x3_cluster' ).prop('checked') + "'. *");
+  if (_this.logging){console.log( " ..*4.5) cbox_3x3_cluster() Box checked = '" + $( '#cbox_3x3_cluster' ).prop('checked') + "'. *");}
   if ( $( '#cbox_3x3_cluster' ).prop('checked') ) {
     _this.settings.isProcessBySkipCount = false;
     _this.settings.isProcessByCluster = true;
@@ -711,7 +712,7 @@ function cbox_3x3_cluster( _this, options, /*Code to resume when done*/ callback
 //----------------------------------------------------------------------------
 function cbox_5x5_cluster( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.5) cbox_5x5_cluster() Box checked = '" + $( '#cbox_5x5_cluster' ).prop('checked') + "'. *");
+  if (_this.logging){console.log( " ..*4.5) cbox_5x5_cluster() Box checked = '" + $( '#cbox_5x5_cluster' ).prop('checked') + "'. *");}
   if ( $( '#cbox_5x5_cluster' ).prop('checked') ) {
     _this.settings.isProcessBySkipCount = false;
     _this.settings.isProcessByCluster = true;
@@ -730,7 +731,7 @@ function cbox_5x5_cluster( _this, options, /*Code to resume when done*/ callback
 //----------------------------------------------------------------------------
 function cbox_7x7_cluster( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.5) cbox_7x7_cluster() Box checked = '" + $( '#cbox_7x7_cluster' ).prop('checked') + "'. *");
+  if (_this.logging){console.log( " ..*4.5) cbox_7x7_cluster() Box checked = '" + $( '#cbox_7x7_cluster' ).prop('checked') + "'. *");}
   if ( $( '#cbox_7x7_cluster' ).prop('checked') ) {
     _this.settings.isProcessBySkipCount = false;
     _this.settings.isProcessByCluster = true;

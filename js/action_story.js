@@ -4,17 +4,17 @@
 //----------------------------------------------------------------------------
 function playSelectedStory( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.2) playSelectedStory() for activeStory: '" + _this.activeStory.tag + "' *");
+  if (_this.logging){console.log( " ..*4.2) playSelectedStory() for activeStory: '" + story.tag + "' *");}
 
   // Hide the active/visible sceneContainer, we will replace it with ours.
   closeActiveSceneContainer( _this,
   /*1-Resume here when done*/ function( activeScene ) {
-  tagToScene( _this, 'elements', _this.activeStory,
+  tagToScene( _this, 'elements', story,
   /*2-Resume here when done*/ function( result ) {
   openSceneContainer( _this, result.item );
 
   // Play story for active/selectedPhoto. All scenes, i.e. expand and main.
-  playStory( _this, _this.activeStory.tag, options,
+  playStory( _this, story.tag, options,
   /*3-Resume here when done*/ function( story ) {
   if ( typeof callback == 'function' ) { callback( story ); return; }
   return story;
@@ -24,7 +24,7 @@ function playSelectedStory( _this, options, /*Code to resume when done*/ callbac
 //----------------------------------------------------------------------------
 function playFullStory( _this, photoTag, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.2) playFullStory() create ParticleMap, animation elements, play story for '" + photoTag + "'. All scenes, i.e. expand and collapse. *");
+  if (_this.logging){console.log( " ..*4.2) playFullStory() create ParticleMap, animation elements, play story for '" + photoTag + "'. All scenes, i.e. expand and collapse. *");}
   options.tweenDuration = 3;
   elements( _this, {
     isOnlyIfNewParticleMap: false,
@@ -46,7 +46,7 @@ function playFullStory( _this, photoTag, options, /*Code to resume when done*/ c
 //----------------------------------------------------------------------------
 function playStory( _this, photoTag, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.2) playStory() Play story for '" + photoTag + "'. All scenes, i.e. expand and collapse. *");
+  if (_this.logging){console.log( " ..*4.2) playStory() Play story for '" + photoTag + "'. All scenes, i.e. expand and collapse. *");}
 
   photoTagToStory( _this, photoTag,
   /*1-Resume here when done*/ function( result ) {
@@ -62,32 +62,45 @@ function playStory( _this, photoTag, options, /*Code to resume when done*/ callb
 
   // NOTE: a story is a "collapse and expand" cycle. Play timeline forwards and in reverse.
   // First make sure we start in the "start" state.
-  var delayMsToWaitForStartState = 0;
+  var delayMsToWaitForStartState = 500;
   if ( !isInStartPosition( _this, story ) ) {
     // The start position of a timeline depends on how the timeline was initially built.
-    startPosition( _this, _this.activeStory, _this.activeStory.timelines.main );
+    startPosition( _this, story, story.timelines.main );
     delayMsToWaitForStartState = (options.tweenDuration * 1000) + 500;
   }
   // Wait for image to get into start position.
   setTimeout(function() {
   /*1a-Resume here when Timeout done*/
 
-  playTimelineForwards( _this.activeStory.timelines.main );
+  playTimelineForwards( _this, story.timelines.main );
   // Wait for timeline.play() to complete.
-  var delayMsToWaitForTimelinePlay = (options.tweenDuration * 1000) + 1500;
+  var delayMsToWaitForTimelinePlay = (options.tweenDuration * 1000);
   setTimeout(function() {
   /*1b-Resume here when Timeout done*/
 
-  playTimelineBackwards( _this.activeStory.timelines.main );
+  playTimelineBackwards( _this, story.timelines.main );
   // Wait for timeline.reverse() to complete.
-  var delayMsToWaitForTimelineReverse = options.tweenDuration * 1000;
+  var delayMsToWaitForTimelineReverse = (options.tweenDuration * 1000) + 500;
   setTimeout(function() {
   /*1c-Resume here when Timeout done*/
+
+  var delayMsToWaitForCollapsedState = 0;
+  if ( !isInCollapsedPosition( _this, story ) ) {
+    startPosition( _this, story, story.timelines.main );
+    // HACK?
+    _this.activeStory = story;
+    collapse( _this, {} );
+    delayMsToWaitForCollapsedState = (options.tweenDuration * 1000) + 0;
+  }
+  // Wait for image to get into collapsed position.
+  setTimeout(function() {
+  /*1d-Resume here when Timeout done*/
 
   if ( typeof callback == 'function' ) { callback( story ); return; }
   return story;
 
-}, delayMsToWaitForTimelineReverse); // end /*1c-timeout*/
+  }, delayMsToWaitForCollapsedState); // end /*1d-timeout*/
+  }, delayMsToWaitForTimelineReverse); // end /*1c-timeout*/
   }, delayMsToWaitForTimelinePlay); // end /*1b-timeout*/
   }, delayMsToWaitForStartState); // end /*1a-timeout*/
   /*1-*/});

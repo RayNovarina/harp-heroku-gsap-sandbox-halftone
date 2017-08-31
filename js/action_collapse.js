@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------------
 function collapse( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.2) collapse() for activeStory: '" + _this.activeStory.tag + "' *");
+  if (_this.logging){console.log( " ..*4.2) collapse() for activeStory: '" + _this.activeStory.tag + "' *");}
 
   // animationElements MUST have already been created.
   if ( !_this.activeStory.timelines ||
@@ -27,11 +27,11 @@ function collapse( _this, options, /*Code to resume when done*/ callback ) {
     if ( _this.settings.isStartImageExpanded ) {
       // If built in expanded position and currently expanded, play timeline
       // forwards to move particles from full image position to collapsed position.
-      playTimelineForwards( _this.activeStory.timelines.main );
+      playTimelineForwards( _this, _this.activeStory.timelines.main );
     } else { // _this.settings.isStartImageCollapsed ) {
       // If built in collapsed position and currently expanded, play timeline in
       // reverse to move particles from full image position to collapsed position.
-      playTimelineBackwards( _this.activeStory.timelines.main );
+      playTimelineBackwards( _this, _this.activeStory.timelines.main );
     }
   } // else { // we are already in a collapsed position, nothing to do.
 
@@ -75,7 +75,7 @@ function collapse( _this, options, /*Code to resume when done/ callback ) {
   _this.activeScene = collapseScene;
   var animationElements = _this.activeScene.animationElements.domElements.html.elems;
 
-  console.log( " ..*4.3) collapse() animationElementsContainer: '" + $( _this.activeScene.animationElements.container.html.elem ).attr( 'id' ) +
+  if (_this.logging){console.log( " ..*4.3) collapse() animationElementsContainer: '" + $( _this.activeScene.animationElements.container.html.elem ).attr( 'id' ) +
                "' which has " + animationElements.length + " elements" +
                ". Tween Duration: '" + options.tweenDuration + "'. *");
 
@@ -106,7 +106,7 @@ function collapse( _this, options, /*Code to resume when done/ callback ) {
     )); // end Timeline.insert()
     if ( idx == animationElements.length - 1 ) {
       /**-Resume here when done with $.each() loop./
-      console.log( " ..*4.3a) collapse() Tweened " + ( animationElements.length - 1 ) +
+      if (_this.logging){console.log( " ..*4.3a) collapse() Tweened " + ( animationElements.length - 1 ) +
                    " AnimationElements. *");
       playSceneIfAutoPlay( _this, { scene: collapseScene },
       /*2a-Resume here when done/ function( timeline ) {

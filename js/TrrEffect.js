@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 function TrrEffect() {
   //----------------------------------------------------------------------------
-  console.log( " ..*2) TrrEffect() Create new TrrEffect instance. *");
+  //console.log( " ..*2) TrrEffect() Create new TrrEffect instance. *");
   // Public CONSTANTS accessible via TrrEffect.xxx
   this.TAU = Math.PI * 2;
   this.ROOT_2 = Math.sqrt( 2 );
@@ -16,6 +16,6 @@ function TrrEffect() {
 
 function TrrForEach( photo_imgs, locals, forEachFunction ) {
   //----------------------------------------------------------------------------
-  console.log( " ..*2.1) TrrForEach() Create new TrrForEach instance. *");
+  //console.log( " ..*2.1) TrrForEach() Create new TrrForEach instance. *");
 
 }; // end function TrrForEach()

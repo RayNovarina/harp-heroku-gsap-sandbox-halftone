@@ -5,10 +5,10 @@
 function particles( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
   updateSettings( _this, options );
-  console.log( " ..*4.1) particles() for active story '" + _this.activeStory.tag +
+  if (_this.logging){console.log( " ..*4.1) particles() for active story '" + _this.activeStory.tag +
                "'. ParticlesFromPhoto: '" +  _this.settings.isParticlesFromPhoto +
                "'. ParticlesFromFile: '" +  _this.settings.isParticlesFromFile +
-               "'. RenderParticleMap: '" + _this.settings.isRenderParticleMap + "'. *");
+               "'. RenderParticleMap: '" + _this.settings.isRenderParticleMap + "'. *");}
 
   getParticles( _this, options, _this.activeStory,
   /*1-Resume here when done*/ function( particlesInfo ) {
@@ -53,14 +53,14 @@ function getParticles( _this, options, story, callback ) {
   _this.settings.getParticlesMethod = _this.settings.isParticlesFromFile
         ? 'getParticlesFromDataFile' : 'getParticlesFromImage';
 
-  console.log( " ..*4.1) getParticles() for story '" + story.tag +
-               "'. getParticlesMethod: '" + _this.settings.getParticlesMethod + "'. *");
+  if (_this.logging){console.log( " ..*4.1) getParticles() for story '" + story.tag +
+               "'. getParticlesMethod: '" + _this.settings.getParticlesMethod + "'. *");}
 
   if ( _this.settings.isOnlyIfNewParticleMap &&
        _this.activeStory.particlesInfo.particles &&
        _this.activeStory.particlesInfo.particles.numParticles > 0 ) {
-    console.log( " ..*4.1a) getParticles() OnlyIfNewParticleMap: True. Ignored, " +
-                 "we already have a particleMap with '" + _this.activeStory.particlesInfo.particles.numParticles + "' particles. *");
+    if (_this.logging){console.log( " ..*4.1a) getParticles() OnlyIfNewParticleMap: True. Ignored, " +
+                 "we already have a particleMap with '" + _this.activeStory.particlesInfo.particles.numParticles + "' particles. *");}
     // We are going to reuse these particles, reset pointers.
     _this.activeStory.particlesInfo.nextIndex = 0;
     if ( typeof callback == 'function' ) { callback( _this.activeStory.particlesInfo ); return; }
@@ -80,9 +80,9 @@ function getParticles( _this, options, story, callback ) {
 function getParticlesFromImage( _this, options, story, callback ) {
   //----------------------------------------------------------------------------
   _this.settings.createParticlesInfoMethod = 'createParticlesInfoFromImageDataObj';
-  console.log( " ..*4.1) getParticlesFromImage() for active story '" + _this.activeStory.tag +
+  if (_this.logging){console.log( " ..*4.1) getParticlesFromImage() for active story '" + _this.activeStory.tag +
                "'. By converting photo file: '" + _this.settings.img.src +
-               "'. Using createParticlesInfoMethod: '" + _this.settings.createParticlesInfoMethod + "'. *");
+               "'. Using createParticlesInfoMethod: '" + _this.settings.createParticlesInfoMethod + "'. *");}
 
   getImgData( _this,
   /*1-Resume here when done*/ function( imgDataObj ) {
@@ -96,7 +96,7 @@ function getParticlesFromImage( _this, options, story, callback ) {
 
 //----------------------------------------------------------------------------
 function createParticlesInfoFromImageDataObj( _this, options, imgDataObj, callback ) {
-  console.log( " ..*4.1) createParticlesInfoFromImageDataObj() *");
+  if (_this.logging){console.log( " ..*4.1) createParticlesInfoFromImageDataObj() *");}
   // Create particle array by selecting pixels we want for a halftone image.
   createParticleMap( _this, {
     id: _this.activeStory.tag + '_particleMap',
@@ -153,9 +153,9 @@ function getParticlesFromDataFile( _this, options, story, callback ) {
           : particles_data_file_var.type == 'Array'     ? 'createParticlesInfoFromDataTypeArray'
           :                                                    'createParticlesInfoFromDataTypeString';
 
-  console.log( " ..*4.1) getParticlesFromDataFile() for active story '" + _this.activeStory.tag +
+  if (_this.logging){console.log( " ..*4.1) getParticlesFromDataFile() for active story '" + _this.activeStory.tag +
                "'. From data file: '" + _this.activeStory.tag + "_particles_data" +
-               "'. Using createParticlesInfoMethod: '" + _this.settings.createParticlesInfoMethod + "'. *");
+               "'. Using createParticlesInfoMethod: '" + _this.settings.createParticlesInfoMethod + "'. *");}
 
   window[ _this.settings.createParticlesInfoMethod ]( _this, options, particles_data_file_var,
   /*1-Resume here when done*/ function( particlesInfo ) {
@@ -167,7 +167,7 @@ function getParticlesFromDataFile( _this, options, story, callback ) {
 //----------------------------------------------------------------------------
 function createParticlesInfoFromDataTypeHashArray( _this, options, data_file_var, callback ) {
   //----------------------------------------------------------------------------
-  console.log( " ..*4.1) createParticlesInfoFromDataTypeHashArray() *");
+  if (_this.logging){console.log( " ..*4.1) createParticlesInfoFromDataTypeHashArray() *");}
   // TypeHashArray: convert from JSON string of hash objects. Each hash object
   // already is of our format pixel(x,y,r), so nothing more to reformat.
   var particlesHashArray = data_file_var.data;
@@ -189,7 +189,7 @@ function createParticlesInfoFromDataTypeHashArray( _this, options, data_file_var
 //----------------------------------------------------------------------------
 function createParticlesInfoFromDataTypeArray( _this, options, data_file_var, callback ) {
   //----------------------------------------------------------------------------
-  console.log( " ..*4.1) createParticlesInfoFromDataTypeArray() *");
+  if (_this.logging){console.log( " ..*4.1) createParticlesInfoFromDataTypeArray() *");}
   // TypeArray: convert from JSON string of array items. Each pixel has three
   // array items for r,g,b values.
   var particlesArray = JSON.parse( data_file_var.data );
@@ -212,7 +212,7 @@ function createParticlesInfoFromDataTypeArray( _this, options, data_file_var, ca
 //----------------------------------------------------------------------------
 function createParticlesInfoFromDataTypeString( _this, options, data_file_var, callback ) {
   //----------------------------------------------------------------------------
-  console.log( " ..*4.1) createParticlesInfoFromDataTypeString() *");
+  if (_this.logging){console.log( " ..*4.1) createParticlesInfoFromDataTypeString() *");}
   // TypeArray: convert from JSON string of pixel r,g,b values. Each value is
   // separated by a space.
   var particlesArray = JSON.parse( data_file_var.data ).split(' ');
@@ -276,7 +276,7 @@ function renderParticleMapAsSingleCanvas( _this, options, callback ) {
       $sceneContainerElem = $( sceneContainerElem ),
       elementsContainer = _this.activeScene.animationElements.container,
       imageElem = _this.activeStory.image.html.elem;
-  console.log( " ..*5b.1) renderParticleMapAsSingleCanvas(): For Particles[].len = " + _this.activeStory.particlesInfo.numParticles + ". *");
+  if (_this.logging){console.log( " ..*5b.1) renderParticleMapAsSingleCanvas(): For Particles[].len = " + _this.activeStory.particlesInfo.numParticles + ". *");}
 
   elementsContainer.html = {
     elem: $( document.createElement( "div" ) )
@@ -325,8 +325,8 @@ function renderParticleMapAsSingleCanvas( _this, options, callback ) {
     domElementsObjsArray: [ document.createElement( 'canvas' ) ], // just a required placeholder.
     timelineProps: null,
   };
-  console.log( " ..*5b.2) renderParticleMapAsSingleCanvas(): Made " + numElements +
-               " canvas AnimationElements. *");
+  if (_this.logging){console.log( " ..*5b.2) renderParticleMapAsSingleCanvas(): Made " + numElements +
+               " canvas AnimationElements. *");}
   if ( typeof callback == 'function' ) { callback( results ); return; }
   return results;
 }; // end renderParticleMapAsSingleCanvas()

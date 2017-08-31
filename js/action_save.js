@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------------
 function save( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.2) save() for activeStory: '" + _this.activeStory.tag + "' *");
+  if (_this.logging){console.log( " ..*4.2) save() for activeStory: '" + _this.activeStory.tag + "' *");}
 
   // animationElements MUST have already been created.
   if ( !_this.activeStory.timelines ||

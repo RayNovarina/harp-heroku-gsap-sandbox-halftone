@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------------
 function expand( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  console.log( " ..*4.2) expand() for activeStory: '" + _this.activeStory.tag + "' *");
+  if (_this.logging){console.log( " ..*4.2) expand() for activeStory: '" + _this.activeStory.tag + "' *");}
   // animationElements MUST have already been created.
   if ( !_this.activeStory.timelines ||
        !_this.activeStory.timelines.main ) {
@@ -21,25 +21,25 @@ function expand( _this, options, /*Code to resume when done*/ callback ) {
   openSceneContainer( _this, result.item );
 
   if ( isInCollapsedPosition( _this, _this.activeStory ) ) {
-    console.log( " ..*4.2a) expand(): " +
+    if (_this.logging){console.log( " ..*4.2a) expand(): " +
     "Image is currently collapsed. The direction we play the timeline depends " +
-    "on how the timeline was initially built. *");
+    "on how the timeline was initially built. *");}
     if ( _this.settings.isStartImageCollapsed ) {
-      console.log( " ..*4.2b) expand(): " +
-      "Image initially built in collapsed position. *");
+      if (_this.logging){console.log( " ..*4.2b) expand(): " +
+      "Image initially built in collapsed position. *");}
       // If built in collapsed position and currently collapsed, play timeline
       // forwards to move particles from collapsed position to full image position.
-      playTimelineForwards( _this.activeStory.timelines.main );
+      playTimelineForwards( _this, _this.activeStory.timelines.main );
     } else { // _this.settings.isStartImageExpanded ) {
-      console.log( " ..*4.2c) expand(): " +
-      "Image initially built in expanded position. *");
+      if (_this.logging){console.log( " ..*4.2c) expand(): " +
+      "Image initially built in expanded position. *");}
       // If built in expanded position and currently collapsed, play timeline in
       // reverse to move particles from collapsed position to full image position.
-      playTimelineBackwards( _this.activeStory.timelines.main );
+      playTimelineBackwards( _this, _this.activeStory.timelines.main );
     }
   } else {
-    console.log( " ..*4.2d) expand(): " +
-    "We are already in an expanded position, nothing to do. *");
+    if (_this.logging){console.log( " ..*4.2d) expand(): " +
+    "We are already in an expanded position, nothing to do. *");}
   }
 
   if ( typeof callback == 'function' ) { callback(); return; }
@@ -54,7 +54,7 @@ function expand( _this, options, /*Code to resume when done/ callback ) {
   selectedPhotoToStory( _this,
   /*1-Resume here when done/ function( result ) {
   var selectedStory = result.item;
-  console.log( " ..*4.2) expand() *");
+  if (_this.logging){console.log( " ..*4.2) expand() *");
   // Hide the active/visible sceneContainer, we will replace it with ours.
   _this.activeScene.container.html.elem.style.display = 'none';
   tagToScene( _this, 'elements', selectedStory,
@@ -79,7 +79,7 @@ function expand( _this, options, /*Code to resume when done/ callback ) {
   selectedPhotoToStory( _this,
   /*1-Resume here when done/ function( result ) {
   _this.activeStory = result.item;
-  console.log( " ..*4.2) expand() *");
+  if (_this.logging){console.log( " ..*4.2) expand() *");
 
   var expandScene = newScene( _this, options.sceneTag );
   playSceneIfAutoPlay( _this, { scene: expandScene },

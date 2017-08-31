@@ -4,6 +4,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
 
   // Create plugIn instance, defaults.
   var trrPlugin = new TrrEffect();
+  trrPlugin.logging = false;
   trrPlugin.$el = $( '#selectedPhoto' );;
   var $el = trrPlugin.$el;
   trrPlugin.leftPanel = document.getElementById( 'leftPanel' );
@@ -96,9 +97,9 @@ function trr_init(/*Code to resume when done*/ callback ) {
     isRenderElementsImage: true,
     isCreateElementsObjArray: false,
     isUseSVGelements: true,
-    isStartImageCollapsed: true,
-    isStartImageExpanded: false,
-    isElementVisible: false,
+    isStartImageCollapsed: false,
+    isStartImageExpanded: true,
+    isElementVisible: true,
     isCreateElementsSceneContainer: true,
     isVisibleElementsSceneContainer: true,
     elementsAnimationElementColor: '#0099cc', // '#70C0EF', // Climate Corp halftone dot blue.
