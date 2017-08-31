@@ -17,13 +17,7 @@ function createParticleMap( _this, options, /*Code to resume when done*/ callbac
       additionalHomeOffsetLeft: 2,
       additionalHomeOffsetTop: 0,
   } );
-  //_this.activeStory.particlesInfo = {
-  //  particles: results.particles,
-  //  gridSize: results.gridSize,
-  //  homeOffsetLeft: results.homeOffsetLeft,
-  //  homeOffsetTop: results.homeOffsetTop,
-  //};
-  console.log( " ..*5a) createParticleMap() Created HomePositionParticles[" + _this.activeStory.particlesInfo.numParticles + "] *");
+  console.log( " ..*5a) createParticleMap() Created HomePositionParticles[" + results.particles.length + "] *");
   if ( typeof callback == 'function' ) { callback( results.particles ); return; }
   return results.particles;
 }; // end: createParticleMap()

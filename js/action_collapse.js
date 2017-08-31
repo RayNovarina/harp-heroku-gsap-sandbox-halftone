@@ -8,7 +8,7 @@ function collapse( _this, options, /*Code to resume when done*/ callback ) {
 
   // animationElements MUST have already been created.
   if ( !_this.activeStory.timelines ||
-       !_this.activeStory.timelines.collapse ) {
+       !_this.activeStory.timelines.main ) {
     alert( "photoTag: '" + _this.activeStory.tag + "'. You MUST create animationElements first via the 'Elements' link." );
     if ( typeof callback == 'function' ) { callback(); return; }
     return;
@@ -17,11 +17,24 @@ function collapse( _this, options, /*Code to resume when done*/ callback ) {
   // Hide the active/visible sceneContainer, we will replace it with ours.
   closeActiveSceneContainer( _this,
   /*1-Resume here when done*/ function( activeScene ) {
-  tagToScene( _this, _this.activeStory.timelines.collapse.sceneTag, _this.activeStory,
+  tagToScene( _this, _this.activeStory.timelines.main.sceneTag, _this.activeStory,
   /*2-Resume here when done*/ function( result ) {
   openSceneContainer( _this, result.item );
-  _this.activeStory.timelines.collapse.gsapTimeline.play(); //pause(5);
-  _this.activeStory.timelines.collapse.isReversed = false;
+
+  if ( isInExpandedPosition( _this, _this.activeStory ) ) {
+    // Image is currently expanded. The direction we play the timeline depends
+    // on how the timeline was initially built.
+    if ( _this.settings.isStartImageExpanded ) {
+      // If built in expanded position and currently expanded, play timeline
+      // forwards to move particles from full image position to collapsed position.
+      playTimelineForwards( _this.activeStory.timelines.main );
+    } else { // _this.settings.isStartImageCollapsed ) {
+      // If built in collapsed position and currently expanded, play timeline in
+      // reverse to move particles from full image position to collapsed position.
+      playTimelineBackwards( _this.activeStory.timelines.main );
+    }
+  } // else { // we are already in a collapsed position, nothing to do.
+
   if ( typeof callback == 'function' ) { callback(); return; }
   return;
   /*2-*/});/*1-*/});

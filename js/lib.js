@@ -290,10 +290,10 @@ function setAnimationBoundaries( _this, options ) {
       panel_width = $sceneContainer.width();
   // Set boundaries for "collapsed" view.
   _this.settings.animationPanelTop = 0;
-  _this.settings.animationPanelTopBoundary = Math.round( panel_bottom * .45 );
-  _this.settings.animationPanelBottom = panel_bottom;
+  _this.settings.animationPanelTopBoundary = Math.round( panel_bottom * .25 );
+  _this.settings.animationPanelBottom = panel_bottom - 80;
   _this.settings.animationPanelWidth = panel_width;
-  _this.settings.animationPanelLeftBoundaryX = Math.round( panel_width * .45 );
+  _this.settings.animationPanelLeftBoundaryX = Math.round( panel_width * .35 );
   _this.settings.animationPanelRightBoundaryX = Math.round( panel_width - _this.settings.animationPanelLeftBoundaryX );
 }; // end setAnimationBoundaries()
 
@@ -358,7 +358,7 @@ function addTimelineToStory( _this, story, props ) {
   }
 
   if ( props.sceneTag == 'elements' ) {
-    story.timelines.collapse = {
+    story.timelines.main = {
       sceneTag: props.sceneTag,
       gsapTimeline: props.gsapTimeline,
       isReversed: props.isReversed,
@@ -494,6 +494,34 @@ function cbox_useSVGelements( _this, options, /*Code to resume when done*/ callb
   _this.settings.isUseSVGelements = $( '#cbox_useSVG' ).prop('checked');
   if ( typeof callback == 'function' ) { callback(); return; }
 }; // end: function cbox_useSVGelements()
+
+//----------------------------------------------------------------------------
+function cbox_atStartCollapsed( _this, options, /*Code to resume when done*/ callback ) {
+  //--------------------------------------------------------------------------
+  console.log( " ..*4.5) cbox_atStartCollapsed() Box checked = '" + $( '#cbox_atStartCollapsed' ).prop('checked') + "'. *");
+  _this.settings.isStartImageCollapsed = $( '#cbox_atStartCollapsed' ).prop('checked');
+  _this.settings.isStartImageExpanded = !_this.settings.isStartImageCollapsed
+  $( '#cbox_atStartExpanded' ).prop('checked', _this.settings.isStartImageExpanded );
+  if ( typeof callback == 'function' ) { callback(); return; }
+}; // end: cbox_atStartCollapsed()
+
+//----------------------------------------------------------------------------
+function cbox_atStartExpanded( _this, options, /*Code to resume when done*/ callback ) {
+  //--------------------------------------------------------------------------
+  console.log( " ..*4.5) cbox_atStartExpanded() Box checked = '" + $( '#cbox_atStartExpanded' ).prop('checked') + "'. *");
+  _this.settings.isStartImageExpanded = $( '#cbox_atStartExpanded' ).prop('checked');
+  _this.settings.isStartImageCollapsed = !_this.settings.isStartImageExpanded
+  $( '#cbox_atStartCollapsed' ).prop('checked', _this.settings.isStartImageCollapsed );
+  if ( typeof callback == 'function' ) { callback(); return; }
+}; // end: cbox_atStartExpanded()
+
+//----------------------------------------------------------------------------
+function cbox_visible( _this, options, /*Code to resume when done*/ callback ) {
+  //--------------------------------------------------------------------------
+  console.log( " ..*4.5) cbox_atStartExpanded() Box checked = '" + $( '#cbox_visible' ).prop('checked') + "'. *");
+  _this.settings.isElementVisible = $( '#cbox_visible' ).prop('checked');
+  if ( typeof callback == 'function' ) { callback(); return; }
+}; // end: cbox_visible()
 
 //----------------------------------------------------------------------------
 function cbox_particlesFromPhoto( _this, options, /*Code to resume when done*/ callback ) {

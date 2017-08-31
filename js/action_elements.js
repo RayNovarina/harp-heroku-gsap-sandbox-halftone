@@ -5,7 +5,7 @@
 function elements( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
   updateSettings( _this, options );
-  console.log( " ..*4.1) elements() for active story '" + _this.activeStory.tag +
+  console.log( " ..*4) elements() for active story '" + _this.activeStory.tag +
                "'. ParticlesFromPhoto: '" +  _this.settings.isParticlesFromPhoto +
                "'. ParticlesFromFile: '" +  _this.settings.isParticlesFromFile + "' *");
 
@@ -60,13 +60,15 @@ function createSvgElementsFromParticles( _this, options, callback ) {
       $sceneContainerElem = $( sceneContainerElem ),
       elementsContainer = _this.activeScene.animationElements.container,
       domElementsObjsArray = [];
-  console.log( " ..*5a.1) createSvgElementsFromParticleMap() Particles source: '" + _this.activeStory.particlesInfo.source +
+  console.log( " ..*4.1) createSvgElementsFromParticleMap() Particles source: '" + _this.activeStory.particlesInfo.source +
                "'. numParticles = '" + _this.activeStory.particlesInfo.numParticles +
                "'. nextParticleMethod: '" + _this.settings.createAnimationElementsParams.nextParticleMethod +
                "'. RenderElementsImage: '" + _this.settings.isRenderElementsImage +
                "'. RandomizeCollapsedCore: '" + _this.settings.createAnimationElementsParams.isRandomizeCollapsedCore +
-               "'. collapseTimeline.tweenDuration: '" + _this.settings.tweenDuration +
-               ". *");
+               "'. mainTimeline.tweenDuration: '" + _this.settings.tweenDuration +
+               "'. StartImageCollapsed: '" + _this.settings.isStartImageCollapsed +
+               "'. ElementVisible: '" + _this.settings.isElementVisible +
+               "'. *");
 
   // Insert the REQUIRED <svg> tag within the sceneContainer to contain the svg <circle> elements.
   // NOTE: browser can not directly add <svg> or <circle> tags, need to use "w3.org namespace".
@@ -94,41 +96,78 @@ function createSvgElementsFromParticles( _this, options, callback ) {
   }
 
   var numElements = 0;
-  var collapseTimeline = new TimelineMax(
+  var mainTimeline = new TimelineMax(
           { repeat: 0, yoyo: false, repeatDelay: 0, delay: 0, paused: true,
-            //onComplete: collapseTimelineCompleteCallback
+            //onComplete: mainTimelineCompleteCallback
             //onComplete: function( timeline ) {
             //  _this = window.trrPlugin;
-            //  alert( "collapseTimeline animation is complete for '" + _this.activeStory.tag +
-            //  "'. collapseTimelineIsReversed = '" + _this.activeStory.timelines.collapseTimelineIsReversed + "'. " );
+            //  alert( "mainTimeline animation is complete for '" + _this.activeStory.tag +
+            //  "'. mainTimelineIsReversed = '" + _this.activeStory.timelines.mainTimelineIsReversed + "'. " );
             //}
           } );
 
-  // Create element (svg <circle> in the particle's "expanded/home position".
-  var results = null; // { element: circle, coreX: coreXY.coreX, coreY: coreXY.coreY };
-  while ( (results = createCollapsedPositionSVGelement( _this, options )) ) {
+  // Create element (svg <circle> in the particle's "expanded/home position" or
+  // its "collapsed/core position". In any case we will need the coreXY values.
+  var results = null;
+  // results = { element: <circle>, particle{ props: {x:homeX, y:homeY} } }
+  while ( (results = createPositionedSVGelement( _this, options )) ) {
     $elementsContainerElem.append( results.element );
     if ( _this.settings.isCreateElementsObjArray ) {
       domElementsObjsArray.push( results.element );
     }
 
-    // Create timeline of tweens that "collapse" the halftone image to a shrunken
-    // core.
-    collapseTimeline.insert(
-      TweenMax.to(
-        results.element, _this.settings.tweenDuration,
-        // NOTE: we don't want to do math calculations when creating DOM elements.
-        //       So require that all adjustments were made when the particle
-        //       map was created.
-        // At this point the <circle> has a cx/cy of the particle's image 'home' position.
-        { attr: { cx: results.coreX,
-                  cy: results.coreY,
-                },
-          autoAlpha: 0,
-          ease: Power0.easeInOut, // will cause fade-out
-        }
-      ) // end TweenMax.to()
-    ); // end collapseTimeline.insert()
+    // Create timeline of tweens that either:
+    //    "collapses" the halftone image to a shrunken core.
+    //    or "expands" the halftone image from a shrunken core to a full image.
+    if ( _this.settings.isStartImageCollapsed ) {
+
+      //----------------------------------------------------
+      // NOTE: particles(xy) image is currently Collapsed,
+      //       we move em to a expanded/home position.
+      // ---------------------------------------------------
+      mainTimeline.insert(
+        TweenMax.to(
+          results.element, _this.settings.tweenDuration,
+          // NOTE: we don't want to do math calculations when creating DOM elements.
+          //       So require that all adjustments were made when the particle
+          //       map was created.
+          // At this point the <circle> has a cx/cy of the particle's image
+          // 'collapsed' position.  So we move em to a expanded/home position.
+          { attr: { cx: results.particle.props.x,
+                    cy: results.particle.props.y,
+                    opacity: 1,
+                  },
+            //autoAlpha: 0,
+            ease: Power0.easeInOut,//ease: Power2.easeIn, // will cause fade-in
+
+            //autoAlpha: 1,
+            //ease: Power0.easeInOut,
+            //ease: Power2.easeOut,
+          }
+        ) // end TweenMax.to()
+      ); // end mainTimeline.insert(COLLAPSED)
+    } else { // isStartImageExpanded
+
+      //----------------------------------------------------
+      // NOTE: particles(xy) image is currently EXPANDED,
+      //       move em to a collapsed position.
+      // ---------------------------------------------------
+      mainTimeline.insert(
+        TweenMax.to(
+          results.element, _this.settings.tweenDuration,
+          // At this point the <circle> has a cx/cy of the particle's image
+          // 'home' position. So we move em to a collapsed position.
+          { attr: { cx: results.coreX,
+                    cy: results.coreY,
+                  },
+            // autoAlpha - the same thing as "opacity" except that when the
+            // value hits "0", the "visibility" property will be set to "hidden"
+            autoAlpha: 0,
+            //ease: Power0.easeInOut, // will cause fade-out
+          },
+        ) // end TweenMax.to()
+      ); // end mainTimeline.insert(EXPANDED)
+    }
     numElements += 1;
   }; // end while ( results )
   // Resume here when all elements created.
@@ -138,50 +177,151 @@ function createSvgElementsFromParticles( _this, options, callback ) {
     domElementsObjsArray: domElementsObjsArray,
     timelineProps: {
       sceneTag: _this.settings.sceneTag,
-      gsapTimeline: collapseTimeline,
-      isReversed: false,
+      gsapTimeline: mainTimeline,
+      // Start position is always the reverse of where our timeline plays forward to.
+      isReversed: true,
     },
   };
-  console.log( " ..*5a.2)createSvgElementsFromParticleMap(): Made " + $sceneContainerElem.attr( 'numElements' ) +
-               " " + _this.settings.createAnimationElementsParams.type + " AnimationElements. *");
+  console.log( " ..*4.1a)createSvgElementsFromParticleMap(): Made " + $sceneContainerElem.attr( 'numElements' ) +
+               " " + _this.settings.createAnimationElementsParams.type +
+               " AnimationElements that start in a '" +
+                    (_this.settings.isStartImageCollapsed ? 'COLLAPSED' : 'EXPANDED') +
+               "' position. *");
 
   if ( typeof callback == 'function' ) { callback( results ); return; }
   return results;
 }; // end createSvgElementsFromParticles()
 
 //----------------------------------------------------------------------------
-function createCollapsedPositionSVGelement( _this, options ) {
+function createPositionedSVGelement( _this, options ) {
   //----------------------------------------------------------------------------
   var results = null,
-      particle = null;
+      particle = null,
+      element = null;
   if ( (particle = getNextParticle( _this, options )) ) {
-    // Create elements to start at their 'home position' which will recreate the
-    // photo image.
-    var circle = $( makeSvgElementNS( 'circle' ) )
-        .attr( 'cx', particle.props.x )
-        .attr( 'cy', particle.props.y )
-        .attr( 'r', particle.props.r )
-        .attr( 'fill', _this.settings.elementsAnimationElementColor );
-    var coreXY = calcCoreXY( _this, options, particle );
-    results = { element: circle, coreX: coreXY.coreX, coreY: coreXY.coreY };
+    var coreX = calcCoreX( _this, particle ),
+        coreY = calcCoreY( _this, particle );
+    if ( _this.settings.isStartImageCollapsed ) {
+      element = createCollapsedPositionSVGelement( _this, options, particle, coreX, coreY );
+    } else {
+      element = createExpandedPositionSVGelement( _this, options, particle, coreX, coreY )
+    }
+  } else {
+    return null;
   }
-  return results;
+  if ( _this.settings.isStartImageCollapsed &&
+      !_this.settings.isElementVisible ) {
+    $( element ).attr( 'opacity', 0 );
+  }
+  return {
+    element: element, particle: particle, coreX: coreX, coreY: coreY,
+  };
+}; // end createPositionedSVGelement()
+
+//----------------------------------------------------------------------------
+function createCollapsedPositionSVGelement( _this, options, particle, coreX, coreY ) {
+  //----------------------------------------------------------------------------
+  // Create elements to start at their 'collapsed position' which will recreate
+  // the photo image as a collapsed core of particles centered in the panel.
+  return $( makeSvgElementNS( 'circle' ) )
+            .attr( 'cx', coreX )
+            .attr( 'cy', coreY )
+            .attr( 'r', particle.props.r )
+            .attr( 'fill', _this.settings.elementsAnimationElementColor );
 }; // end createCollapsedPositionSVGelement()
 
 //----------------------------------------------------------------------------
-function calcCoreXY( _this, options, particle ) {
+function createExpandedPositionSVGelement( _this, options, particle, coreX, coreY ) {
   //----------------------------------------------------------------------------
-  var coreX = _this.settings.createAnimationElementsParams.collapsedCoreX,
-      coreY = _this.settings.createAnimationElementsParams.collapsedCoreY;
+  // Create elements to start at their 'home position' which will recreate the
+  // photo image.
+  return $( makeSvgElementNS( 'circle' ) )
+            .attr( 'cx', particle.props.x )
+            .attr( 'cy', particle.props.y )
+            .attr( 'r', particle.props.r )
+            .attr( 'fill', _this.settings.elementsAnimationElementColor );
+}; // end createExpandedPositionSVGelement()
+
+//----------------------------------------------------------------------------
+  function calcCoreX( _this, particle ) {
+  //----------------------------------------------------------------------------
   if ( _this.settings.createAnimationElementsParams.isRandomizeCollapsedCore ) {
-    coreX = getRandom( _this.settings.animationPanelLeftBoundaryX, _this.settings.animationPanelRightBoundaryX );
-    coreY = getRandom( _this.settings.animationPanelTopBoundary, _this.settings.animationPanelBottom );
+    return getRandom( _this.settings.animationPanelLeftBoundaryX, _this.settings.animationPanelRightBoundaryX );
   }
-  return {
-    coreX: coreX,
-    coreY: coreY
-  };
-}; // end calcCoreXY()
+  return _this.settings.createAnimationElementsParams.collapsedCoreX;
+}; // end calcCoreX()
+
+//----------------------------------------------------------------------------
+  function calcCoreY( _this, particle ) {
+  //----------------------------------------------------------------------------
+  if ( _this.settings.createAnimationElementsParams.isRandomizeCollapsedCore ) {
+    return getRandom( _this.settings.animationPanelTopBoundary, _this.settings.animationPanelBottom );
+  }
+  return _this.settings.createAnimationElementsParams.collapsedCoreY;
+}; // end calcCoreY()
+
+//----------------------------------------------------------------------------
+function playTimelineForwards( tcb ) {
+  //----------------------------------------------------------------------------
+  console.log( " ..*4.2) playTimelineForwards(): will set isReversed to 'false' *");
+  tcb.gsapTimeline.play(); //pause(5);
+  tcb.isReversed = false;
+}; // end: playTimelineForwards()
+
+//----------------------------------------------------------------------------
+function playTimelineBackwards( tcb ) {
+  //----------------------------------------------------------------------------
+  console.log( " ..*4.3) playTimelineBackwards(): will set isReversed to 'true' *");
+  tcb.gsapTimeline.reverse();
+  tcb.isReversed = true;
+}; // end: playTimelineBackwards()
+
+//----------------------------------------------------------------------------
+function isInStartPosition( _this, story ) {
+  //----------------------------------------------------------------------------
+  console.log( " ..*4.4) isInStartPosition(): " +
+               "StartImageExpanded: '" + _this.settings.isStartImageExpanded +
+               "'. Will return: '" + ( _this.settings.isStartImageExpanded
+                    ? isInExpandedPosition( _this, story ) : isInCollapsedPosition( _this, story ) ) + "'*");
+  return _this.settings.isStartImageExpanded
+    ? isInExpandedPosition( _this, story )
+    : isInCollapsedPosition( _this, story );
+}; // end: isInStartPosition()
+
+//----------------------------------------------------------------------------
+function startPosition( _this, story, tcb ) {
+  //----------------------------------------------------------------------------
+  // The start position of a timeline depends on how the timeline was initially built.
+  if ( ( _this.settings.isStartImageExpanded  && !isInExpandedPosition( _this, story ) ) ||
+       ( _this.settings.isStartImageCollapsed && !isInCollapsedPosition( _this, story ) ) ) {
+    playTimelineBackwards( tcb );
+  }
+}
+
+//----------------------------------------------------------------------------
+function isInExpandedPosition( _this, story ) {
+  //----------------------------------------------------------------------------
+  console.log( " ..*4.5) isInExpandedPosition(): " +
+               "StartImageExpanded: '" + _this.settings.isStartImageExpanded +
+               "'. Will return: '" + ( _this.settings.isStartImageExpanded
+                    ? story.timelines.main.isReversed : !story.timelines.main.isReversed ) + "'*");
+  if ( _this.settings.isStartImageExpanded ) {
+    // Note: main.isReversed means "image is expanded"
+    return story.timelines.main.isReversed;
+  }
+  // if ( _this.settings.isStartImageCollapsed ) {
+  // Note: main.isReversed means "image is collapsed"
+  return !story.timelines.main.isReversed;
+}; // end: isInExpandedPosition()
+
+//----------------------------------------------------------------------------
+function isInCollapsedPosition( _this, story ) {
+  //----------------------------------------------------------------------------
+  console.log( " ..*4.6) isInCollapsedPosition(): " +
+               "StartImageExpanded: '" + _this.settings.isStartImageExpanded +
+               "'. Will return: '" + !isInExpandedPosition( _this, story ) + "'*");
+  return !isInExpandedPosition( _this, story );
+}; // end: isInCollapsedPosition()
 
 /*
 $.each( particles, function( idx, particle ) {
@@ -216,6 +356,26 @@ $.each( particles, function( idx, particle ) {
     } // end if ( element )
   }); // end $.each()
 }; // end createSvgElementsFromParticleMap()
+
+//----------------------------------------------------------------------------
+function createCollapsedPositionSVGelement( _this, options ) {
+  //----------------------------------------------------------------------------
+  var results = null,
+      particle = null;
+  if ( (particle = getNextParticle( _this, options )) ) {
+    _this.settings.isStartImageCollapsed
+    // Create elements to start at their 'home position' which will recreate the
+    // photo image.
+    var circle = $( makeSvgElementNS( 'circle' ) )
+        .attr( 'cx', particle.props.x )
+        .attr( 'cy', particle.props.y )
+        .attr( 'r', particle.props.r )
+        .attr( 'fill', _this.settings.elementsAnimationElementColor );
+    var coreXY = calcCoreXY( _this, options, particle );
+    results = { element: circle, coreX: coreXY.coreX, coreY: coreXY.coreY };
+  }
+  return results;
+}; // end createCollapsedPositionSVGelement()
 
 //----------------------------------------------------------------------------
 function createCollapsedPositionSVGelement( _this, particle ) {

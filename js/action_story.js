@@ -13,7 +13,7 @@ function playSelectedStory( _this, options, /*Code to resume when done*/ callbac
   /*2-Resume here when done*/ function( result ) {
   openSceneContainer( _this, result.item );
 
-  // Play story for active/selectedPhoto. All scenes, i.e. expand and collapse.
+  // Play story for active/selectedPhoto. All scenes, i.e. expand and main.
   playStory( _this, _this.activeStory.tag, options,
   /*3-Resume here when done*/ function( story ) {
   if ( typeof callback == 'function' ) { callback( story ); return; }
@@ -25,8 +25,14 @@ function playSelectedStory( _this, options, /*Code to resume when done*/ callbac
 function playFullStory( _this, photoTag, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
   console.log( " ..*4.2) playFullStory() create ParticleMap, animation elements, play story for '" + photoTag + "'. All scenes, i.e. expand and collapse. *");
-
-  elements( _this, { isCreateSceneInCenterPanel: true, tweenDuration: 2, },
+  options.tweenDuration = 3;
+  elements( _this, {
+    isOnlyIfNewParticleMap: false,
+    isRenderElementsImage: true,
+    isCreateElementsObjArray: false,
+    tweenDuration: options.tweenDuration,
+    isCreateSceneInCenterPanel: true,
+  },
   /*1-Resume here when done*/ function( activeScene ) {
   // Play story for active/selectedPhoto. All scenes, i.e. expand and collapse.
   playStory( _this, photoTag, options,
@@ -46,41 +52,43 @@ function playStory( _this, photoTag, options, /*Code to resume when done*/ callb
   /*1-Resume here when done*/ function( result ) {
   if ( !result.isFound ||
        (!result.item.timelines ||
-        !result.item.timelines.collapse ) ) {
+        !result.item.timelines.main ) ) {
     alert( "photoTag: '" + photoTag + "'. A story has not been created for this photo yet! You MUST create animationElements first via the 'Elements' link." );
     if ( typeof callback == 'function' ) { callback( null ); return; }
     return null;
   }
-  // NOTE: after elements are built they form an expanded image.
+  // NOTE: after elements are built they form an expanded image or an invisible collapsed core.
   var story = result.item;
+
+  // NOTE: a story is a "collapse and expand" cycle. Play timeline forwards and in reverse.
+  // First make sure we start in the "start" state.
   var delayMsToWaitForStartState = 0;
-  // Note: collapse.isReversed means "image is expanded"
-  if ( !story.timelines.collapse.isReversed ) {
-    delayMsToWaitForStartState = 2000;
-    story.timelines.collapse.gsapTimeline.reverse();
-    story.timelines.collapse.isReversed = true;
+  if ( !isInStartPosition( _this, story ) ) {
+    // The start position of a timeline depends on how the timeline was initially built.
+    startPosition( _this, _this.activeStory, _this.activeStory.timelines.main );
+    delayMsToWaitForStartState = (options.tweenDuration * 1000) + 500;
   }
   // Wait for image to get into start position.
   setTimeout(function() {
   /*1a-Resume here when Timeout done*/
-  // Collapse the image.
-  story.timelines.collapse.gsapTimeline.play();
-  story.timelines.collapse.isReversed = false;
-  // Wait for collapse to complete.
-  var delayMsToWaitForCollapsedState = 2500;
+
+  playTimelineForwards( _this.activeStory.timelines.main );
+  // Wait for timeline.play() to complete.
+  var delayMsToWaitForTimelinePlay = (options.tweenDuration * 1000) + 1500;
   setTimeout(function() {
   /*1b-Resume here when Timeout done*/
-  // Expand the collapse image back to a full image.
-  story.timelines.collapse.gsapTimeline.reverse();
-  story.timelines.collapse.isReversed = true;
-  // Wait for expand to complete.
-  var delayMsToWaitForExpandedState = 1000;
+
+  playTimelineBackwards( _this.activeStory.timelines.main );
+  // Wait for timeline.reverse() to complete.
+  var delayMsToWaitForTimelineReverse = options.tweenDuration * 1000;
   setTimeout(function() {
   /*1c-Resume here when Timeout done*/
+
   if ( typeof callback == 'function' ) { callback( story ); return; }
   return story;
-  }, delayMsToWaitForExpandedState); // end /*1c-timeout*/
-  }, delayMsToWaitForCollapsedState); // end /*1b-timeout*/
+
+}, delayMsToWaitForTimelineReverse); // end /*1c-timeout*/
+  }, delayMsToWaitForTimelinePlay); // end /*1b-timeout*/
   }, delayMsToWaitForStartState); // end /*1a-timeout*/
   /*1-*/});
 }; // end: playStory()

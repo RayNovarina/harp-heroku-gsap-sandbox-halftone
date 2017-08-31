@@ -15,7 +15,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
       lastActiveScene: scene,
       tag: _this.settings.photoTag,
       timelines: {
-        collapse: {
+        main: {
           sceneTag: 'convert',
           gsapTimeline: collapseTimeline,
           isReversed: false,
@@ -80,9 +80,9 @@ function trr_init(/*Code to resume when done*/ callback ) {
     isExcludePixels: false,
     isProcessBySkipCount: true,
     isEvery1: false,
-    nthPixelToProcess: 2,
-    isEvery2: true,
-    isEvery3: false,
+    nthPixelToProcess: 3,
+    isEvery2: false,
+    isEvery3: true,
     isEvery4: false,
     is1x1_cluster: false,
     is3x3_cluster: false,
@@ -96,6 +96,9 @@ function trr_init(/*Code to resume when done*/ callback ) {
     isRenderElementsImage: true,
     isCreateElementsObjArray: false,
     isUseSVGelements: true,
+    isStartImageCollapsed: true,
+    isStartImageExpanded: false,
+    isElementVisible: false,
     elementsAnimationElementColor: '#0099cc', // '#70C0EF', // Climate Corp halftone dot blue.
     particleMapAnimationElementColor: 'black',
     maxHalftoneDotSize: 1/150,
@@ -122,6 +125,10 @@ function trr_init(/*Code to resume when done*/ callback ) {
   $( '#cbox_fromFile' ).prop('checked', trrPlugin.defaults.isParticlesFromFile );
   $( '#cbox_fromPhoto' ).prop('checked', trrPlugin.defaults.isParticlesFromPhoto );
   $( '#cbox_useSVG' ).prop('checked', trrPlugin.settings.isUseSVGelements );
+  $( '#cbox_useSVG' ).prop('checked', trrPlugin.settings.isUseSVGelements );
+  $( '#cbox_atStartCollapsed' ).prop('checked', trrPlugin.settings.isStartImageCollapsed );
+  $( '#cbox_atStartExpanded' ).prop('checked', trrPlugin.settings.isStartImageExpanded );
+  $( '#cbox_visible' ).prop('checked', trrPlugin.settings.isElementVisible );
   $( '#cbox_exclude' ).prop('checked', trrPlugin.defaults.isExcludePixels );
   $( '#cbox_transform' ).prop('checked', trrPlugin.defaults.isTransformPixels );
   $( '#cbox_every1' ).prop('checked', trrPlugin.defaults.isEvery1 );
@@ -185,7 +192,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
       isOnlyIfNewParticleMap: false,
       isRenderElementsImage: true,
       isCreateElementsObjArray: false,
-      tweenDuration: 2,
+      tweenDuration: 3,
     } );
   });
   $( "#collapse" ).click( function() {
@@ -203,7 +210,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
       isRenderParticleMap: false,
       isRenderElementsImage: true,
       isCreateElementsObjArray: false,
-      tweenDuration: 2, } );
+      tweenDuration: 3, } );
   });
 
   // "Scroll To" links.
@@ -217,7 +224,15 @@ function trr_init(/*Code to resume when done*/ callback ) {
   $( "#cbox_useSVG" ).click( function( event ) {
     cbox_useSVGelements( trrPlugin, { event: event } );
   });
-
+  $( "#cbox_atStartCollapsed" ).click( function( event ) {
+    cbox_atStartCollapsed( trrPlugin, { event: event } );
+  });
+  $( "#cbox_atStartExpanded" ).click( function( event ) {
+    cbox_atStartExpanded( trrPlugin, { event: event } );
+  });
+  $( "#cbox_visible" ).click( function( event ) {
+    cbox_visible( trrPlugin, { event: event } );
+  });
   $( "#cbox_fromPhoto" ).click( function( event ) {
     cbox_particlesFromPhoto( trrPlugin, { event: event } );
   });
