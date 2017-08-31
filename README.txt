@@ -59,61 +59,14 @@ View on Heroku:
   Deployed on Heroku at https://harp-gsap-sandbox-htone-94037.herokuapp.com/
 
 =======================================================================
-Create array of animation elements:
-    That appear when attached to the conversionContainer.
-OR timeline.scene1:
-    Draw halftone image - from start till end of drawing image. Start
-    with total fade out/invisible. Draw with
-    tween.to(dot, homeX, homeY), duration: 0.
-<img>.timeline:
-  scene1:
-      Collapse AnimationElements showing full image to center
-      column that fades out.
-=======================================================================
 
 Notes:
 
-* Convert link: Display converted particle map once it is done.
-    Create particle map and then create a
-    canvas in the conversionContainer and write the particle
-    dots on it in one pass, i.e. without animation. Just call
-    createAnimationElements() with isDrawOnSingleCanvas = true;
-* Elements link: Create AnimationElements in the animationContainer. Pin them to
-    their image home position, i.e. re-create the photo image.
-Explode link: Create AnimationElements in the animationContainer. Pin them to
-    their image home position, i.e. re-create the photo image.
-    Delay and then apply the explode animation effect.
-    Elements move up and out.
-Collapse link: Create AnimationElements in the animationContainer. Pin them to
-    their image home position, i.e. re-create the photo image.
-    Delay and then apply the collapse animation effect.
-    Elements move down and inward.
-Rise Up link: Create AnimationElements in the animationContainer. Pin below
-    their image bottom position, i.e. photo image is visible below the
-    animationContainer.
-    Delay and then apply the rise up animation effect.
-    Elements move up and out.
-All link: Create AnimationElements in the animationContainer. Pin them to
-    their image home position, i.e. re-create the photo image.
-    Delay and then animate a sequence of events: collaspe, rise up.
-
-Create Particle Map: Get exclude and transform cluster logic working.
-
-Create Animation Elements: Get <svg Ball> working, <div>ball</div> working.
-
-All effects link: Add option to animate as GASP TimeLine of effects.
 
 ==============================================
 Boneyard: code snippets
 ==============================================
 
-_this.particles = results.particles;
-_this.activeStory.particleMap = {
-  particles: results.particles,
-  gridSize: results.gridSize,
-  homeOffsetLeft: results.homeOffsetLeft,
-  homeOffsetTop: results.homeOffsetTop,
-};
 
 ===================================
 /*

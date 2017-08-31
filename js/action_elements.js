@@ -142,8 +142,11 @@ function createSvgElementsFromParticles( _this, options, callback ) {
                     cy: results.particle.props.y,
                     opacity: 1,
                   },
+            // autoAlpha - the same thing as "opacity" except that when the
+            // value hits "0", the "visibility" property will be set to "hidden",
+            // i.e. fade.
             //autoAlpha: 0,
-            ease: Power0.easeInOut,//ease: Power2.easeIn, // will cause fade-in
+            //ease: Power0.easeInOut,//ease: Power2.easeIn,
 
             //autoAlpha: 1,
             //ease: Power0.easeInOut,
@@ -166,9 +169,10 @@ function createSvgElementsFromParticles( _this, options, callback ) {
                     cy: results.coreY,
                   },
             // autoAlpha - the same thing as "opacity" except that when the
-            // value hits "0", the "visibility" property will be set to "hidden"
+            // value hits "0", the "visibility" property will be set to "hidden",
+            // i.e. fade.
             autoAlpha: 0,
-            //ease: Power0.easeInOut, // will cause fade-out
+            //ease: Power0.easeInOut,
           },
         ) // end TweenMax.to()
       ); // end mainTimeline.insert(EXPANDED)
