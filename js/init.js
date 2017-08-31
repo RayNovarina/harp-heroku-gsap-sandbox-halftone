@@ -99,6 +99,8 @@ function trr_init(/*Code to resume when done*/ callback ) {
     isStartImageCollapsed: true,
     isStartImageExpanded: false,
     isElementVisible: false,
+    isCreateElementsSceneContainer: true,
+    isVisibleElementsSceneContainer: true,
     elementsAnimationElementColor: '#0099cc', // '#70C0EF', // Climate Corp halftone dot blue.
     particleMapAnimationElementColor: 'black',
     maxHalftoneDotSize: 1/150,

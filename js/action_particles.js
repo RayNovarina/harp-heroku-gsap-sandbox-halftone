@@ -289,7 +289,8 @@ function renderParticleMapAsSingleCanvas( _this, options, callback ) {
   };
 
   var elementsContainerElem = elementsContainer.html.elem,
-      $elementsContainerElem = $( elementsContainerElem );
+      $elementsContainerElem = $( elementsContainerElem ),
+      numElements = 0;
 
   // attach to specified Panel.
   $( _this.centerPanel ).children().last().append( elementsContainerElem );
@@ -317,38 +318,18 @@ function renderParticleMapAsSingleCanvas( _this, options, callback ) {
   }; // end while ( results )
   // Resume here when all circles drawn.
   $elementsContainerElem.append( canvas );
-  $sceneContainerElem.attr( 'numElements', '1' );
+  numElements += 1;
 
   var results = {
     animationElementsContainerElem: elementsContainerElem,
     domElementsObjsArray: [ document.createElement( 'canvas' ) ], // just a required placeholder.
     timelineProps: null,
   };
-  console.log( " ..*5b.2) renderParticleMapAsSingleCanvas(): Made " + $sceneContainerElem.attr( 'numElements' ) +
+  console.log( " ..*5b.2) renderParticleMapAsSingleCanvas(): Made " + numElements +
                " canvas AnimationElements. *");
   if ( typeof callback == 'function' ) { callback( results ); return; }
   return results;
 }; // end renderParticleMapAsSingleCanvas()
-
-/*
-//----------------------------------------------------------------------------
-function createCollapsedPositionSVGelement( _this, options ) {
-  //----------------------------------------------------------------------------
-  var results = null;
-  if ( (particle = getNextParticle( _this, options )) ) {
-    // Create elements to start at their 'home position' which will recreate the
-    // photo image.
-    var circle = $( makeSvgElementNS( 'circle' ) )
-        .attr( 'cx', particle.props.x )
-        .attr( 'cy', particle.props.y )
-        .attr( 'r', particle.props.r )
-        .attr( 'fill', _this.settings.animationElementColor );
-    var coreXY = calcCoreXY( _this, options, particle );
-    results = { element: circle, coreX: coreXY.coreX, coreY: coreXY.coreY };
-  }
-  return results;
-}; // end createCollapsedPositionSVGelement()
-*/
 
 //----------------------------------------------------------------------------
 function createExpandedPositionCanvasCircle( _this, options, context ) {

@@ -55,8 +55,8 @@ function newPhoto( _this, options, /*Code to resume when done*/ callback ) {
   openSceneContainer( _this, _this.activeStory.lastActiveScene );
 
   console.log( " ..*3a) newPhoto() DONE. *");
-  if ( typeof callback == 'function' ) { callback( _this.activeStory.imgage ); return; }
-  return _this.activeStory.imgage;
+  if ( typeof callback == 'function' ) { callback( _this.activeStory.image ); return; }
+  return _this.activeStory.image;
   /*3-*/});/*2-*/});/*1-*/}; // end img.onload()
 
   _this.settings.$img.attr('src', _this.settings.imgSrc); // causes photo to be loaded and rendered.
@@ -102,9 +102,10 @@ function createScene( _this, options, /*Code to resume when done*/ callback ) {
     story: _this.activeStory,
   },
   /*1-Resume here when done*/ function( activeContainer ) {
-  activeContainer.panelElem.appendChild( activeContainer.html.elem );
-  // NOTE: container.style.display = 'none'. Will be enabled during animation.
-
+  if ( activeContainer.html.elem ) {
+    activeContainer.panelElem.appendChild( activeContainer.html.elem );
+    // NOTE: container.style.display = 'none'. Will be enabled during animation.
+  }
   // Create AnimationElements per panel and options specified in settings.
   // Attach them as needed to the sceneContainer.
   createAnimationElements( _this, {
@@ -120,29 +121,37 @@ function createScene( _this, options, /*Code to resume when done*/ callback ) {
 function createSceneContainer( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
   updateSettings( _this, options );
-  console.log( " ..*3.4) createSceneContainer() For '" + _this.settings.panel + "' Panel. *");
+  console.log( " ..*3.4) createSceneContainer() For '" + _this.settings.panel + "' Panel. " +
+               "sceneTag: '" + _this.settings.sceneTag +
+               "'. CreateElementsSceneContainer: '" + _this.settings.isCreateElementsSceneContainer +
+               "'. VisibleElementsSceneContainer: '" + _this.settings.isVisibleElementsSceneContainer +
+               "'. *");
 
   // NOTE: will remove existing sceneContainer if it already exists.
   createSceneContainer_reset( _this,
   /*1-Resume here when done*/ function() {
 
-  var sceneContainerElem = document.createElement( "div" ),
-      $sceneContainerElem = $( sceneContainerElem );
-  $sceneContainerElem
-    .addClass( 'trr-scene-container' )
-    .attr( 'id', _this.settings.sceneId )
-    .attr( 'sceneTag', _this.settings.sceneTag )
-    .attr( 'photoTag', _this.settings.photoTag )
-    .attr( 'style', 'width: '           + _this.settings.createContainerParams.width + 'px; ' +
-                    'height: '          + _this.settings.createContainerParams.height + 'px; ' +
-                    'position: '        + 'absolute; ' +
-                    'left: '            + _this.settings.createContainerParams.left + 'px; ' +
-                    'top: '             + _this.settings.createContainerParams.top + 'px; ' +
-                    'backgroundColor: ' + _this.settings.createContainerParams.backgroundColor + '; ' +
-                    'border: '          + _this.settings.createContainerParams.border + '; ' +
-                    'display: '         + 'none'
-         );
-
+  var sceneContainerElem = null;
+  if ( !(_this.settings.sceneTag == 'elements') ||
+       ( _this.settings.sceneTag == 'elements' && _this.settings.isCreateElementsSceneContainer ) ) {
+    sceneContainerElem = document.createElement( "div" );
+    var $sceneContainerElem = $( sceneContainerElem );
+    $sceneContainerElem
+      .addClass( 'trr-scene-container' )
+      .attr( 'id', _this.settings.sceneId )
+      .attr( 'sceneTag', _this.settings.sceneTag )
+      .attr( 'photoTag', _this.settings.photoTag )
+      .attr( 'style', 'width: '           + _this.settings.createContainerParams.width + 'px; ' +
+                      'height: '          + _this.settings.createContainerParams.height + 'px; ' +
+                      'position: '        + 'absolute; ' +
+                      'left: '            + _this.settings.createContainerParams.left + 'px; ' +
+                      'top: '             + _this.settings.createContainerParams.top + 'px; ' +
+                      'backgroundColor: ' + _this.settings.createContainerParams.backgroundColor + '; ' +
+                      'border: '          + _this.settings.createContainerParams.border + '; ' +
+                      'display: '         + ( (_this.settings.sceneTag == 'elements') && _this.settings.isVisibleElementsSceneContainer
+                                                  ? 'block' : 'none')
+            );
+  }
   _this.activeScene.container = {
     panelElem: ( _this.settings.isCreateSceneInLeftPanel ? _this.leftPanel
                 : _this.centerPanel ),
@@ -150,10 +159,16 @@ function createSceneContainer( _this, options, /*Code to resume when done*/ call
       elem: sceneContainerElem,
     }
   };
-  console.log( " ..*3.4a) createSceneContainer() container.width: '" +  _this.activeScene.container.html.elem.style.width +
-               "'. container.height: '" + _this.activeScene.container.html.elem.style.height +
-               "'. Container Offset left: '" + _this.activeScene.container.html.elem.style.left +
-               "'. top: '" + _this.activeScene.container.html.elem.style.top + "' *");
+  console.log( " ..*3.4a) createSceneContainer() " +
+               ( _this.activeScene.container.html.elem
+                  ? ( "container.width: '" +  _this.activeScene.container.html.elem.style.width +
+                      "'. container.height: '" + _this.activeScene.container.html.elem.style.height +
+                      "'. Container Offset left: '" + _this.activeScene.container.html.elem.style.left +
+                      "'. top: '" + _this.activeScene.container.html.elem.style.top + "'."
+                    )
+                  : '** container not created **'
+               )
+               + " *");
 
   if ( typeof callback == 'function' ) { callback( _this.activeScene.container ); return; }
   return _this.activeScene.container;
@@ -164,15 +179,19 @@ function createSceneContainer( _this, options, /*Code to resume when done*/ call
 function createSceneContainer_reset( _this, callback ) {
   //--------------------------------------------------------------------------
   // NOTE: Assume we have an acitveStory{}.
-  if ( _this.activeScene ) {
-    // hide current scene before we create another one.
-    _this.activeScene.container.html.elem.style.display = 'none';
+  if ( _this.activeScene &&
+       _this.activeScene.container.html.elem ) {
+    if ( !( (_this.settings.sceneTag == 'elements') && _this.settings.isVisibleElementsSceneContainer) ) {
+      // hide current scene before we create another one.
+      _this.activeScene.container.html.elem.style.display = 'none';
+    }
   }
   // Case: just loaded, just created meg_story, meg_Particles Going to render
   //       particleMap for meg. need to create scene.
   tagToScene( _this, _this.settings.sceneTag, _this.settings.story,
   /*1-Resume here when done*/ function( result ) {
-  if ( result.isFound ) {
+  if ( result.isFound &&
+       result.item.container.html.elem ) {
     // This scene has been created before for this story.
     var scene = result.item,
         $sceneContainerElem = $( scene.container.html.elem );
@@ -285,16 +304,19 @@ function makeSvgElementNS( tag ) {
 function setAnimationBoundaries( _this, options ) {
   //----------------------------------------------------------------------------
   // NOTE: options.sceneTag = scene id.
-  var $sceneContainer = $( _this.activeScene.container.html.elem ),
-      panel_bottom = $sceneContainer.height(),
-      panel_width = $sceneContainer.width();
+  var $container = ( _this.activeScene.container.html.elem
+                        ? $( _this.activeScene.container.html.elem )
+                        : $( _this.centerPanel )
+                   );
+  var container_bottom = $container.height(),
+      container_width = $container.width();
   // Set boundaries for "collapsed" view.
   _this.settings.animationPanelTop = 0;
-  _this.settings.animationPanelTopBoundary = Math.round( panel_bottom * .25 );
-  _this.settings.animationPanelBottom = panel_bottom - 80;
-  _this.settings.animationPanelWidth = panel_width;
-  _this.settings.animationPanelLeftBoundaryX = Math.round( panel_width * .35 );
-  _this.settings.animationPanelRightBoundaryX = Math.round( panel_width - _this.settings.animationPanelLeftBoundaryX );
+  _this.settings.animationPanelTopBoundary = Math.round( container_bottom * .25 );
+  _this.settings.animationPanelBottom = container_bottom - 80;
+  _this.settings.animationPanelWidth = container_width;
+  _this.settings.animationPanelLeftBoundaryX = Math.round( container_width * .35 );
+  _this.settings.animationPanelRightBoundaryX = Math.round( container_width - _this.settings.animationPanelLeftBoundaryX );
 }; // end setAnimationBoundaries()
 
 //------------------------------------------------------------------------------
@@ -421,9 +443,10 @@ function tagToScene( _this, sceneTag, story, callback ) {
 function openSceneContainer( _this, scene ) {
   //----------------------------------------------------------------------------
   console.log( " ..*3.7) openSceneContainer() sceneTag: '" +
-               ( scene ? (scene.tag + "'. sceneContainer.id: '" + scene.container.html.elem.id)
+               ( scene ? (scene.tag + "'. sceneContainer.id: '" + ( scene.container.html.elem ? scene.container.html.elem.id : '*none*') )
                        : '*none' ) + "'. *");
-  if ( !scene ) {
+  if ( !scene ||
+       !scene.container.html.elem ) {
     return;
   }
   scene.container.html.elem.style.display = 'block';
@@ -435,7 +458,9 @@ function closeSceneContainer( _this, scene ) {
   console.log( " ..*3.7) closeSceneContainer() sceneTag: '" +
                ( scene ? (scene.tag + "'. sceneContainer.id: '" + scene.container.html.elem.id)
                        : '*none' ) + "'. *");
-  if ( !scene ) {
+  if ( !scene ||
+       !scene.container.html.elem ||
+       ( (_this.settings.sceneTag == 'elements') && _this.settings.isVisibleElementsSceneContainer ) ) {
     return;
   }
   scene.container.html.elem.style.display = 'none';
@@ -446,7 +471,10 @@ function closeActiveSceneContainer( _this, callback ) {
   //----------------------------------------------------------------------------
   // NOTE: photo can be selected and is the activeStory but a sceneContainer may
   // not have been created yet for its particles or elements scene.
-  if ( !_this.activeStory || !_this.activeScene ) {
+  if ( !_this.activeStory ||
+       !_this.activeScene ||
+       !_this.activeScene.container.html.elem ||
+       ( (_this.settings.sceneTag == 'elements') && _this.settings.isVisibleElementsSceneContainer ) ) {
     if ( typeof callback == 'function' ) { callback( null ); return; }
     return null;
   }
@@ -464,7 +492,9 @@ function openLastActiveSceneContainer( _this, callback ) {
   //----------------------------------------------------------------------------
   // NOTE: photo can be selected and is the activeStory but a sceneContainer may
   // not have been created yet for its particles or elements scene.
-  if ( !_this.activeStory ) {
+  if ( !_this.activeStory ||
+       !_this.activeStory.lastActiveScene ||
+       !_this.activeScene.container.html.elem ) {
     if ( typeof callback == 'function' ) { callback( null ); return; }
     return null;
   }

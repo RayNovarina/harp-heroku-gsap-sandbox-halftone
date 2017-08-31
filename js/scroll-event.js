@@ -47,7 +47,7 @@ function scrollTo( _this, options, callback ) {
   console.log( " ..*4.5) scrollTo() From Story: Halftone image for '" + fromPhotoTag + "' IS NOW expanded. Start collapsing it. *" );
 
   collapse( _this, {} );
-  var delayMsToWaitForCollapsedState = 2000;
+  var delayMsToWaitForCollapsedState = 500;
   console.log( " ..*4.5) scrollTo() Waiting '" + delayMsToWaitForCollapsedState + "'ms for From Story Halftone image for '" + fromPhotoTag + "' to collapse. *" );
   setTimeout(function() {
   /*1b-Resume here when WaitForCollapsedState Timeout done*/

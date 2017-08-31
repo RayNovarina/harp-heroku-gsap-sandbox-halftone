@@ -64,6 +64,7 @@ function createSvgElementsFromParticles( _this, options, callback ) {
                "'. numParticles = '" + _this.activeStory.particlesInfo.numParticles +
                "'. nextParticleMethod: '" + _this.settings.createAnimationElementsParams.nextParticleMethod +
                "'. RenderElementsImage: '" + _this.settings.isRenderElementsImage +
+               "'. CreateElementsSceneContainer: '" + _this.settings.isCreateElementsSceneContainer +
                "'. RandomizeCollapsedCore: '" + _this.settings.createAnimationElementsParams.isRandomizeCollapsedCore +
                "'. mainTimeline.tweenDuration: '" + _this.settings.tweenDuration +
                "'. StartImageCollapsed: '" + _this.settings.isStartImageCollapsed +
@@ -74,7 +75,7 @@ function createSvgElementsFromParticles( _this, options, callback ) {
   // NOTE: browser can not directly add <svg> or <circle> tags, need to use "w3.org namespace".
   elementsContainer.html = {
     elem: $( makeSvgElementNS('svg') )
-      .attr( 'id', 'aniElems_Con_' )
+      .attr( 'id', 'aniElems_Con_for_' + _this.activeStory.tag )
       .attr( 'width', '600' )
       .attr( 'height', '600' )
       .attr( 'trr-ani-elem-type', 'circle' )
@@ -85,7 +86,11 @@ function createSvgElementsFromParticles( _this, options, callback ) {
       $elementsContainerElem = $( elementsContainerElem );
 
   // attach to specified Panel.
-  $( _this.centerPanel ).children().last().append( elementsContainerElem );
+  if ( _this.settings.isCreateElementsSceneContainer ) {
+    $( _this.centerPanel ).children().last().append( elementsContainerElem );
+  } else {
+    $( _this.centerPanel ).append( elementsContainerElem );
+  }
   // Assume activeScene container was made invisible.
   if ( _this.settings.isRenderElementsImage ) {
     // make our container visible before we start filling it up.
@@ -171,7 +176,6 @@ function createSvgElementsFromParticles( _this, options, callback ) {
     numElements += 1;
   }; // end while ( results )
   // Resume here when all elements created.
-  $sceneContainerElem.attr( 'numElements', numElements + '' );
   var results = {
     animationElementsContainerElem: elementsContainerElem,
     domElementsObjsArray: domElementsObjsArray,
@@ -182,7 +186,7 @@ function createSvgElementsFromParticles( _this, options, callback ) {
       isReversed: true,
     },
   };
-  console.log( " ..*4.1a)createSvgElementsFromParticleMap(): Made " + $sceneContainerElem.attr( 'numElements' ) +
+  console.log( " ..*4.1a)createSvgElementsFromParticleMap(): Made " + numElements +
                " " + _this.settings.createAnimationElementsParams.type +
                " AnimationElements that start in a '" +
                     (_this.settings.isStartImageCollapsed ? 'COLLAPSED' : 'EXPANDED') +
@@ -322,120 +326,3 @@ function isInCollapsedPosition( _this, story ) {
                "'. Will return: '" + !isInExpandedPosition( _this, story ) + "'*");
   return !isInExpandedPosition( _this, story );
 }; // end: isInCollapsedPosition()
-
-/*
-$.each( particles, function( idx, particle ) {
-    // NOTE: particleAnimationMethod should return a Tween for the element. And it
-    // should call its own "make an element" method.
-    // Create element in the "collapsed position column".
-    var element = createCollapsedPositionSVGelement( _this, particle );
-    if ( element ) {
-      $elementsContainerElem.append( element );
-      domElementsObjsArray.push( element );
-
-      // We can optionally "animate" the collapsed elements to an expaded view.
-      // Move elements from collapsed position to image home position.
-      //if ( _this.settings.isRenderParticleMapAsTweens ) {
-        _this.activeStory.expandTimeline.insert(
-          TweenMax.to(
-            element, _this.settings.tweenDuration,
-            // NOTE: we don't want to do math calculations when creating DOM elements.
-            //       So require that all adjustments were made when the particle
-            //       map was created.
-            { attr: { cx: particle.x, // + animationElementOffsetX,
-                      cy: particle.y, // + animationElementOffsetY,
-                    },
-    	        //autoAlpha: 0,
-              //ease: Power0.easeInOut,
-              ease: Power2.easeOut,
-            }
-          ) // end TweenMax.to()
-        ); // end Timeline.insert()
-      //} // end if ( RenderParticleMapAsTweens )
-      numElements += 1;
-    } // end if ( element )
-  }); // end $.each()
-}; // end createSvgElementsFromParticleMap()
-
-//----------------------------------------------------------------------------
-function createCollapsedPositionSVGelement( _this, options ) {
-  //----------------------------------------------------------------------------
-  var results = null,
-      particle = null;
-  if ( (particle = getNextParticle( _this, options )) ) {
-    _this.settings.isStartImageCollapsed
-    // Create elements to start at their 'home position' which will recreate the
-    // photo image.
-    var circle = $( makeSvgElementNS( 'circle' ) )
-        .attr( 'cx', particle.props.x )
-        .attr( 'cy', particle.props.y )
-        .attr( 'r', particle.props.r )
-        .attr( 'fill', _this.settings.elementsAnimationElementColor );
-    var coreXY = calcCoreXY( _this, options, particle );
-    results = { element: circle, coreX: coreXY.coreX, coreY: coreXY.coreY };
-  }
-  return results;
-}; // end createCollapsedPositionSVGelement()
-
-//----------------------------------------------------------------------------
-function createCollapsedPositionSVGelement( _this, particle ) {
-  //----------------------------------------------------------------------------
-  // Create elements to start at our "collapsed core". i.e. in a column in the
-  // middle of the panel.
-  var circle = $( makeSvgElementNS( 'circle' ) )
-      .attr( 'cx', getRandom( _this.settings.animationPanelLeftBoundaryX, _this.settings.animationPanelRightBoundaryX ) )
-      .attr( 'cy', getRandom( _this.settings.animationPanelTopBoundary, _this.settings.animationPanelBottom ) )
-      .attr( 'r', particle.r )
-      .attr( 'fill', _this.settings.animationElementColor );
-      // NOTE: hx/hy is the "home" position x,y for this particle.
-      //.attr( 'hx', particle.x )
-      //.attr( 'hy', particle.y );
-  return circle;
-  /*
-  // Create element "below the fold" and in a column in the middle of the panel.
-  // i.e. element.y is off the bottom of the page, element.x is in middle.
-  .attr( 'cx', getRandom( _this.settings.animationPanelLeftBoundaryX, _this.settings.animationPanelRightBoundaryX ) )
-  .attr( 'cy', _this.settings.animationPanelBottom - getRandom( 40, 50 ) )
-  */
-/*}; // end createCollapsedPositionSVGelement()
-*/
-
-/*
-//----------------------------------------------------------------------------
-function makeParticlesFromTrrMap( _this, options, /*Code to resume when done/ callback ) {
-  //--------------------------------------------------------------------------
-  updateSettings( _this, options );
-  var effectsData = JSON.parse( _this.settings.effectsDataAsJSONstring );
-  var particles = [],
-      effectsDataParticles = effectsData.particles,
-      edpParticle = {},
-      homeOffsetLeft = _this.settings.particlesHomeOffsetLeft + _this.settings.additionalHomeOffsetLeft,
-      homeOffsetTop = _this.settings.particlesHomeOffsetTop + _this.settings.additionalHomeOffsetTop;
-  console.log( " ..*5.1) makeParticlesFromTrrMap() for id: " + _this.settings.id +
-               ". effectsData.particles.len = " + effectsData.particles.length +
-               ". effectsDataAsJSONstring.len = " + _this.settings.effectsDataAsJSONstring.length +
-               ". Canvas Particles Home position Offset left: " + _this.settings.particlesHomeOffsetLeft +
-               ". top: " + _this.settings.particlesHomeOffsetTop +
-               ". MakeHomePositionMap: " + _this.settings.isMakeHomePositionMap +
-               ".");
-
-  if ( _this.settings.isMakeHomePositionMap ) {
-    for( var i = 0; i < (effectsData.particles.length); i += 1 ) {
-      edpParticle = effectsDataParticles[ i ];
-      particles.push( {
-          x: edpParticle.x + homeOffsetLeft,
-          y: edpParticle.y + homeOffsetTop,
-          r: edpParticle.r,
-      });
-    } //end for( var n )
-  }
-  var results = {
-    particles: particles,
-    gridSize: null,
-    homeOffsetLeft: homeOffsetLeft,
-    homeOffsetTop: homeOffsetTop,
-  };
-  if ( typeof callback == 'function' ) { callback( results ); return; }
-  return results;
-}; // end: makeParticlesFromTrrMap()
-*/
