@@ -100,9 +100,6 @@ function createParticlesInfoFromImageDataObj( _this, options, imgDataObj, callba
   // Create particle array by selecting pixels we want for a halftone image.
   createParticleMap( _this, {
     id: _this.activeStory.tag + '_particleMap',
-    isRejectParticlesOutOfBounds: true,
-    isRejectParticlesBelowIntensityThreshold: true,
-    isRejectParticlesSameAsContainerBackground: true,
     sceneTag: _this.settings.sceneTag,
     particlesHomeOffsetLeft: 0,
     particlesHomeOffsetTop: 0,
@@ -240,7 +237,7 @@ function getNextParticle(_this, options ) {
       particleProps = null,
       pcb = _this.activeStory.particlesInfo;
   if ( !(pcb.eof == -1) &&
-       !(pcb.nextIndex == pcb.eof) ) {
+       ( (pcb.nextIndex == 0) || !(pcb.nextIndex == pcb.eof) ) ) {
     particleProps = window[ pcb.nextParticleMethod ]( _this, options, pcb );
     pcb.nextIndex += 1;
     particle = {
@@ -348,6 +345,7 @@ function createExpandedPositionCanvasCircle( _this, options, context ) {
           // particle.r versus 3 for particle.i
           particle.props.r, // * gridSize, // not needed, already adjusted when mapped.
           0, _this.TAU );
+      context.fillStyle = particle.props.c || _this.settings.particleMapAnimationElementColor;
       context.fill();
       context.closePath();
     results = {};

@@ -4,7 +4,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
 
   // Create plugIn instance, defaults.
   var trrPlugin = new TrrEffect();
-  trrPlugin.logging = false;
+  trrPlugin.logging = true;
   trrPlugin.$el = $( '#selectedPhoto' );;
   var $el = trrPlugin.$el;
   trrPlugin.leftPanel = document.getElementById( 'leftPanel' );
@@ -80,17 +80,20 @@ function trr_init(/*Code to resume when done*/ callback ) {
     isTransformPixels: true,
     isExcludePixels: false,
     isProcessBySkipCount: true,
+    nthPixelToProcess: 2,
     isEvery1: false,
-    nthPixelToProcess: 3,
-    isEvery2: false,
-    isEvery3: true,
+    isEvery2: true,
+    isEvery3: false,
     isEvery4: false,
-    is1x1_cluster: false,
-    is3x3_cluster: false,
-    is5x5_cluster: false,
-    is7x7_cluster: false,
-    isProcessByCluster: false,
-    pixelsPerClusterSide: 5,
+    isProcessByGrid: false,
+    pixelsPerGridSide: undefined,
+    is1x1_grid: false,
+    is3x3_grid: false,
+    is5x5_grid: false,
+    is7x7_grid: false,
+    isRejectPixelsOutOfBounds: true,
+    isRejectPixelsBelowIntensityThreshold: true,
+    isRejectPixelsSameAsContainerBackground: true,
     isParticlesFromFile: false,
     isParticlesFromPhoto: true,
     isRenderParticleMap: true,
@@ -103,7 +106,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
     isCreateElementsSceneContainer: true,
     isVisibleElementsSceneContainer: true,
     elementsAnimationElementColor: '#0099cc', // '#70C0EF', // Climate Corp halftone dot blue.
-    particleMapAnimationElementColor: 'black',
+    particleMapAnimationElementColor: '#0099cc', //'black',
     maxHalftoneDotSize: 1/150,
     pixelChannelIntensityThreshold: 0.05,
     imageScale: 1.0, // canvas.width / imgWidth;
@@ -138,10 +141,10 @@ function trr_init(/*Code to resume when done*/ callback ) {
   $( '#cbox_every2' ).prop('checked', trrPlugin.defaults.isEvery2 );
   $( '#cbox_every3' ).prop('checked', trrPlugin.defaults.isEvery3 );
   $( '#cbox_every4' ).prop('checked', trrPlugin.defaults.isEvery4 );
-  $( '#cbox_1x1_cluster' ).prop('checked', trrPlugin.defaults.is1x1_cluster );
-  $( '#cbox_3x3_cluster' ).prop('checked', trrPlugin.defaults.is3x3_cluster );
-  $( '#cbox_5x5_cluster' ).prop('checked', trrPlugin.defaults.is5x5_cluster );
-  $( '#cbox_7x7_cluster' ).prop('checked', trrPlugin.defaults.is7x7_cluster );
+  $( '#cbox_1x1_grid' ).prop('checked', trrPlugin.defaults.is1x1_grid );
+  $( '#cbox_3x3_grid' ).prop('checked', trrPlugin.defaults.is3x3_grid );
+  $( '#cbox_5x5_grid' ).prop('checked', trrPlugin.defaults.is5x5_grid );
+  $( '#cbox_7x7_grid' ).prop('checked', trrPlugin.defaults.is7x7_grid );
 
   // Add click handlers for various functions.
   // NOTE: within click handler 'this' refers to the dom element clicked, i.e.
@@ -188,6 +191,19 @@ function trr_init(/*Code to resume when done*/ callback ) {
     particles( trrPlugin, {
       isOnlyIfNewParticleMap: false,
       isRenderParticleMap: true,
+      isRejectPixelsOutOfBounds: true,
+      isRejectPixelsBelowIntensityThreshold: true,
+      isRejectPixelsSameAsContainerBackground: true,
+      // looks ok:
+      //    Transform Every 3
+      //    maxHalftoneDotSize: 1/150,
+      //    pixelChannelIntensityThreshold: 0.16,
+      // looks better:
+      //    Transform Every 2
+      //    maxHalftoneDotSize: 1/180,
+      //    pixelChannelIntensityThreshold: 0.16,
+      maxHalftoneDotSize: 1/180, // if 600x600 photo then 1/600 gets every pixel.
+      pixelChannelIntensityThreshold: 0.16,
     } );
   });
   $( "#elements" ).click( function() {
@@ -261,17 +277,17 @@ function trr_init(/*Code to resume when done*/ callback ) {
   $( "#cbox_every4" ).click( function( event ) {
     cbox_every4( trrPlugin, { event: event } );
   });
-  $( "#cbox_1x1_cluster" ).click( function( event ) {
-    cbox_1x1_cluster( trrPlugin, { event: event } );
+  $( "#cbox_1x1_grid" ).click( function( event ) {
+    cbox_1x1_grid( trrPlugin, { event: event } );
   });
-  $( "#cbox_3x3_cluster" ).click( function( event ) {
-    cbox_3x3_cluster( trrPlugin, { event: event } );
+  $( "#cbox_3x3_grid" ).click( function( event ) {
+    cbox_3x3_grid( trrPlugin, { event: event } );
   });
-  $( "#cbox_5x5_cluster" ).click( function( event ) {
-    cbox_5x5_cluster( trrPlugin, { event: event } );
+  $( "#cbox_5x5_grid" ).click( function( event ) {
+    cbox_5x5_grid( trrPlugin, { event: event } );
   });
-  $( "#cbox_7x7_cluster" ).click( function( event ) {
-    cbox_7x7_cluster( trrPlugin, { event: event } );
+  $( "#cbox_7x7_grid" ).click( function( event ) {
+    cbox_7x7_grid( trrPlugin, { event: event } );
   });
 
 

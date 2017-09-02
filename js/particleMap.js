@@ -27,14 +27,14 @@ function createParticleMap_reset( _this, options ) {
   //----------------------------------------------------------------------------
 
   _this.settings.rgbChannel = _this.settings.halftoneColor;
-  _this.particlesRejectedBecauseParticleIsOutOfBounds = 0;
-  _this.particlesRejectedBecausePixelIntensityLessThanThreshold = 0;
-  _this.particlesRejectedBecausePixelSameAsContainerBackgroundRGB = 0;
-  _this.particlesRejectedBecausePixelSameAsContainerBackgroundRGBA = 0;
-  _this.particlesRejectedBecauseIsExcludedNthPixell = 0;
-  _this.particlesRejectedBecauseIsExcludedNotNthPixell = 0;
-  _this.particlesRejectedBecauseIsNonCenterMemberOfCluster = 0;
-  _this.particlesRejectedBecausePixelIndexIsOutOfBounds = 0;
+  _this.pixelsRejectedBecausePixelIsOutOfBounds = 0;
+  _this.pixelsRejectedBecausePixelIntensityLessThanThreshold = 0;
+  _this.pixelsRejectedBecausePixelSameAsContainerBackgroundRGB = 0;
+  _this.pixelsRejectedBecausePixelSameAsContainerBackgroundRGBA = 0;
+  _this.pixelsRejectedBecauseIsExcludedNthPixell = 0;
+  _this.pixelsRejectedBecauseIsExcludedNotNthPixell = 0;
+  _this.pixelsRejectedBecauseIsNonCenterMemberOfGrid = 0;
+  _this.pixelsRejectedBecausePixelIndexIsOutOfBounds = 0;
   _this.settings.rgbChannelOffset = _this.RGB_CHANNEL_OFFSETS[ _this.settings.rgbChannel ];
   _this.settings.rgbChannelAngle = _this.RGB_CHANNEL_ANGLES[ _this.settings.rgbChannel ];
 }; // end: createParticleMap_reset()
@@ -57,17 +57,17 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
                ". isProcessBySkipCount: " + _this.settings.isProcessBySkipCount +
                ". nthPixelToProcess: " + _this.settings.nthPixelToProcess +
 
-               ". isProcessByCluster: " + _this.settings.isProcessByCluster +
-               ". pixelsPerClusterSide: " + _this.settings.pixelsPerClusterSide +
+               ". isProcessByGrid: " + _this.settings.isProcessByGrid +
+               ". pixelsPerGridSide: " + _this.settings.pixelsPerGridSide +
 
-               ". isRejectParticlesOutOfBounds: " + _this.settings.isRejectParticlesOutOfBounds +
-               ". isRejectParticlesBelowIntensityThreshold: " + _this.settings.isRejectParticlesBelowIntensityThreshold +
-               ". isRejectParticlesSameAsContainerBackground: " + _this.settings.isRejectParticlesSameAsContainerBackground + ".");}
+               ". isRejectPixelsOutOfBounds: " + _this.settings.isRejectPixelsOutOfBounds +
+               ". isRejectPixelsBelowIntensityThreshold: " + _this.settings.isRejectPixelsBelowIntensityThreshold +
+               ". isRejectPixelsSameAsContainerBackground: " + _this.settings.isRejectPixelsSameAsContainerBackground + ".");}
 
   // Create local variables to reduce loop overhead.
   var homeOffsetLeft = _this.settings.particlesHomeOffsetLeft + _this.settings.additionalHomeOffsetLeft,
       homeOffsetTop = _this.settings.particlesHomeOffsetTop + _this.settings.additionalHomeOffsetTop,
-      pixelsPerCluster = _this.settings.pixelsPerCluster,
+      pixelsPerGrid = _this.settings.pixelsPerGrid,
       image_width = _this.settings.img.width,
       image_heigth = _this.settings.img.height,
       diagonal = Math.sqrt( (image_width * image_width) + (image_heigth * image_heigth) ),
@@ -91,7 +91,9 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
   if (_this.logging){console.log( " ..*5.2a) makeCartesianGridParticles(): BEGIN LOOP: " +
                " gridSize: '" + gridSize + "'. rows: '" + rows + "'. columns: '" + cols +
                "'. Max number of particles: '" + maxNumOfParticles +
-               "'. addParticleMethod: '" + _this.settings.addParticleMethod + "'. *");}
+               "'. addParticleMethod: '" + _this.settings.addParticleMethod +
+               "'. Out of bounds points: x < '0' || x > '" + _this.settings.img.width +
+               "'. y < '0' || y > '" + _this.settings.img.height + "'. *");}
 
   var particles = null;
   var carryOverResults = {};
@@ -130,10 +132,12 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
       home_position_y += halfImageHeigth; // home_position_y += image_heigth / 2;
 
       // Returns null if rejected. Else returns Particle.
-      // NOTE: rejected particle locations just stay whatever the canvas
+      // NOTE: rejected pixel locations just stay whatever the canvas
       // background/fill color is.
-      var filterResults = particleFilter( _this, _this.settings.rgbChannel, home_position_x, home_position_y, carryOverResults );
+      var filterResults = pixelFilter( _this, _this.settings.rgbChannel, home_position_x, home_position_y,
+                                       row, col, carryOverResults );
       if ( filterResults.isAccepted ) {
+        var radius = Math.max( (filterResults.pixelChannelIntensity * gridSize), _this.settings.pixelChannelIntensityThreshold );
         var particle = {
           x: filterResults.x + homeOffsetLeft,
           y: filterResults.y + homeOffsetTop,
@@ -141,7 +145,10 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
           // chars are stored in string so we can just multiply with the CONSTANT gridSize. BUT we
           // have the multiplication overhead. IF calc when mapped, about 20chars are stored for
           // particle.r versus 3 for particle.i
-          r: (filterResults.pixelChannelIntensity * gridSize) * .5,
+          // NOTE: A value of zero disables rendering of the element.
+          r: radius, //(filterResults.pixelChannelIntensity * gridSize), //* .5,
+          c: filterResults.c,
+          grid: filterResults.grid,
         };
         // We have different formats for storing particle objects.
         particles = window[ _this.settings.addParticleMethod ]( _this, options, particles, particle );
@@ -158,22 +165,22 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
 
   if (_this.logging){console.log( " ..*5.2b) makeCartesianGridParticles(): END LOOP: HomePositionParticles[].len = " +
                particles.length + ". Out of " + maxNumOfParticles + " possible. " +
-               "Particles Rejected Because Particle Is Out Of Bounds = '" +
-               _this.particlesRejectedBecauseParticleIsOutOfBounds +
-               "'. Particles Rejected Because Pixel Intensity Less Than Threshold = '" +
-               _this.particlesRejectedBecausePixelIntensityLessThanThreshold +
-               "'. Particles Rejected Because Pixel Same As Conversion Container Background RGBA = '" +
-               _this.particlesRejectedBecausePixelSameAsContainerBackgroundRGBA +
-               "'. Particles Rejected Because Pixel Same As Conversion Container Background RGB = '" +
-               _this.particlesRejectedBecausePixelSameAsContainerBackgroundRGB +
-               "'. Particles Rejected Because is Every Nth Pixell = '" +
-               _this.particlesRejectedBecauseIsExcludedNthPixell +
-               "'. Particles Rejected Because it is NOT the Nth Pixell = '" +
-               _this.particlesRejectedBecauseIsExcludedNotNthPixell +
-               "'. Particles Rejected Because is Non-center member of cluster = '" +
-               _this.particlesRejectedBecauseIsNonCenterMemberOfCluster +
-               "'. Particles Rejected Because PixelIndex Is Out Of Bounds = '" +
-               _this.particlesRejectedBecausePixelIndexIsOutOfBounds +
+               "Pixels Rejected Because Pixel Is Out Of Bounds = '" +
+               _this.pixelsRejectedBecausePixelIsOutOfBounds +
+               "'. Pixels Rejected Because Pixel Intensity Less Than Threshold = '" +
+               _this.pixelsRejectedBecausePixelIntensityLessThanThreshold +
+               "'. Pixels Rejected Because Pixel Same As Conversion Container Background RGBA = '" +
+               _this.pixelsRejectedBecausePixelSameAsContainerBackgroundRGBA +
+               "'. Pixels Rejected Because Pixel Same As Conversion Container Background RGB = '" +
+               _this.pixelsRejectedBecausePixelSameAsContainerBackgroundRGB +
+               "'. Pixels Rejected Because is Every Nth Pixell = '" +
+               _this.pixelsRejectedBecauseIsExcludedNthPixell +
+               "'. Pixels Rejected Because it is NOT the Nth Pixell = '" +
+               _this.pixelsRejectedBecauseIsExcludedNotNthPixell +
+               "'. Pixels Rejected Because is Non-center member of grid = '" +
+               _this.pixelsRejectedBecauseIsNonCenterMemberOfGrid +
+               "'. Pixels Rejected Because PixelIndex Is Out Of Bounds = '" +
+               _this.pixelsRejectedBecausePixelIndexIsOutOfBounds +
                "'. *");}
 
   if ( typeof callback == 'function' ) { callback( results ); return; }
@@ -295,7 +302,7 @@ $(window.arr.slice(0,100000))
   });
  */
 //----------------------------------------------------------------------------
-function particleFilter( _this, rgbChannel, x, y, carryOverResults ) {
+function pixelFilter( _this, rgbChannel, x, y, row, col, carryOverResults ) {
   //----------------------------------------------------------------------------
   if (_this.settings.imageScale !== 1.0 ) {
       x = Math.round( x / _this.settings.imageScale);
@@ -305,49 +312,58 @@ function particleFilter( _this, rgbChannel, x, y, carryOverResults ) {
     y = Math.round( y );
   }
 
-  if ( _this.settings.isRejectParticlesOutOfBounds &&
+  if ( _this.settings.isRejectPixelsOutOfBounds &&
        ( x < 0 || x > _this.settings.img.width ||
          y < 0 || y > _this.settings.img.height ) ) {
-    _this.particlesRejectedBecauseParticleIsOutOfBounds += 1;
+    _this.pixelsRejectedBecausePixelIsOutOfBounds += 1;
     return { isAccepted: false };
   }
 
-  if ( _this.settings.isProcessByCluster ) {
-    return particleFilterByCluster( _this, rgbChannel, x, y, carryOverResults );
+  if ( _this.settings.isProcessByGrid ) {
+    return pixelFilterByGrid( _this, rgbChannel, x, y, row, col, carryOverResults );
   }
 
   // We are processing every pixel that gets here.
   if ( _this.settings.nthPixelToProcess == 1 &&
        _this.settings.isExcludePixels ) {
     // special case for ??
-    _this.particlesRejectedBecauseIsExcludedNthPixell += 1;
+    _this.pixelsRejectedBecauseIsExcludedNthPixell += 1;
     return { isAccepted: false };
-  }
-
-  // We are processing every pixel that gets here.
-  var pixelInfo = getPixelInfo( _this, x, y, rgbChannel );
-  if ( pixelInfo == null ) {
-    _this.particlesRejectedBecausePixelIndexIsOutOfBounds += 1;
-    return { isAccepted: false };
-  }
-
-  if ( _this.settings.isRejectParticlesBelowIntensityThreshold &&
-       ( pixelInfo.channelIntensity < _this.settings.pixelChannelIntensityThreshold ) ) {
-    // pixelChannelIntensityThreshold: 0.05
-    _this.particlesRejectedBecausePixelIntensityLessThanThreshold += 1;
-    return { isAccepted: false };
-  }
-
-  if ( _this.settings.isRejectParticlesSameAsContainerBackground &&
-       ( pixelInfo.rgbString == _this.containerBackgroundRGB ) ) {
-    _this.particlesRejectedBecausePixelSameAsContainerBackgroundRGB += 1;
-    if ( pixelInfo.rgbaString == _this.containerBackgroundRGBA ) {
-      _this.particlesRejectedBecausePixelSameAsContainerBackgroundRGBA += 1;
+    /*var pixelInfo = getPixelInfo( _this, x, y, rgbChannel );
+    if ( pixelInfo == null ) {
+      _this.pixelsRejectedBecausePixelIndexIsOutOfBounds += 1;
+      return { isAccepted: false };
     }
+    return {
+      isAccepted: true,
+      x: x,
+      y: y,
+      pixelChannelIntensity: pixelInfo.channelIntensity,
+      c: 'black',
+    };*/
+  }
+
+  // We are processing every pixel that gets here.
+  var pixelInfo = pixelInfoFilter( _this, x, y, rgbChannel );
+  if ( pixelInfo == null ) {
+    // NOTE: reject counters have already been updated by pixelInfoFilter().
     return { isAccepted: false };
   }
 
   // We are processing every pixel that gets here.
+  if ( _this.settings.isRejectPixelsBelowIntensityThreshold &&
+       ( pixelInfo.channelIntensity < _this.settings.pixelChannelIntensityThreshold ) ) {
+    _this.pixelsRejectedBecausePixelIntensityLessThanThreshold += 1;
+    return { isAccepted: false };
+    /*return {
+      isAccepted: true,
+      x: x,
+      y: y,
+      pixelChannelIntensity: pixelInfo.channelIntensity,
+      c: 'red',
+    };*/
+  }
+
   // isProcessBySkipCount: reject or transform every nth accepted pixels
   if ( _this.settings.nthPixelToProcess > 1 ) {
     // Not every pixel is to be looked at.
@@ -356,36 +372,122 @@ function particleFilter( _this, rgbChannel, x, y, carryOverResults ) {
          x % _this.settings.nthPixelToProcess == 0 ) {
       // _this is the nth pixel.
       if ( _this.settings.isExcludePixels ) {
-        _this.particlesRejectedBecauseIsExcludedNthPixell += 1;
+        _this.pixelsRejectedBecauseIsExcludedNthPixell += 1;
         return { isAccepted: false };
+        /*return {
+          isAccepted: true,
+          x: x,
+          y: y,
+          pixelChannelIntensity: pixelInfo.channelIntensity,
+          c: 'black',
+        };*/
       }
     // Else _this is not the nth pixel.
     } else if ( _this.settings.isTransformPixels ) {
       // And we are only accepting the nth pixel.
-      _this.particlesRejectedBecauseIsExcludedNotNthPixell += 1;
+      _this.pixelsRejectedBecauseIsExcludedNotNthPixell += 1;
       return { isAccepted: false };
+      /*return {
+        isAccepted: true,
+        x: x,
+        y: y,
+        pixelChannelIntensity: pixelInfo.channelIntensity,
+        c: 'black',
+      };*/
     }
   }
 
   // We are processing every pixel that gets here.
+  return pixelIsAccepted( x, y, undefined, pixelInfo );
+}; // end pixelFilter()
+
+//----------------------------------------------------------------------------
+function pixelIsAccepted( x, y, colorOverride, pixelInfo ) {
+  //----------------------------------------------------------------------------
   return {
     isAccepted: true,
     x: x,
     y: y,
     pixelChannelIntensity: pixelInfo.channelIntensity,
+    c: colorOverride,
   };
-}; // end particleFilter()
+}; // end pixelIsAccepted()
 
 //----------------------------------------------------------------------------
-function particleFilterByCluster( _this, rgbChannel, x, y, carryOverResults ) {
+function pixelInfoFilter( _this, x, y, rgbChannel ) {
+  //----------------------------------------------------------------------------
+  var pixelInfo = getPixelInfo( _this, x, y, rgbChannel );
+  if ( pixelInfo == null ) {
+    _this.pixelsRejectedBecausePixelIndexIsOutOfBounds += 1;
+    return null
+  }
+
+  if ( _this.settings.isRejectPixelsSameAsContainerBackground &&
+       ( pixelInfo.rgbString == _this.containerBackgroundRGB ) ) {
+    _this.pixelsRejectedBecausePixelSameAsContainerBackgroundRGB += 1;
+    if ( pixelInfo.rgbaString == _this.containerBackgroundRGBA ) {
+      _this.pixelsRejectedBecausePixelSameAsContainerBackgroundRGBA += 1;
+    }
+    return null;
+    /*return {
+      isAccepted: true,
+      x: x,
+      y: y,
+      pixelChannelIntensity: pixelInfo.channelIntensity,
+      c: 'yellow',
+    };*/
+  }
+  return pixelInfo;
+}; // end pixelInfoFilter()
+
+//----------------------------------------------------------------------------
+function pixelFilterByGrid( _this, rgbChannel, x, y, row, col, carryOverResults ) {
   //--------------------------------------------------------------------------
-  // _this.settings.pixelsPerClusterSide
-  return { isAccepted: true };
+  var pixelInfo = pixelInfoFilter( _this, x, y, rgbChannel );
+  if ( pixelInfo == null ) {
+    // NOTE: reject counters have already been updated by pixelInfoFilter().
+    return { isAccepted: false };
+  }
+
+  // We are processing every pixel that gets here.
+  if ( _this.settings.isRejectPixelsBelowIntensityThreshold &&
+       ( pixelInfo.channelIntensity < _this.settings.pixelChannelIntensityThreshold ) ) {
+    _this.pixelsRejectedBecausePixelIntensityLessThanThreshold += 1;
+    return { isAccepted: false };
+    /*return {
+      isAccepted: true,
+      x: x,
+      y: y,
+      pixelChannelIntensity: pixelInfo.channelIntensity,
+      c: 'red',
+    };*/
+  }
+
+  var gridRow = row % _this.settings.pixelsPerGridSide;
+  var gridCol = col % _this.settings.pixelsPerGridSide;
+  var isGridBegin =  ( (gridRow == 0) && (gridCol == 0) );
+
+  var lastRowInGrid = _this.settings.pixelsPerGridSide - 1;
+  var lastColInGrid = lastRowInGrid;
+  var isGridEnd =    ( (gridRow == lastRowInGrid) && (gridCol == lastColInGrid) );
+
+  var gridCenterOffset = Math.floor( _this.settings.pixelsPerGridSide / 2 );
+  var isGridCenter = ( (gridRow == gridCenterOffset) && (gridCol == gridCenterOffset) );
+
+  // _this.settings.pixelsPerGridSide
   //if ( 2 == 0 ) {
-  //  _this.particlesRejectedBecauseIsNonCenterMemberOfCluster += 1;
+  //  _this.pixelsRejectedBecauseIsNonCenterMemberOfGrid += 1;
   //  return { isAccepted: true };
   //}
-}; // end particleFilterByCluster()
+
+  // We are processing every pixel that gets here.
+  if ( isGridCenter ) {
+    pixelInfo.channelIntensity = _this.settings.pixelChannelIntensityThreshold;
+    return pixelIsAccepted( x, y, 'red', pixelInfo );
+  }
+  _this.pixelsRejectedBecauseIsNonCenterMemberOfGrid += 1;
+  return { isAccepted: false };
+}; // end pixelFilterByGrid()
 
 //----------------------------------------------------------------------------
 function getPixelInfo( _this, x, y, rgbChannel ) {

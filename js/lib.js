@@ -601,15 +601,15 @@ function cbox_every1( _this, options, /*Code to resume when done*/ callback ) {
   if (_this.logging){console.log( " ..*4.5) cbox_every1() Box checked = '" + $( '#cbox_every1' ).prop('checked') + "'. *");}
   if ( $( '#cbox_every1' ).prop('checked') ) {
     _this.settings.isProcessBySkipCount = true;
-    _this.settings.isProcessByCluster = false;
+    _this.settings.isProcessByGrid = false;
     _this.settings.nthPixelToProcess = 1;
     $( '#cbox_every2' ).prop('checked', false );
     $( '#cbox_every3' ).prop('checked', false );
     $( '#cbox_every4' ).prop('checked', false );
-    $( '#cbox_1x1_cluster' ).prop('checked', false );
-    $( '#cbox_3x3_cluster' ).prop('checked', false );
-    $( '#cbox_5x5_cluster' ).prop('checked', false );
-    $( '#cbox_7x7_cluster' ).prop('checked', false );
+    $( '#cbox_1x1_grid' ).prop('checked', false );
+    $( '#cbox_3x3_grid' ).prop('checked', false );
+    $( '#cbox_5x5_grid' ).prop('checked', false );
+    $( '#cbox_7x7_grid' ).prop('checked', false );
   }
   if ( typeof callback == 'function' ) { callback(); return; }
 } // end: cbox_every1()
@@ -620,15 +620,15 @@ function cbox_every2( _this, options, /*Code to resume when done*/ callback ) {
   if (_this.logging){console.log( " ..*4.5) cbox_every2() Box checked = '" + $( '#cbox_every2' ).prop('checked') + "'. *");}
   if ( $( '#cbox_every2' ).prop('checked') ) {
     _this.settings.isProcessBySkipCount = true;
-    _this.settings.isProcessByCluster = false;
+    _this.settings.isProcessByGrid = false;
     _this.settings.nthPixelToProcess = 2;
     $( '#cbox_every1' ).prop('checked', false );
     $( '#cbox_every3' ).prop('checked', false );
     $( '#cbox_every4' ).prop('checked', false );
-    $( '#cbox_1x1_cluster' ).prop('checked', false );
-    $( '#cbox_3x3_cluster' ).prop('checked', false );
-    $( '#cbox_5x5_cluster' ).prop('checked', false );
-    $( '#cbox_7x7_cluster' ).prop('checked', false );
+    $( '#cbox_1x1_grid' ).prop('checked', false );
+    $( '#cbox_3x3_grid' ).prop('checked', false );
+    $( '#cbox_5x5_grid' ).prop('checked', false );
+    $( '#cbox_7x7_grid' ).prop('checked', false );
   }
   if ( typeof callback == 'function' ) { callback(); return; }
 } // end: cbox_every2()
@@ -639,15 +639,15 @@ function cbox_every3( _this, options, /*Code to resume when done*/ callback ) {
   if (_this.logging){console.log( " ..*4.5) cbox_every3() Box checked = '" + $( '#cbox_every3' ).prop('checked') + "'. *");}
   if ( $( '#cbox_every3' ).prop('checked') ) {
     _this.settings.isProcessBySkipCount = true;
-    _this.settings.isProcessByCluster = false;
+    _this.settings.isProcessByGrid = false;
     _this.settings.nthPixelToProcess = 3;
     $( '#cbox_every1' ).prop('checked', false );
     $( '#cbox_every2' ).prop('checked', false );
     $( '#cbox_every4' ).prop('checked', false );
-    $( '#cbox_1x1_cluster' ).prop('checked', false );
-    $( '#cbox_3x3_cluster' ).prop('checked', false );
-    $( '#cbox_5x5_cluster' ).prop('checked', false );
-    $( '#cbox_7x7_cluster' ).prop('checked', false );
+    $( '#cbox_1x1_grid' ).prop('checked', false );
+    $( '#cbox_3x3_grid' ).prop('checked', false );
+    $( '#cbox_5x5_grid' ).prop('checked', false );
+    $( '#cbox_7x7_grid' ).prop('checked', false );
   }
   if ( typeof callback == 'function' ) { callback(); return; }
 } // end: cbox_every3()
@@ -658,94 +658,94 @@ function cbox_every4( _this, options, /*Code to resume when done*/ callback ) {
   if (_this.logging){console.log( " ..*4.5) cbox_every4() Box checked = '" + $( '#cbox_every4' ).prop('checked') + "'. *");}
   if ( $( '#cbox_every4' ).prop('checked') ) {
     _this.settings.isProcessBySkipCount = true;
-    _this.settings.isProcessByCluster = false;
+    _this.settings.isProcessByGrid = false;
     _this.settings.nthPixelToProcess = 4;
     $( '#cbox_every1' ).prop('checked', false );
     $( '#cbox_every2' ).prop('checked', false );
     $( '#cbox_every3' ).prop('checked', false );
-    $( '#cbox_1x1_cluster' ).prop('checked', false );
-    $( '#cbox_3x3_cluster' ).prop('checked', false );
-    $( '#cbox_5x5_cluster' ).prop('checked', false );
-    $( '#cbox_7x7_cluster' ).prop('checked', false );
+    $( '#cbox_1x1_grid' ).prop('checked', false );
+    $( '#cbox_3x3_grid' ).prop('checked', false );
+    $( '#cbox_5x5_grid' ).prop('checked', false );
+    $( '#cbox_7x7_grid' ).prop('checked', false );
   }
   if ( typeof callback == 'function' ) { callback(); return; }
 } // end: cbox_every4()
 
 //----------------------------------------------------------------------------
-function cbox_1x1_cluster( _this, options, /*Code to resume when done*/ callback ) {
+function cbox_1x1_grid( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  if (_this.logging){console.log( " ..*4.5) cbox_1x1_cluster() Box checked = '" + $( '#cbox_1x1_cluster' ).prop('checked') + "'. *");}
-  if ( $( '#cbox_1x1_cluster' ).prop('checked') ) {
+  if (_this.logging){console.log( " ..*4.5) cbox_1x1_grid() Box checked = '" + $( '#cbox_1x1_grid' ).prop('checked') + "'. *");}
+  if ( $( '#cbox_1x1_grid' ).prop('checked') ) {
     _this.settings.isProcessBySkipCount = false;
-    _this.settings.isProcessByCluster = true;
-    _this.settings.pixelsPerClusterSide = 1;
+    _this.settings.isProcessByGrid = true;
+    _this.settings.pixelsPerGridSide = 1;
     $( '#cbox_every1' ).prop('checked', false );
     $( '#cbox_every2' ).prop('checked', false );
     $( '#cbox_every3' ).prop('checked', false );
     $( '#cbox_every4' ).prop('checked', false );
-    $( '#cbox_3x3_cluster' ).prop('checked', false );
-    $( '#cbox_5x5_cluster' ).prop('checked', false );
-    $( '#cbox_7x7_cluster' ).prop('checked', false );
+    $( '#cbox_3x3_grid' ).prop('checked', false );
+    $( '#cbox_5x5_grid' ).prop('checked', false );
+    $( '#cbox_7x7_grid' ).prop('checked', false );
   }
   if ( typeof callback == 'function' ) { callback(); return; }
-} // end: cbox_1x1_cluster()
+} // end: cbox_1x1_grid()
 
 //----------------------------------------------------------------------------
-function cbox_3x3_cluster( _this, options, /*Code to resume when done*/ callback ) {
+function cbox_3x3_grid( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  if (_this.logging){console.log( " ..*4.5) cbox_3x3_cluster() Box checked = '" + $( '#cbox_3x3_cluster' ).prop('checked') + "'. *");}
-  if ( $( '#cbox_3x3_cluster' ).prop('checked') ) {
+  if (_this.logging){console.log( " ..*4.5) cbox_3x3_grid() Box checked = '" + $( '#cbox_3x3_grid' ).prop('checked') + "'. *");}
+  if ( $( '#cbox_3x3_grid' ).prop('checked') ) {
     _this.settings.isProcessBySkipCount = false;
-    _this.settings.isProcessByCluster = true;
-    _this.settings.pixelsPerClusterSide = 3;
+    _this.settings.isProcessByGrid = true;
+    _this.settings.pixelsPerGridSide = 3;
     $( '#cbox_every1' ).prop('checked', false );
     $( '#cbox_every2' ).prop('checked', false );
     $( '#cbox_every3' ).prop('checked', false );
     $( '#cbox_every4' ).prop('checked', false );
-    $( '#cbox_1x1_cluster' ).prop('checked', false );
-    $( '#cbox_5x5_cluster' ).prop('checked', false );
-    $( '#cbox_7x7_cluster' ).prop('checked', false );
+    $( '#cbox_1x1_grid' ).prop('checked', false );
+    $( '#cbox_5x5_grid' ).prop('checked', false );
+    $( '#cbox_7x7_grid' ).prop('checked', false );
   }
   if ( typeof callback == 'function' ) { callback(); return; }
-} // end: cbox_3x3_cluster()
+} // end: cbox_3x3_grid()
 
 //----------------------------------------------------------------------------
-function cbox_5x5_cluster( _this, options, /*Code to resume when done*/ callback ) {
+function cbox_5x5_grid( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  if (_this.logging){console.log( " ..*4.5) cbox_5x5_cluster() Box checked = '" + $( '#cbox_5x5_cluster' ).prop('checked') + "'. *");}
-  if ( $( '#cbox_5x5_cluster' ).prop('checked') ) {
+  if (_this.logging){console.log( " ..*4.5) cbox_5x5_grid() Box checked = '" + $( '#cbox_5x5_grid' ).prop('checked') + "'. *");}
+  if ( $( '#cbox_5x5_grid' ).prop('checked') ) {
     _this.settings.isProcessBySkipCount = false;
-    _this.settings.isProcessByCluster = true;
-    _this.settings.pixelsPerClusterSide = 5;
+    _this.settings.isProcessByGrid = true;
+    _this.settings.pixelsPerGridSide = 5;
     $( '#cbox_every1' ).prop('checked', false );
     $( '#cbox_every2' ).prop('checked', false );
     $( '#cbox_every3' ).prop('checked', false );
     $( '#cbox_every4' ).prop('checked', false );
-    $( '#cbox_1x1_cluster' ).prop('checked', false );
-    $( '#cbox_3x3_cluster' ).prop('checked', false );
-    $( '#cbox_7x7_cluster' ).prop('checked', false );
+    $( '#cbox_1x1_grid' ).prop('checked', false );
+    $( '#cbox_3x3_grid' ).prop('checked', false );
+    $( '#cbox_7x7_grid' ).prop('checked', false );
   }
   if ( typeof callback == 'function' ) { callback(); return; }
-} // end: cbox_5x5_cluster()
+} // end: cbox_5x5_grid()
 
 //----------------------------------------------------------------------------
-function cbox_7x7_cluster( _this, options, /*Code to resume when done*/ callback ) {
+function cbox_7x7_grid( _this, options, /*Code to resume when done*/ callback ) {
   //--------------------------------------------------------------------------
-  if (_this.logging){console.log( " ..*4.5) cbox_7x7_cluster() Box checked = '" + $( '#cbox_7x7_cluster' ).prop('checked') + "'. *");}
-  if ( $( '#cbox_7x7_cluster' ).prop('checked') ) {
+  if (_this.logging){console.log( " ..*4.5) cbox_7x7_grid() Box checked = '" + $( '#cbox_7x7_grid' ).prop('checked') + "'. *");}
+  if ( $( '#cbox_7x7_grid' ).prop('checked') ) {
     _this.settings.isProcessBySkipCount = false;
-    _this.settings.isProcessByCluster = true;
-    _this.settings.pixelsPerClusterSide = 7;
+    _this.settings.isProcessByGrid = true;
+    _this.settings.pixelsPerGridSide = 7;
     $( '#cbox_every1' ).prop('checked', false );
     $( '#cbox_every2' ).prop('checked', false );
     $( '#cbox_every3' ).prop('checked', false );
     $( '#cbox_every4' ).prop('checked', false );
-    $( '#cbox_1x1_cluster' ).prop('checked', false );
-    $( '#cbox_3x3_cluster' ).prop('checked', false );
-    $( '#cbox_7x7_cluster' ).prop('checked', false );
+    $( '#cbox_1x1_grid' ).prop('checked', false );
+    $( '#cbox_3x3_grid' ).prop('checked', false );
+    $( '#cbox_7x7_grid' ).prop('checked', false );
   }
   if ( typeof callback == 'function' ) { callback(); return; }
-} // end: cbox_7x7_cluster()
+} // end: cbox_7x7_grid()
 
 //==============================================================================
 //******************************************************************************
