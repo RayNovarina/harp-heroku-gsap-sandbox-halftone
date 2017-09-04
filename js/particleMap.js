@@ -6,13 +6,14 @@ function createParticleMap( _this, options, /*Code to resume when done*/ callbac
   //----------------------------------------------------------------------------
   createParticleMap_reset( _this );
   updateSettings( _this, options );
+  _this.settings.makeGridParticlesMethod = 'makeCartesianGridParticles';
   if (_this.logging){console.log( " ..*5) createParticleMap() for id: '" + options.id +
                "'. particlesHomeOffsetLeft: '" + _this.settings.particlesHomeOffsetLeft +
                "'. particlesHomeOffsetTop: '" + _this.settings.particlesHomeOffsetTop +
                "'. *");}
   _this.containerBackgroundRGB = _this.imgDataBackgroundRGB;
   _this.containerBackgroundRGBA = _this.imgDataBackgroundRGBA;
-  results = makeCartesianGridParticles( _this, {
+  results = window[ _this.settings.makeGridParticlesMethod]( _this, {
       id: options.id,
       additionalHomeOffsetLeft: 2,
       additionalHomeOffsetTop: 0,
@@ -95,8 +96,11 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
                "'. Out of bounds points: x < '0' || x > '" + _this.settings.img.width +
                "'. y < '0' || y > '" + _this.settings.img.height + "'. *");}
 
-  var particles = null;
-  var carryOverResults = {};
+  var particles = [];
+  var carryOverResults = { accumulatedChannelIntensity: 0, };
+  var pixelsPerGridFilter = _this.settings.pixelsPerGridSide * _this.settings.pixelsPerGridSide;
+  var minRadius = .8;
+  var maxRadius = _this.settings.pixelsPerGridSide / 2;
 
   // Calculate the "home position", i.e. the image xy of each filtered pixel.
   //var isTerminateLoop = false;
@@ -148,7 +152,7 @@ function makeCartesianGridParticles( _this, options, /*Code to resume when done*
           // NOTE: A value of zero disables rendering of the element.
           r: radius, //(filterResults.pixelChannelIntensity * gridSize), //* .5,
           c: filterResults.c,
-          grid: filterResults.grid,
+          //grid: filterResults.grid,
         };
         // We have different formats for storing particle objects.
         particles = window[ _this.settings.addParticleMethod ]( _this, options, particles, particle );
@@ -481,9 +485,9 @@ function pixelFilterByGrid( _this, rgbChannel, x, y, row, col, carryOverResults 
   //}
 
   // We are processing every pixel that gets here.
-  if ( isGridCenter ) {
-    pixelInfo.channelIntensity = _this.settings.pixelChannelIntensityThreshold;
-    return pixelIsAccepted( x, y, 'red', pixelInfo );
+  carryOverResults.accumulatedChannelIntensity += pixelInfo.channelIntensity;
+  if ( isGridEnd ) {
+    return pixelIsAccepted( x, y, undefined, pixelInfo );
   }
   _this.pixelsRejectedBecauseIsNonCenterMemberOfGrid += 1;
   return { isAccepted: false };

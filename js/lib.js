@@ -610,6 +610,7 @@ function cbox_every1( _this, options, /*Code to resume when done*/ callback ) {
     $( '#cbox_3x3_grid' ).prop('checked', false );
     $( '#cbox_5x5_grid' ).prop('checked', false );
     $( '#cbox_7x7_grid' ).prop('checked', false );
+    $( '#cbox_9x9_grid' ).prop('checked', false );
   }
   if ( typeof callback == 'function' ) { callback(); return; }
 } // end: cbox_every1()
@@ -629,6 +630,7 @@ function cbox_every2( _this, options, /*Code to resume when done*/ callback ) {
     $( '#cbox_3x3_grid' ).prop('checked', false );
     $( '#cbox_5x5_grid' ).prop('checked', false );
     $( '#cbox_7x7_grid' ).prop('checked', false );
+    $( '#cbox_9x9_grid' ).prop('checked', false );
   }
   if ( typeof callback == 'function' ) { callback(); return; }
 } // end: cbox_every2()
@@ -648,6 +650,7 @@ function cbox_every3( _this, options, /*Code to resume when done*/ callback ) {
     $( '#cbox_3x3_grid' ).prop('checked', false );
     $( '#cbox_5x5_grid' ).prop('checked', false );
     $( '#cbox_7x7_grid' ).prop('checked', false );
+    $( '#cbox_9x9_grid' ).prop('checked', false );
   }
   if ( typeof callback == 'function' ) { callback(); return; }
 } // end: cbox_every3()
@@ -667,6 +670,7 @@ function cbox_every4( _this, options, /*Code to resume when done*/ callback ) {
     $( '#cbox_3x3_grid' ).prop('checked', false );
     $( '#cbox_5x5_grid' ).prop('checked', false );
     $( '#cbox_7x7_grid' ).prop('checked', false );
+    $( '#cbox_9x9_grid' ).prop('checked', false );
   }
   if ( typeof callback == 'function' ) { callback(); return; }
 } // end: cbox_every4()
@@ -686,6 +690,7 @@ function cbox_1x1_grid( _this, options, /*Code to resume when done*/ callback ) 
     $( '#cbox_3x3_grid' ).prop('checked', false );
     $( '#cbox_5x5_grid' ).prop('checked', false );
     $( '#cbox_7x7_grid' ).prop('checked', false );
+    $( '#cbox_9x9_grid' ).prop('checked', false );
   }
   if ( typeof callback == 'function' ) { callback(); return; }
 } // end: cbox_1x1_grid()
@@ -705,6 +710,7 @@ function cbox_3x3_grid( _this, options, /*Code to resume when done*/ callback ) 
     $( '#cbox_1x1_grid' ).prop('checked', false );
     $( '#cbox_5x5_grid' ).prop('checked', false );
     $( '#cbox_7x7_grid' ).prop('checked', false );
+    $( '#cbox_9x9_grid' ).prop('checked', false );
   }
   if ( typeof callback == 'function' ) { callback(); return; }
 } // end: cbox_3x3_grid()
@@ -724,6 +730,7 @@ function cbox_5x5_grid( _this, options, /*Code to resume when done*/ callback ) 
     $( '#cbox_1x1_grid' ).prop('checked', false );
     $( '#cbox_3x3_grid' ).prop('checked', false );
     $( '#cbox_7x7_grid' ).prop('checked', false );
+    $( '#cbox_9x9_grid' ).prop('checked', false );
   }
   if ( typeof callback == 'function' ) { callback(); return; }
 } // end: cbox_5x5_grid()
@@ -742,10 +749,31 @@ function cbox_7x7_grid( _this, options, /*Code to resume when done*/ callback ) 
     $( '#cbox_every4' ).prop('checked', false );
     $( '#cbox_1x1_grid' ).prop('checked', false );
     $( '#cbox_3x3_grid' ).prop('checked', false );
-    $( '#cbox_7x7_grid' ).prop('checked', false );
+    $( '#cbox_5x5_grid' ).prop('checked', false );
+    $( '#cbox_9x9_grid' ).prop('checked', false );
   }
   if ( typeof callback == 'function' ) { callback(); return; }
 } // end: cbox_7x7_grid()
+
+//----------------------------------------------------------------------------
+function cbox_9x9_grid( _this, options, /*Code to resume when done*/ callback ) {
+  //--------------------------------------------------------------------------
+  if (_this.logging){console.log( " ..*4.5) cbox_9x9_grid() Box checked = '" + $( '#cbox_9x9_grid' ).prop('checked') + "'. *");}
+  if ( $( '#cbox_9x9_grid' ).prop('checked') ) {
+    _this.settings.isProcessBySkipCount = false;
+    _this.settings.isProcessByGrid = true;
+    _this.settings.pixelsPerGridSide = 9;
+    $( '#cbox_every1' ).prop('checked', false );
+    $( '#cbox_every2' ).prop('checked', false );
+    $( '#cbox_every3' ).prop('checked', false );
+    $( '#cbox_every4' ).prop('checked', false );
+    $( '#cbox_1x1_grid' ).prop('checked', false );
+    $( '#cbox_3x3_grid' ).prop('checked', false );
+    $( '#cbox_5x5_grid' ).prop('checked', false );
+    $( '#cbox_7x7_grid' ).prop('checked', false );
+  }
+  if ( typeof callback == 'function' ) { callback(); return; }
+} // end: cbox_9x9_grid()
 
 //==============================================================================
 //******************************************************************************

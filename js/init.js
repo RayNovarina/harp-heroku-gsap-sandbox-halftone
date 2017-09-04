@@ -91,6 +91,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
     is3x3_grid: false,
     is5x5_grid: false,
     is7x7_grid: false,
+    is9x9_grid: false,
     isRejectPixelsOutOfBounds: true,
     isRejectPixelsBelowIntensityThreshold: true,
     isRejectPixelsSameAsContainerBackground: true,
@@ -106,11 +107,11 @@ function trr_init(/*Code to resume when done*/ callback ) {
     isCreateElementsSceneContainer: true,
     isVisibleElementsSceneContainer: true,
     elementsAnimationElementColor: '#0099cc', // '#70C0EF', // Climate Corp halftone dot blue.
-    particleMapAnimationElementColor: '#0099cc', //'black',
+    particleMapAnimationElementColor: '#0099cc',
     maxHalftoneDotSize: 1/150,
     pixelChannelIntensityThreshold: 0.05,
     imageScale: 1.0, // canvas.width / imgWidth;
-    rgbChannel: 'blue',
+    rgbChannel: 'black', //'blue',
     isParticlesObjAsHashArray: true,
     isParticlesObjAsString: false,
     isParticlesObjAsArray: false,
@@ -145,6 +146,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
   $( '#cbox_3x3_grid' ).prop('checked', trrPlugin.defaults.is3x3_grid );
   $( '#cbox_5x5_grid' ).prop('checked', trrPlugin.defaults.is5x5_grid );
   $( '#cbox_7x7_grid' ).prop('checked', trrPlugin.defaults.is7x7_grid );
+  $( '#cbox_9x9_grid' ).prop('checked', trrPlugin.defaults.is9x9_grid );
 
   // Add click handlers for various functions.
   // NOTE: within click handler 'this' refers to the dom element clicked, i.e.
@@ -204,6 +206,7 @@ function trr_init(/*Code to resume when done*/ callback ) {
       //    pixelChannelIntensityThreshold: 0.16,
       maxHalftoneDotSize: 1/180, // if 600x600 photo then 1/600 gets every pixel.
       pixelChannelIntensityThreshold: 0.16,
+      rgbChannel: 'black', //'blue',
     } );
   });
   $( "#elements" ).click( function() {
@@ -289,7 +292,9 @@ function trr_init(/*Code to resume when done*/ callback ) {
   $( "#cbox_7x7_grid" ).click( function( event ) {
     cbox_7x7_grid( trrPlugin, { event: event } );
   });
-
+  $( "#cbox_9x9_grid" ).click( function( event ) {
+    cbox_9x9_grid( trrPlugin, { event: event } );
+  });
 
   // Select, display default photo.
   newPhoto( trrPlugin, { photoTag: trrPlugin.defaults.photoTag, photoType: trrPlugin.defaults.photoType, imgSrc: trrPlugin.defaults.imgSrc },
@@ -305,10 +310,3 @@ function trr_init(/*Code to resume when done*/ callback ) {
   if ( typeof callback == 'function' ) { callback( trrPlugin ); return; }
   return trrPlugin;
 }; // end: trr_init()
-
-
-// Private methods in context of plugIn instance, i.e. this
-// NOTE: Private methods MUST use _this to get 'this' for this instance of TrrPlugin
-//----------------------------------------------------------------------------
-//function init_reset( _this ) {
-//};// end: init_reset()
